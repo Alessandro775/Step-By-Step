@@ -1,7 +1,51 @@
-.container{
+.container {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
     background-color: #282c34;
+    color: white;
+    gap: 20px;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.5rem;
+    /* Aggiungi flex-shrink: 0 per evitare che il titolo si riduca */
+    flex-shrink: 0;
+}
+
+/* Aggiungi questo stile per il nav */
+nav {
+    margin-left: auto;  /* Spinge tutto il nav a destra */
+}
+
+.nav-list {
+    display: flex;
+    list-style: none;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-list button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--color-primary);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.nav-list button:hover {
+    background-color: var(--color-accent);
+}
+
+.logo {
+    width: 60px;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    /* Aggiungi flex-shrink: 0 per evitare che il logo si riduca */
+    flex-shrink: 0;
 }

@@ -1,0 +1,47 @@
+.login-container { /*contenitore principale della pagina login*/
+    display: flex; /* Attiva il layout flessibile (Flexbox) per il contenitore */
+    justify-content: center; /* Centra gli elementi figli ORIZZONTALMENTE (lungo l'asse principale) */
+    align-items: center; /* Centra gli elementi figli VERTICALMENTE (lungo l'asse secondario) */
+    min-height: calc(100vh - 64px); /* Altezza minima: 100% dell'altezza dello schermo (viewport height) meno 64px (per evitare sovrapposizione con header/footer) */
+    padding: 2rem; /* Spaziatura interna: 2rem (32px) su tutti i lati */
+}
+
+.login-form { /* Stile del form di login */
+    background-color: white; /* Sfondo bianco per contrastare con lo sfondo della pagina */
+    padding: 3rem; /* Ridotto da 10rem a 3rem per un padding più ragionevole */
+    border-radius: 8px; /* Bordi arrotondati (8px di raggio) */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombra leggera */
+    width: 100%; /* Larghezza al 100% del contenitore genitore */
+    max-width: 500px; /* Aumentato da 250px a 500px per un form più grande */
+}
+
+.form-group { /* Stile del gruppo di elementi del form */
+    margin-bottom: 1.5rem; /* Aumentato leggermente per più spazio */
+}
+
+.form-group input { /* Stile degli input all'interno dei form-group */
+    width: 100%; /* Larghezza al 100% del contenitore genitore (.form-group) */
+    padding: 1rem; /* Aumentato da 0.80rem a 1rem per input più grandi */
+    border: 1px solid #ddd; /* Bordo sottile di colore grigio chiaro */
+    border-radius: 4px; /* Aggiunto border-radius per consistenza */
+    margin-bottom: 0; /* Rimosso perché già gestito da .form-group */
+    font-size: 1rem; /* Aggiunto per una migliore leggibilità */
+}
+
+.login-form button { /* Specifico per il button nel form */
+    width: 100%; /* Larghezza al 100% del contenitore genitore */
+    padding: 1rem; /* Aumentato per un button più grande */
+    background-color: var(--color-primary); /* Colore di sfondo preso da variabile CSS */
+    color: white; /* Testo bianco */
+    border: none; /* Rimozione del bordo predefinito */
+    border-radius: 4px; /* Bordi arrotondati */
+    cursor: pointer; /* Cursore pointer al hover */
+    font-size: 1rem; /* Dimensione font consistente */
+    font-weight: 500; /* Testo leggermente più bold */
+}
+
+.login-form h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
