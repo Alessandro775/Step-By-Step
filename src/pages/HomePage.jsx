@@ -1,5 +1,7 @@
 import React from 'react';
-import Header from '../components/Header/Header'; // Importa il componente Header
+import Header from '../components/Header/Header';
+import CorpoHomePage from '../components/corpoHomePage';
+
 
 
 const HomePage = () => {
@@ -7,6 +9,7 @@ const HomePage = () => {
         <>
             {/* Qui puoi inserire il contenuto della tua homepage, ad esempio: */}
             <Header /> {/* Aggiungi il componente Header qui */}
+            <CorpoHomePage/>
         </>
     );
 };
