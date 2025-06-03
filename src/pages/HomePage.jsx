@@ -12,14 +12,10 @@ import CorpoHomePage from '../components/corpoHomePage';
 const HomePage = () => {
     return (
         <>
-<<<<<<< HEAD
-        
-=======
             {/* Qui puoi inserire il contenuto della tua homepage, ad esempio: */}
             <Header /> {/* Aggiungi il componente Header qui */}
             <CorpoHomePage/>
         </>
->>>>>>> corpoHomePage
     );
 };
 
