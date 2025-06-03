@@ -1,0 +1,74 @@
+/* Container principale del footer */
+.footer-content {
+    position: fixed; /* Posiziona il footer in basso alla pagina */
+    bottom: 0; /* Allinea il footer al bordo inferiore */
+    width: 100%; /* Il footer occupa tutta la larghezza della pagina */
+    display: flex; /* Utilizza il layout flexbox per organizzare gli elementi */
+    justify-content: flex-start; /* Allinea gli elementi all'inizio orizzontalmente */
+    align-items: flex-start; /* Allinea gli elementi all'inizio verticalmente */
+    background: #2e8b57; /* Colore di sfondo del footer */
+    color: #fff; /* Colore del testo */
+    padding: 28px 32px; /* Spaziatura interna del footer */
+    box-sizing: border-box; /* Include padding e bordo nelle dimensioni totali */
+    z-index: 100; /* Imposta la priorità di visualizzazione del footer */
+    border-top: 2px solid #26734d; /* Bordo superiore del footer */
+}
+
+  /* Colonna loghi */
+  .footer-logos {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 90px;
+    width: 60px;
+    height: auto;
+    padding: 4px;
+    background: none; /* Rimosso lo sfondo */
+  }
+  
+  /* Colonna contatti */
+  .footer-contacts {
+    min-width: 200px;
+    margin-left: 20px;
+  }
+  
+  .site-logo,
+  .uniba-logo {
+    width: 60px;
+    height: auto;
+    padding: 4px;
+  }
+  
+  .footer-contacts h3,
+  .footer-info h3 {
+    margin-top: 0;
+    color: #fff;
+    font-size: 1.1em;
+  }
+  
+  .footer-contacts ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px 0;
+  }
+  
+  .footer-contacts li {
+    margin-bottom: 6px;
+    font-size: 1em;
+  }
+  
+  .footer-dipartimento {
+    font-size: 0.98em;
+    color: #e8e6e6;
+    font-style: italic;
+    margin-top: 8px;
+  }
+  
+  .footer-info {
+    max-width: 650px;
+    margin-left: 70px; /* Sposta la colonna informazioni più a sinistra */
+    margin-right: 20px; /* Spazio tra la colonna informazioni e il bordo destro */
+  }
+  
+   
