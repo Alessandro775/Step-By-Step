@@ -1,6 +1,6 @@
 /* Container principale del footer */
 .footer-content {
-    position: fixed; /* Posiziona il footer in basso alla pagina */
+    
     bottom: 0; /* Allinea il footer al bordo inferiore */
     width: 100%; /* Il footer occupa tutta la larghezza della pagina */
     display: flex; /* Utilizza il layout flexbox per organizzare gli elementi */
