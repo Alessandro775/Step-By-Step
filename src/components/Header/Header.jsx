@@ -1,7 +1,7 @@
 import React from 'react';
 import header from './header.module.css'
 import { useNavigate } from 'react-router-dom'
-import logo from '../../assets/logo-removebg-preview.png' 
+import logo from '../../assets/logosito.png' 
 
 //dichiarazione di variabili e funzioni
 
@@ -11,9 +11,9 @@ const Header = () => {
 
     // Funzioni per la navigazione
     const goToHome = () => navigate('/');
-    const goToLogin = () => navigate('/chi siamo');
-    const goToProfile = () => navigate('/esempio esercizio');
-    const goToPractice = () => navigate('/login');
+    const goToChiSiamo = () => navigate('/chi siamo');
+    const goToEsercizi = () => navigate('/esempio esercizio');
+    const goToLogin = () => navigate('/accedi');
 
     return (
         <header className={header.container}>
@@ -27,9 +27,9 @@ const Header = () => {
             <h1 className={header.title}>Step By Step</h1>
                 <nav>
                 <ul className={header['nav-list']}>
-                    <li><button onClick={goToLogin}>Chi siamo</button></li>
-                    <li><button onClick={goToProfile}>Esempio esercizio</button></li>
-                    <li><button onClick={goToPractice}>Login</button></li>
+                    <li><button onClick={goToChiSiamo}>Chi siamo</button></li>
+                    <li><button onClick={goToEsercizi}>Esempio esercizio</button></li>
+                    <li><button onClick={goToLogin}>Accedi</button></li>
                 </ul>
             </nav>
         </header>
