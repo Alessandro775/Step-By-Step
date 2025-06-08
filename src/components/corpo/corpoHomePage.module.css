@@ -10,19 +10,19 @@
   width: 100%;          /* Occupa tutta la larghezza disponibile all’interno del genitore */
 }
 
-.heading {
+.titolo {
     font-size: 2.5rem;       /* Grandezza del testo per l’intestazione principale */
     font-weight: bold;       /* Grassetto per evidenziare */
     margin-bottom: 1.5rem;   /* Spazio sotto l’elemento per separarlo dal contenuto successivo */
 }
 
-.subheading {
+.sottotitolo {
     font-size: 1.8rem;       /* Dimensione leggermente più piccola per i sottotitoli */
     font-weight: bold;       /* Anche qui grassetto */
     margin-bottom: 1rem;     /* Spazio sotto il sottotitolo */
 }
 
-.text {
+.testo {
     font-size: 1.1rem;       /* Dimensione del corpo del testo: leggermente più grande del normale per migliorare la leggibilità */
     line-height: 1.6;        /* Altezza della linea aumentata per rendere il testo più arioso e leggibile */
 }
