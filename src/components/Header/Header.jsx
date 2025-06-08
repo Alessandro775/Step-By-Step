@@ -1,7 +1,7 @@
 import React from 'react';
 import header from './header.module.css'
 import { useNavigate } from 'react-router-dom'
-import logo from '../../assets/logo-removebg-preview.png' 
+import logo from '../../assets/logosito.png' 
 
 //dichiarazione di variabili e funzioni
 
