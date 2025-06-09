@@ -12,7 +12,7 @@ const Header = () => {
     // Funzioni per la navigazione
     const goToHome = () => navigate('/');
     const goToChiSiamo = () => navigate('/chi siamo');
-    const goToEsercizi = () => navigate('/esempio esercizio');
+    const goToEsercizi = () => navigate('/esercizi');
     const goToLogin = () => navigate('/login');
 
     return (
