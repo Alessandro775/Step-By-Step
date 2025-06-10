@@ -1,41 +1,71 @@
 const express = require('express');
-require('dotenv').config();
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise'); // Usiamo la versione promise-based
 const cors = require('cors');
 
 const app = express();
-const port = 3001;
+const port = 3008;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Configurazione database
-const db = mysql.createPool({
-    host: process.env.DB_HOST,     // usa l'IP dell'altro computer
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
+const dbConfig = {
+    host: 'localhost',
+    user: 'root',
+    password: '', // CONSIGLIO: Usa variabili d'ambiente per le credenziali
+    database: 'step by step', // Nota: gli spazi nel nome del database potrebbero causare problemi
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
-});
+};
 
-// Test connessione
-db.getConnection((err, connection) => {
-    if (err) {
+// Creazione pool di connessioni
+const pool = mysql.createPool(dbConfig);
+
+// Test connessione database (versione migliorata)
+async function testDatabaseConnection() {
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        console.log('Connessione al database stabilita con successo!');
+    } catch (err) {
         console.error('Errore di connessione al database:', err);
-        return;
+    } finally {
+        if (connection) connection.release();
     }
-    console.log('Database connesso con successo!');
-    connection.release();
+}
+
+// Esegui il test all'avvio
+testDatabaseConnection();
+
+// Endpoint di test migliorato
+app.get('/test-db', async (req, res) => {
+    try {
+        const [results] = await pool.query('SELECT 1');
+        res.json({ 
+            status: 'success',
+            message: 'Connessione al database funzionante',
+            data: results 
+        });
+    } catch (err) {
+        console.error('Database error:', err);
+        res.status(500).json({ 
+            status: 'error',
+            message: 'Errore di connessione al database',
+            error: err.message 
+        });
+    }
 });
 
-// Gestione errori globale
+// Gestione errori globale migliorata
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).send('Qualcosa è andato storto!');
+    res.status(500).json({
+        status: 'error',
+        message: 'Qualcosa è andato storto!',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
 });
 
 // Avvio server

@@ -4,8 +4,10 @@ import ProfilePage from "../pages/ProfilePage";
 import RegisterPage from "../pages/RegisterPage";
 import ChiSiamo from "../pages/ChiSiamo";
 import EsempioEsercizio from "../pages/EsempioEsercizio"; // Aggiungi questa riga
+import EsercizioAudio from "../pages/EsercizioAudio"; // Aggiungi questa riga per importare la pagina degli esercizi
 
 import { Route, Routes } from "react-router-dom";
+
 
 function RoutesPath() {
   return (
@@ -18,6 +20,7 @@ function RoutesPath() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/chi siamo" element={<ChiSiamo />} />
         <Route path="/esercizi" element={<EsempioEsercizio />} />
+        <Route path="/esercizio audio" element={<EsercizioAudio />} /> {/* Aggiungi questa riga per gestire gli esercizi con ID */}
         <Route path="*" element={<HomePage />} /> {/* Questa rotta gestisce i percorsi non trovati */}
       </Routes>
     </>
