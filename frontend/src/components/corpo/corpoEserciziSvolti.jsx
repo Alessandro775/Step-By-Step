@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './corpoHomePage.module.css';
+import styles from './corpo.module.css';
 import stopwatch from '../../assets/stopwatch-graphic-icon-design-template-png_302689-removebg-preview.png';
 import sillabe from '../../assets/sillabe-removebg-preview.png';
 import pronuncia from '../../assets/pronuncia-removebg-preview.png';
