@@ -1,5 +1,4 @@
-/* Aggiungi al tuo corpoHomePage.module.css */
-
+/* Animazioni */
 .fadeIn {
     animation: fadeIn 0.8s ease-in-out forwards;
     opacity: 0;
@@ -24,43 +23,83 @@
     }
 }
 
+/* Layout generale */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px;
+    background-color: #f0f0f0; /* grigio chiaro */
+}
+.content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+/* Sezioni */
+.sezione {
+    margin-bottom: 64px;
+}
+
+.titolo {
+    margin-bottom: 16px;
+    color: #000000; /* verde scuro */
+}
+
+.sottotitolo {
+    margin-bottom: 16px;
+    color: #000000; /* verde foresta */
+}
+
+.testo {
+    line-height: 1.6;
+    color: #000000; /* verde scuro grigiastro */
+}
+
+/* Disturbi */
 .disturbiGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin: 2rem 0;
+    grid-template-columns: repeat(2, 1fr); /* Exactly 2 columns */
+    gap: 24px;
+    margin-top: 32px;
 }
 
 .disturboCard {
     display: flex;
     align-items: flex-start;
-    padding: 1.5rem;
-    background: #f8f9fa;
+    padding: 24px;
+    background: #d7ddd773; /* verde molto chiaro */
     border-radius: 12px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .disturboCard:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px #e6e0e033; /* ombra verde */
 }
 
 .disturboIcon {
-    font-size: 2rem;
-    margin-right: 1rem;
+    margin-right: 16px;
 }
 
+.disturboNome {
+    margin-bottom: 4px;
+}
+
+/* Servizi */
 .serviziGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin: 2rem 0;
+    gap: 24px;
+    margin-top: 32px;
 }
 
 .servizioCard {
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    padding: 24px;
+    background: #e6e0e033;
+    box-shadow: 0 8px 25px #0a8f2b33; /* ombra verde */ /* verde lime a verde chiaro */
+    color: #000000; /* verde scuro */
     border-radius: 12px;
     transition: transform 0.3s ease;
 }
@@ -69,16 +108,35 @@
     transform: scale(1.05);
 }
 
+.servizioIcon {
+    margin-bottom: 16px;
+}
+
+.servizioTitolo {
+    margin-bottom: 8px;
+}
+
+/* Evidenziazione progetto */
 .progettoHighlight {
-    background: linear-gradient(90deg, #e3f2fd, #f3e5f5);
-    padding: 2rem;
+    background: #e6e0e033; /* verde pastello chiaro */
+    padding: 32px;
     border-radius: 12px;
-    border-left: 4px solid #2196f3;
+    border-left: 5px solid #228B22; /* verde foresta */
+    box-shadow: 0 4px 12px rgba(0, 100, 0, 0.05);
 }
 
 .evidenziato {
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    background: #006400;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-weight: bold;
+}
+
+/* Missione */
+.missioneContent {
+    margin-top: 24px;
+}
+
+.obiettivo {
+    margin-top: 16px;
+    color: #e6e0e033;
 }
