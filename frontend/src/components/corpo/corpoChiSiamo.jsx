@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './corpoHomePage.module.css';
+import styles from './corpo.module.css';
 
 const CorpoChiSiamo = () => {
     return (

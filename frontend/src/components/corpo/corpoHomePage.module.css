@@ -1,79 +1,84 @@
-/* ===== LAYOUT GENERALE ===== */
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
+/* Aggiungi al tuo corpoHomePage.module.css */
+
+.fadeIn {
+    animation: fadeIn 0.8s ease-in-out forwards;
+    opacity: 0;
 }
 
-.content {
-  max-width: 1200px;    /* Imposta una larghezza massima per il contenitore */
-  width: 100%;          /* Occupa tutta la larghezza disponibile */
+.slideIn {
+    animation: slideIn 0.6s ease-out forwards;
+    transform: translateY(20px);
+    opacity: 0;
 }
 
-/* ===== INTESTAZIONI GENERALI ===== */
-.titolo {
-    font-size: 2.5rem;       /* Grandezza del testo per l'intestazione principale */
-    font-weight: bold;       /* Grassetto per evidenziare */
-    margin-bottom: 1.5rem;   /* Spazio sotto l'elemento */
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
 }
 
-.sottotitolo {
-    font-size: 1.8rem;       /* Dimensione leggermente più piccola per i sottotitoli */
-    font-weight: bold;       /* Anche qui grassetto */
-    margin-bottom: 1rem;     /* Spazio sotto il sottotitolo */
+@keyframes slideIn {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
-.testo {
-    font-size: 1.1rem;       /* Dimensione del corpo del testo */
-    line-height: 1.6;        /* Altezza della linea aumentata per leggibilità */
+.disturbiGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
 }
 
-/* ===== SEZIONE ESERCIZI ===== */
-.headerSection {
-    text-align: center;      /* Centra il contenuto orizzontalmente */
-    margin: 2rem 0;          /* Margine sopra e sotto di 2rem */
+.disturboCard {
+    display: flex;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.titoloEsempio {
-    font-size: 2.5rem;       /* Imposta una dimensione grande del font per il titolo */
+.disturboCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
-.sottotitoloEsempio {
-    font-size: 1.8rem;       /* Dimensione del font leggermente più piccola del titolo */
+.disturboIcon {
+    font-size: 2rem;
+    margin-right: 1rem;
 }
 
-.eserciziContainer {
-    display: flex;           /* Usa Flexbox per il layout */
-    flex-direction: column;  /* Dispone gli elementi in colonna */
-    gap: 2rem;              /* Spaziatura di 2rem tra gli elementi figli */
+.serviziGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
 }
 
-.esercizio {
-    display: flex;          
-    align-items: center;    
-    gap: 2rem;             
-    padding: 2rem;          /* Aggiunge padding interno */
+.servizioCard {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
 }
 
-.descrizione {
-    flex: 1;               /* Occupa lo spazio rimanente */
+.servizioCard:hover {
+    transform: scale(1.05);
 }
 
-.descrizione h3 {
-    font-size: 2rem;       /* Aumenta dimensione titolo */
-    margin-bottom: 1rem;   /* Spazio sotto il titolo */
-    color: #2e8b57;        /* Colore verde come l'header */
-    font-weight: bold;     /* Testo in grassetto */
+.progettoHighlight {
+    background: linear-gradient(90deg, #e3f2fd, #f3e5f5);
+    padding: 2rem;
+    border-radius: 12px;
+    border-left: 4px solid #2196f3;
 }
 
-.descrizione p {
-    font-size: 1.3rem;     /* Aumenta dimensione testo */
-    line-height: 1.6;      /* Aumenta interlinea */
-    color: #333;           /* Colore testo più scuro */
-    margin-top: 1rem;      /* Spazio sopra il paragrafo */
-}
-
-.immaginEsercizio {
-    max-width: 300px;      /* Larghezza massima di 300px */
+.evidenziato {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
 }
