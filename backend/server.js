@@ -39,8 +39,15 @@ app.use((err, req, res, next) => {
 });
 
 // Avvio server
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Server in esecuzione sulla porta ${port}`);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('Errore non gestito:', error);
+    server.close(() => {
+        process.exit(1);
+    });
 });
 
 // Gestione errori non catturati
@@ -48,4 +55,28 @@ process.on('unhandledRejection', (err) => {
     console.error('Errore non gestito:', err);
 });
 
-module.exports = app;
+// ...existing code...
+const createAuthenticationServices = require('./authenticationServices');
+const authenticationServices = createAuthenticationServices(db);
+
+// Route per la registrazione
+app.post('/api/register', async (req, res) => {
+    try {
+        const result = await authenticationServices.register(req.body);
+        res.json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Route per il login
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const result = await authenticationServices.login(email, password);
+        res.json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
