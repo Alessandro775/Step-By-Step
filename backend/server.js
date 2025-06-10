@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const mysql = require('mysql2');
 const cors = require('cors');
 
@@ -11,10 +12,11 @@ app.use(express.json());
 
 // Configurazione database
 const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'step-by-step',
+    host: process.env.DB_HOST,     // usa l'IP dell'altro computer
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
