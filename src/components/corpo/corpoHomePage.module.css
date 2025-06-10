@@ -1,0 +1,79 @@
+/* ===== LAYOUT GENERALE ===== */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.content {
+  max-width: 1200px;    /* Imposta una larghezza massima per il contenitore */
+  width: 100%;          /* Occupa tutta la larghezza disponibile */
+}
+
+/* ===== INTESTAZIONI GENERALI ===== */
+.titolo {
+    font-size: 2.5rem;       /* Grandezza del testo per l'intestazione principale */
+    font-weight: bold;       /* Grassetto per evidenziare */
+    margin-bottom: 1.5rem;   /* Spazio sotto l'elemento */
+}
+
+.sottotitolo {
+    font-size: 1.8rem;       /* Dimensione leggermente più piccola per i sottotitoli */
+    font-weight: bold;       /* Anche qui grassetto */
+    margin-bottom: 1rem;     /* Spazio sotto il sottotitolo */
+}
+
+.testo {
+    font-size: 1.1rem;       /* Dimensione del corpo del testo */
+    line-height: 1.6;        /* Altezza della linea aumentata per leggibilità */
+}
+
+/* ===== SEZIONE ESERCIZI ===== */
+.headerSection {
+    text-align: center;      /* Centra il contenuto orizzontalmente */
+    margin: 2rem 0;          /* Margine sopra e sotto di 2rem */
+}
+
+.titoloEsempio {
+    font-size: 2.5rem;       /* Imposta una dimensione grande del font per il titolo */
+}
+
+.sottotitoloEsempio {
+    font-size: 1.8rem;       /* Dimensione del font leggermente più piccola del titolo */
+}
+
+.eserciziContainer {
+    display: flex;           /* Usa Flexbox per il layout */
+    flex-direction: column;  /* Dispone gli elementi in colonna */
+    gap: 2rem;              /* Spaziatura di 2rem tra gli elementi figli */
+}
+
+.esercizio {
+    display: flex;          
+    align-items: center;    
+    gap: 2rem;             
+    padding: 2rem;          /* Aggiunge padding interno */
+}
+
+.descrizione {
+    flex: 1;               /* Occupa lo spazio rimanente */
+}
+
+.descrizione h3 {
+    font-size: 2rem;       /* Aumenta dimensione titolo */
+    margin-bottom: 1rem;   /* Spazio sotto il titolo */
+    color: #2e8b57;        /* Colore verde come l'header */
+    font-weight: bold;     /* Testo in grassetto */
+}
+
+.descrizione p {
+    font-size: 1.3rem;     /* Aumenta dimensione testo */
+    line-height: 1.6;      /* Aumenta interlinea */
+    color: #333;           /* Colore testo più scuro */
+    margin-top: 1rem;      /* Spazio sopra il paragrafo */
+}
+
+.immaginEsercizio {
+    max-width: 300px;      /* Larghezza massima di 300px */
+}

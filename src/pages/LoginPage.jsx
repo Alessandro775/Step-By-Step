@@ -34,17 +34,19 @@ const LoginPage = () => {
                     required
                  />
             </div>
-        <div className={styles["form-group"]}>
-    <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        value={formData.password}
-        onChange={handleChange}
-        required
-    />
-        </div>
-                <button type="submit">Login</button>
+            <div className={styles["form-group"]}>
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                />
+            </div>
+            <button type="submit">Invia</button>
+            <a href="#" className={styles["forgot-password"]}>Hai dimenticato la password?</a>
+            <button type="submit">Registrati</button>
             </form>
         </div>
     );

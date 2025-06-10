@@ -31,7 +31,7 @@
 .login-form button { /* Specifico per il button nel form */
     width: 100%; /* Larghezza al 100% del contenitore genitore */
     padding: 1rem; /* Aumentato per un button più grande */
-    background-color: var(--color-primary); /* Colore di sfondo preso da variabile CSS */
+    background-color: #2e8b57; /* Sea Green color */
     color: white; /* Testo bianco */
     border: none; /* Rimozione del bordo predefinito */
     border-radius: 4px; /* Bordi arrotondati */
@@ -41,7 +41,21 @@
 }
 
 .login-form h2 {
+    text-align: center;     /* Centra orizzontalmente il testo dell'intestazione <h2> */
+    margin-bottom: 2rem;    /* Aggiunge uno spazio di 2rem sotto l'elemento, separandolo dagli elementi successivi */
+    color: #333;            /* Imposta il colore del testo su un grigio scuro (#333) */
+}
+
+.login-form a {
+    display: block;
     text-align: center;
-    margin-bottom: 2rem;
-    color: #333;
+    margin-top: 1rem;      /* Aumentato a 3rem per distanziare dal pulsante invia (sopra) */
+    margin-bottom: 2.5rem; /* Aumentato a 3.5rem per distanziare maggiormente dal pulsante registrati (sotto) */
+    color: #312e8b;
+    text-decoration: none;
+}
+
+
+.login-form a:hover {
+    text-decoration: underline;
 }

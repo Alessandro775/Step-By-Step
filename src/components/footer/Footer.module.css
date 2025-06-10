@@ -1,0 +1,91 @@
+/* Imposta altezza completa per html e body */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Wrapper dell’intera pagina */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Contenuto principale che cresce per riempire lo spazio */
+.main-content {
+  flex: 1;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Container principale del footer */
+.footer-content {
+  width: 100%; /* Il footer occupa tutta la larghezza */
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background: #2e8b57;
+  color: #fff;
+  padding: 28px 32px;
+  box-sizing: border-box;
+  border-top: 2px solid #26734d;
+  z-index: 100;
+}
+
+/* Colonna loghi */
+.footer-logos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 90px;
+  width: 60px;
+  padding: 4px;
+  background: none;
+}
+
+.site-logo,
+.uniba-logo {
+  width: 60px;
+  height: auto;
+  padding: 4px;
+}
+
+/* Colonna contatti */
+.footer-contacts {
+  min-width: 200px;
+  margin-left: 20px;
+}
+
+.footer-contacts h3,
+.footer-info h3 {
+  margin-top: 0;
+  color: #fff;
+  font-size: 1.1em;
+}
+
+.footer-contacts ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px 0;
+}
+
+.footer-contacts li {
+  margin-bottom: 6px;
+  font-size: 1em;
+}
+
+/* Colonna informazioni */
+.footer-info {
+  max-width: 650px;
+  margin-left: 70px;
+  margin-right: 20px;
+}
+
+.footer-dipartimento {
+  font-size: 0.98em;
+  color: #e8e6e6;
+  font-style: italic;
+  margin-top: 8px;
+}
