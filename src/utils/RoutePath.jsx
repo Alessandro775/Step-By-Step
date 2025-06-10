@@ -14,7 +14,7 @@ function RoutesPath() {
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage/>}/>
+        <Route path="/registrazione" element={<RegisterPage/>}/>
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/chi siamo" element={<ChiSiamo />} />
         <Route path="/esercizi" element={<EsempioEsercizio />} />

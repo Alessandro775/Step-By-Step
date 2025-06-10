@@ -46,7 +46,7 @@ const LoginPage = () => {
             </div>
             <button type="submit">Invia</button>
             <a href="#" className={styles["forgot-password"]}>Hai dimenticato la password?</a>
-            <button type="submit">Registrati</button>
+            <button type="button" onClick={() => window.location.href = '/registrazione'}>Registrati</button>
             </form>
         </div>
     );
