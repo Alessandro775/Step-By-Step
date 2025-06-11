@@ -1,28 +1,3 @@
-/* Animazioni */
-.fadeIn {
-    animation: fadeIn 0.8s ease-in-out forwards;
-    opacity: 0;
-}
-
-.slideIn {
-    animation: slideIn 0.6s ease-out forwards;
-    transform: translateY(20px);
-    opacity: 0;
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideIn {
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
 /* Layout generale */
 .container {
     display: flex;
@@ -71,11 +46,9 @@
     padding: 24px;
     background: #d7ddd773; /* verde molto chiaro */
     border-radius: 12px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .disturboCard:hover {
-    transform: translateY(-5px);
     box-shadow: 0 8px 25px #e6e0e033; /* ombra verde */
 }
 
@@ -104,10 +77,6 @@
     transition: transform 0.3s ease;
 }
 
-.servizioCard:hover {
-    transform: scale(1.05);
-}
-
 .servizioIcon {
     margin-bottom: 16px;
 }
@@ -126,9 +95,7 @@
 }
 
 .evidenziato {
-    background: #006400;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #006400;
 }
 
 /* Missione */

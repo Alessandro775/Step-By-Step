@@ -61,33 +61,11 @@ const CorpoHomePage = () => {
         ]
     };
 
-    // Animazione di entrata per le sezioni
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsVisible(prev => ({ ...prev, intro: true }));
-        }, 300);
-
-        const timer2 = setTimeout(() => {
-            setIsVisible(prev => ({ ...prev, disturbi: true }));
-        }, 600);
-
-        const timer3 = setTimeout(() => {
-            setIsVisible(prev => ({ ...prev, servizi: true }));
-        }, 900);
-
-        return () => {
-            clearTimeout(timer);
-            clearTimeout(timer2);
-            clearTimeout(timer3);
-        };
-    }, []);
-
     // Componente per i disturbi DSA
     const DisturboCard = ({ disturbo, index }) => (
         <div 
             className={`${styles.disturboCard} ${isVisible.disturbi ? styles.fadeIn : ''}`}
             style={{ 
-                animationDelay: `${index * 0.2}s`,
                 borderLeft: `4px solid ${disturbo.colore}`
             }}
         >
@@ -103,7 +81,6 @@ const CorpoHomePage = () => {
     const ServizioCard = ({ servizio, index }) => (
         <div 
             className={`${styles.servizioCard} ${isVisible.servizi ? styles.slideIn : ''}`}
-            style={{ animationDelay: `${index * 0.15}s` }}
         >
             <div className={styles.servizioIcon}>{servizio.icon}</div>
             <div className={styles.servizioContent}>
