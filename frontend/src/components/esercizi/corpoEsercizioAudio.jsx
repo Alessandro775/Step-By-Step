@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './corpoEsercizioAudio.module.css';
+import logoUniba from '../../assets/logouniba.jpeg';
+
 
 const CorpoEsercizioAudio = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -12,26 +14,42 @@ const CorpoEsercizioAudio = () => {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
+  // Richiedi automaticamente i permessi del microfono al caricamento della pagina
   useEffect(() => {
-    checkMicrophonePermission();
+    requestMicrophonePermissionOnLoad();
     getNuovaParola();
   }, []);
 
-  const checkMicrophonePermission = async () => {
+  const requestMicrophonePermissionOnLoad = async () => {
     try {
-      if (navigator.permissions) {
-        const permission = await navigator.permissions.query({ name: 'microphone' });
-        setMicrophonePermission(permission.state);
-        
-        permission.onchange = function() {
-          setMicrophonePermission(this.state);
-        };
+      console.log('Richiedendo permessi microfono automaticamente...');
+      
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+
+      setMicrophonePermission('granted');
+      console.log('✅ Permessi microfono concessi automaticamente');
+      
+      stream.getTracks().forEach(track => track.stop());
+      
+    } catch (error) {
+      console.error('Errore richiesta permessi automatica:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        setMicrophonePermission('denied');
+        console.log('❌ Permessi microfono negati dall\'utente');
+      } else if (error.name === 'NotFoundError') {
+        console.log('❌ Nessun microfono trovato');
+        setMicrophonePermission('denied');
       } else {
+        console.log('❌ Errore generico:', error.message);
         setMicrophonePermission('prompt');
       }
-    } catch (error) {
-      console.log('Permissions API non supportata:', error);
-      setMicrophonePermission('prompt');
     }
   };
 
@@ -51,7 +69,7 @@ const CorpoEsercizioAudio = () => {
 
       setMicrophonePermission('granted');
       stream.getTracks().forEach(track => track.stop());
-      alert('✅ Permesso microfono concesso con successo!');
+      alert('✅ Permesso microfono concesso!');
 
     } catch (error) {
       console.error('Errore richiesta permesso:', error);
@@ -93,8 +111,11 @@ const CorpoEsercizioAudio = () => {
   const startRecording = async () => {
     try {
       if (microphonePermission !== 'granted') {
-        alert('⚠️ Devi prima concedere il permesso per il microfono');
-        return;
+        await requestMicrophonePermission();
+        if (microphonePermission !== 'granted') {
+          alert('⚠️ Devi concedere il permesso per il microfono per registrare');
+          return;
+        }
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -144,7 +165,7 @@ const CorpoEsercizioAudio = () => {
     formData.append('reference_text', parolaRiferimento);
 
     try {
-      setFeedback('Analizzando la pronuncia italiana...');
+      setFeedback('Analizzando la pronuncia...');
 
       const response = await fetch('/check_pronunciation', {
         method: 'POST',
@@ -185,9 +206,9 @@ const CorpoEsercizioAudio = () => {
 
   const getPermissionStatusText = () => {
     switch (microphonePermission) {
-      case 'granted': return '✅ Permesso microfono concesso';
-      case 'denied': return '❌ Permesso microfono negato';
-      default: return '⚠️ Permesso microfono richiesto';
+      case 'granted': return '✅ Microfono pronto';
+      case 'denied': return '❌ Microfono bloccato';
+      default: return '⏳ Richiedendo permessi...';
     }
   };
 
@@ -200,38 +221,35 @@ const CorpoEsercizioAudio = () => {
 
   return (
     <div className={styles.container}>
-      <h1>🇮🇹 Pronuncia Italiana AI</h1>
+      <h1 className={styles.mainTitle}>Pronuncia la parola correttamente</h1>
 
       <div className={styles.pronunciationArea}>
-        <div id="permissionSection">
-          <h3>Stato Permessi Microfono:</h3>
+        {/* Immagine locale sempre visibile per test */}
+        <div className={styles.imageContainer}>
+          <img 
+            src={logoUniba} 
+            alt="Logo Università di Bari"
+            className={styles.wordImage}
+          />
+        </div>
+
+        <div className={styles.textControls}>
+          PAROLA
+        </div>
+
+      {/* Stato microfono sempre visibile */}
+        <div className={styles.microphoneStatus}>
           <div className={`${styles.permissionStatus} ${getPermissionStatusClass()}`}>
             {getPermissionStatusText()}
           </div>
-          {microphonePermission !== 'granted' && (
+          {microphonePermission === 'denied' && (
             <button 
               className={styles.permissionBtn}
               onClick={requestMicrophonePermission}
             >
-              🎤 Richiedi Permesso Microfono
+              🎤 Riprova Permesso Microfono
             </button>
           )}
-        </div>
-
-        <div className={styles.textControls}>
-          <button 
-            className={styles.permissionBtn}
-            onClick={getNuovaParola}
-          >
-            🎲 Nuova parola italiana
-          </button>
-        </div>
-
-        <div className={styles.wordContainer}>
-          <div className={styles.referenceText}>
-            {parolaRiferimento || 'Caricamento parola italiana...'}
-          </div>
-          <div className={styles.italianFlag}>🇮🇹</div>
         </div>
 
         <div className={styles.controls}>
@@ -239,9 +257,9 @@ const CorpoEsercizioAudio = () => {
             <button 
               className={styles.recordBtn}
               onClick={startRecording}
-              disabled={microphonePermission !== 'granted'}
+              disabled={!parolaRiferimento || microphonePermission === 'denied'}
             >
-              🎤 Pronuncia in italiano
+              🎤 premi per eseguire la registrazione
             </button>
           ) : (
             <button 
@@ -261,15 +279,15 @@ const CorpoEsercizioAudio = () => {
 
         {results && (
           <div className={styles.results}>
-            <h4>Risultati Pronuncia Italiana:</h4>
-            <p><strong>Parola italiana da pronunciare:</strong> {results.reference_text}</p>
+            <h4>Risultati:</h4>
+            <p><strong>Parola da pronunciare:</strong> {results.reference_text}</p>
             <p><strong>Parola pronunciata:</strong> {results.transcribed_text}</p>
             {results.similarity_score && (
               <p><strong>Accuratezza pronuncia:</strong> {results.similarity_score}%</p>
             )}
             {results.corrections && results.corrections.length > 0 && (
               <div className={styles.corrections}>
-                <h5>Suggerimenti per migliorare la pronuncia italiana:</h5>
+                <h5>Suggerimenti per migliorare:</h5>
                 <ul>
                   {results.corrections.map((correction, index) => (
                     <li key={index}>{correction}</li>
