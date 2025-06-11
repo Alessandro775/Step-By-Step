@@ -1,16 +1,398 @@
-/* Contenitore per la sezione del profilo */
-.profile-section {
-    text-align: center;              /* Allinea il contenuto al centro */
+/* Reset e configurazione base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* Titolo della sezione "Personal Information" */
-.profile-section h2 {
-    color: #2c3e50;                  /* Colore scuro/bluastro */
-    margin: 2rem 0 1rem 0;           /* Margine sopra e sotto il titolo */
+/* Contenitore principale della pagina profilo */
+.profileContainer {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #c1c4d1 0%, #bfcec9 100%);
+    padding: 0 0 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
 }
 
-.pageTitle {
+
+
+/* Container del nome con spaziatura */
+.nameContainer {
+    margin-bottom: 1rem;
+}
+
+/* Nome utente principale con spaziatura */
+.profileName {
+    font-size: 290%;
+    font-weight: 800;
+    color: #2d3748;
+    background: linear-gradient(135deg, #667eea, #5153b9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    justify-content: center;
+
+  
+}
+
+.firstName {
+    display: inline-block;
+}
+
+.lastName {
+    display: inline-block;
+}
+
+.spacer {
+    width: 1.5rem;
+    height: 1px;
+}
+
+/* Contenitore principale delle card */
+.profileContent {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    flex: 1;
+}
+
+/* BLOCCO INFORMAZIONI PERSONALI */
+.infoBlock {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.infoBlock:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+}
+
+/* Header del blocco */
+.blockHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f7fafc;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.blockTitle {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
     text-align: center;
+}
+
+.blockTitle svg {
+    color: #48bb78;
+}
+
+.editBtn {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.editBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(72, 187, 120, 0.3);
+}
+
+/* Griglia delle informazioni */
+.infoGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+}
+
+/* Righe con spaziatura */
+.nameRow,
+.contactRow,
+.academicRow {
+    display: flex;
+    gap: 1.5rem;
+    align-items: end;
+}
+
+/* Avvicinamento nome e cognome */
+.nameRow {
+    margin-top: 1rem;
+    gap: 1rem;
+}
+
+.singleRow {
+    display: flex;
+    justify-content: center;
+}
+
+.fieldSpacer {
+    width: 2rem;
+    flex-shrink: 0;
+}
+
+/* Singolo elemento informazione */
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    flex: 1;
+    text-align: center;
+}
+
+.singleRow .infoItem {
+    max-width: 400px;
+}
+
+/* Label dei campi */
+.infoItem label {
+    font-weight: 700;
+    color: #4a5568;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    text-align: center;
+}
+
+/* Valori delle informazioni */
+.infoValue {
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    color: #2d3748;
+    font-weight: 500;
+    font-size: 1rem;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Campi input */
+.inputField {
+    padding: 1rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+    min-height: 50px;
+    text-align: center;
+    font-family: inherit;
+}
+
+.inputField:focus {
+    outline: none;
+    border-color: #48bb78;
+    box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+}
+
+/* Sezione bottone salva */
+.saveSection {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #f7fafc;
+    text-align: center;
+}
+
+.saveBtn {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 auto;
+}
+
+.saveBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(72, 187, 120, 0.3);
+}
+
+/* BLOCCO CRONOLOGIA */
+.cronologiaBlock {
+    background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+    border: 2px solid #48bb78;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(72, 187, 120, 0.15);
+    transition: all 0.3s ease;
+}
+
+.cronologiaBlock:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(72, 187, 120, 0.2);
+}
+
+.cronologiaTitle {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #48bb78;
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+}
+
+.cronologiaDescription {
+    font-size: 1.1rem;
+    color: #718096;
     margin-bottom: 2rem;
-    color: #333;
+    line-height: 1.5;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cronologiaButtonContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.cronologiaBtn {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    border: none;
+    padding: 1.2rem 2.5rem;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    box-shadow: 0 8px 20px rgba(72, 187, 120, 0.25);
+}
+
+.cronologiaBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(72, 187, 120, 0.3);
+}
+
+/* RESPONSIVE DESIGN */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .profileHero,
+    .profileContent {
+        max-width: 95%;
+    }
+    
+    .profileName {
+        font-size: 2.5rem;
+    }
+    
+    .blockHeader {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Mobile grande */
+@media (max-width: 768px) {
+    .profileHero {
+        padding: 2rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profileName {
+        font-size: 2.2rem;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    
+    .spacer {
+        display: none;
+    }
+    
+    .profileContent {
+        padding: 0 1rem 2rem;
+        gap: 1.5rem;
+    }
+    
+    .infoBlock,
+    .cronologiaBlock {
+        padding: 1.5rem;
+    }
+    
+    .nameRow,
+    .contactRow,
+    .academicRow {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .fieldSpacer {
+        display: none;
+    }
+    
+    .cronologiaBtn {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+}
+
+/* Mobile piccolo */
+@media (max-width: 480px) {
+    .profileHero {
+        padding: 1.5rem 1rem;
+        margin: 0.8rem auto 1.5rem;
+    }
+    
+    .profileName {
+        font-size: 2rem;
+    }
+    
+    .blockTitle,
+    .cronologiaTitle {
+        font-size: 1.4rem;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    
+    .infoBlock,
+    .cronologiaBlock {
+        padding: 1.2rem;
+    }
+    
+    .cronologiaBtn {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+    }
 }
