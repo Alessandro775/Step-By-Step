@@ -5,12 +5,49 @@
   font-family: Arial, sans-serif;
 }
 
+.mainTitle {
+  text-align: center;
+  font-size: 45px;
+  color: #000000;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+.microphoneStatus {
+  text-align: center;
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 2px solid #28a745;
+}
+
+.mainTitle {
+  text-align: center;
+  font-size: 44px;
+  color: #000000;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+
 .pronunciationArea {
   background-color: #f8f9fa;
   padding: 20px;
   border-radius: 10px;
   margin: 20px 0;
   border: 3px solid #28a745;
+}
+
+.imageContainer {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.wordImage {
+  max-width: 300px;
+  max-height: 200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .wordContainer {
@@ -23,8 +60,8 @@
   font-weight: bold;
   text-align: center;
   margin: 20px 0;
-  padding: 25px;
-  background: linear-gradient(135deg, #28a745, #20c997);
+  padding: 15px;
+  background: linear-gradient(135deg, #3e6b49, #20c997);
   color: white;
   border-radius: 15px;
   min-height: 100px;
@@ -34,18 +71,6 @@
   letter-spacing: 3px;
   text-transform: lowercase;
   box-shadow: 0 8px 16px rgba(40, 167, 69, 0.3);
-}
-
-.italianFlag {
-  font-size: 32px;
-  margin: 10px 0;
-  animation: wave 2s infinite;
-}
-
-@keyframes wave {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-10deg); }
-  75% { transform: rotate(10deg); }
 }
 
 .textControls {
@@ -112,31 +137,11 @@
   box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
 }
 
-.permissionStatus {
-  text-align: center;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.permissionGranted {
-  background-color: #d4edda;
-  color: #155724;
-  border: 3px solid #28a745;
-}
-
-.permissionDenied {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 3px solid #dc3545;
-}
-
-.permissionPrompt {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 3px solid #ffc107;
+.permissionBtn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 @keyframes pulse {
@@ -234,6 +239,10 @@
     padding: 10px;
   }
   
+  .mainTitle {
+    font-size: 24px;
+  }
+  
   .referenceText {
     font-size: 32px;
     letter-spacing: 2px;
@@ -246,6 +255,11 @@
   .recordBtn, .permissionBtn {
     padding: 15px 25px;
     font-size: 16px;
+  }
+  
+  .wordImage {
+    max-width: 250px;
+    max-height: 150px;
   }
 }
 
@@ -265,4 +279,30 @@
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(-30px); }
   to { opacity: 1; transform: translateX(0); }
+}
+.permissionStatus {
+  text-align: center;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.permissionGranted {
+  background-color: #d4edda;
+  color: #155724;
+  border: 3px solid #28a745;
+}
+
+.permissionDenied {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 3px solid #dc3545;
+}
+
+.permissionPrompt {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 3px solid #ffc107;
 }
