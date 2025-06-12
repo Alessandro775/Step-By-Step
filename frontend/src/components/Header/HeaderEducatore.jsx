@@ -5,15 +5,15 @@ import logo from '../../assets/logosito.png'
 
 //dichiarazione di variabili e funzioni
 
-const Header = () => {
+const HeaderEducatore = () => {
     const navigate = useNavigate();
 
 
     // Funzioni per la navigazione
     const goToHome = () => navigate('/');
-    const goToChiSiamo = () => navigate('/chi-siamo');
-    const goToEsercizi = () => navigate('/esempio-esercizio');
-    const goToLogin = () => navigate('/login');
+    const goToStudenti = () => navigate('/studenti-educatore');
+    const goToProfilo = () => navigate('/profilo-educatore');
+    const goToContenuti = () => navigate('/contenuto-educatore');
 
     return (
         <header className={header.container}>
@@ -27,13 +27,13 @@ const Header = () => {
             <h1 className={header.title}>Step By Step</h1>
                 <nav>
                 <ul className={header['nav-list']}>
-                    <li><button onClick={goToChiSiamo}>Chi siamo</button></li>
-                    <li><button onClick={goToEsercizi}>Esempio esercizio</button></li>
-                    <li><button onClick={goToLogin}>Login</button></li>
+                    <li><button onClick={goToStudenti}>Studenti</button></li>
+                    <li><button onClick={goToContenuti}>Contenuti degli esercizi</button></li>                    
+                    <li><button onClick={goToProfilo}>Profilo utente</button></li>
                 </ul>
             </nav>
         </header>
     );
 };
 
-export default Header;
+export default HeaderEducatore;

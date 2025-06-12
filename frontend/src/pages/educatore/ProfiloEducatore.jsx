@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
-import styles from './ProfilePage.module.css';
-import Header from '../components/Header/Header';
-import Footer from '../components/footer/Footer';
+import styles from '../ProfilePage.module.css';
+import Header from '../../components/Header/HeaderEducatore';
+import Footer from '../../components/footer/Footer';
 
-const ProfilePage = () => {
+const EducatorProfile = () => {
     // State per gestire la modalità di modifica
     const [isEditing, setIsEditing] = useState(false);
     
-    // State per memorizzare le informazioni dell'utente
+    // State per memorizzare le informazioni dell'educatore (rimossi classe e anno accademico)
     const [userInfo, setUserInfo] = useState({
         nome: 'Mario',
         cognome: 'Rossi',
         email: 'mario.rossi@email.com',
-        citta: 'Milano',
-        istituto: 'Università Statale di Milano',
-        classe: '3A Informatica',
-        annoAccademico: '2024/2025'
+        istituto: 'Università Statale di Milano'
     });
 
     // Funzione per attivare/disattivare la modalità modifica
@@ -39,7 +36,7 @@ const ProfilePage = () => {
 
     // Funzione per gestire il click sulla cronologia
     const handleCronologia = () => {
-        console.log('Apertura cronologia utente');
+        console.log('Apertura cronologia educatore');
     };
 
     return (
@@ -47,7 +44,6 @@ const ProfilePage = () => {
             {/* Header della pagina */}
             <Header />
             
-
             <div style={{ height: 24 }} />
             {/* Contenitore principale delle card */}
             <div className={styles.profileContent}>
@@ -102,8 +98,8 @@ const ProfilePage = () => {
                             </div>
                         </div>
 
-                        {/* Email e Città in una riga con spazio */}
-                        <div className={styles.contactRow}>
+                        {/* Email da sola in una riga */}
+                        <div className={styles.singleRow}>
                             <div className={styles.infoItem}>
                                 <label>Email</label>
                                 {isEditing ? (
@@ -118,26 +114,9 @@ const ProfilePage = () => {
                                     <div className={styles.infoValue}>{userInfo.email}</div>
                                 )}
                             </div>
-                            
-                            <div className={styles.fieldSpacer}></div>
-                            
-                            <div className={styles.infoItem}>
-                                <label>Città</label>
-                                {isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={userInfo.citta}
-                                        onChange={(e) => handleInputChange('citta', e.target.value)}
-                                        className={styles.inputField}
-                                        placeholder="Inserisci la tua città"
-                                    />
-                                ) : (
-                                    <div className={styles.infoValue}>{userInfo.citta}</div>
-                                )}
-                            </div>
                         </div>
 
-                        {/* Istituto */}
+                        {/* Istituto da solo in una riga */}
                         <div className={styles.singleRow}>
                             <div className={styles.infoItem}>
                                 <label>Istituto</label>
@@ -151,41 +130,6 @@ const ProfilePage = () => {
                                     />
                                 ) : (
                                     <div className={styles.infoValue}>{userInfo.istituto}</div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Classe e Anno Accademico in una riga con spazio */}
-                        <div className={styles.academicRow}>
-                            <div className={styles.infoItem}>
-                                <label>Classe</label>
-                                {isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={userInfo.classe}
-                                        onChange={(e) => handleInputChange('classe', e.target.value)}
-                                        className={styles.inputField}
-                                        placeholder="Inserisci la tua classe"
-                                    />
-                                ) : (
-                                    <div className={styles.infoValue}>{userInfo.classe}</div>
-                                )}
-                            </div>
-                            
-                            <div className={styles.fieldSpacer}></div>
-                            
-                            <div className={styles.infoItem}>
-                                <label>Anno Accademico</label>
-                                {isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={userInfo.annoAccademico}
-                                        onChange={(e) => handleInputChange('annoAccademico', e.target.value)}
-                                        className={styles.inputField}
-                                        placeholder="Es. 2024/2025"
-                                    />
-                                ) : (
-                                    <div className={styles.infoValue}>{userInfo.annoAccademico}</div>
                                 )}
                             </div>
                         </div>
@@ -203,29 +147,6 @@ const ProfilePage = () => {
                         </div>
                     )}
                 </div>
-
-                {/* BLOCCO 2: Cronologia */}
-                <div className={styles.cronologiaBlock}>
-                    <h2 className={styles.cronologiaTitle}>
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
-                        </svg>
-                        Cronologia Attività
-                    </h2>
-                    
-                    <p className={styles.cronologiaDescription}>
-                        Visualizza gli esercizi svolti
-                    </p>
-                    
-                    <div className={styles.cronologiaButtonContainer}>
-                        <button className={styles.cronologiaBtn} onClick={handleCronologia}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
-                            </svg>
-                            Visualizza Cronologia Completa
-                        </button>
-                    </div>
-                </div>
             </div>
 
             {/* Footer della pagina */}
@@ -234,4 +155,4 @@ const ProfilePage = () => {
     );
 };
 
-export default ProfilePage;
+export default EducatorProfile;
