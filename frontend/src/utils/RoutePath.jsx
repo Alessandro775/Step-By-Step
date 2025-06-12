@@ -1,33 +1,56 @@
-import HomePage from "../pages/HomePage";
-import LoginPage from "../pages/LoginPage";
-import ProfilePage from "../pages/ProfilePage";
-import RegisterPage from "../pages/RegisterPage";
-import ChiSiamo from "../pages/ChiSiamo";
-import EsempioEsercizio from "../pages/EsempioEsercizio"; // Aggiungi questa riga
-import EsercizioAudio from "../pages/EsercizioAudio"; // Aggiungi questa riga per importare la pagina degli esercizi
-import EducatorPage from "../pages/EducatorPage";
-import FamilyPage from "../pages/FamilyPage";
-import { Route, Routes } from "react-router-dom";
+// Import pagine pubbliche
+import HomePage from "../pages/non loggato/HomePage";
+import LoginPage from "../pages/non loggato/LoginPage"; 
+import RegisterPage from "../pages/non loggato/RegisterPage";
+import ChiSiamo from "../pages/non loggato/ChiSiamo";
+import EsempioEsercizio from "../pages/non loggato/EsempioEsercizio";
 
+// Import pagine studente
+import ProfuloStudente from "../pages/studente/ProfiloStudente";
+import EsercizioAudio from "../pages/studente/EsercizioAudio";
+import HomePageStudente from "../pages/studente/HomePageStudente";  
+import CronologiaStudente from "../pages/studente/CronologiaStudente"; // Importa il componente CorpoHomePage
+
+// Import pagine educatore
+import ProfiloEducatore from "../pages/educatore/ProfiloEducatore";
+import HomePageEducatore from "../pages/educatore/HomePageEducatore";
+import ContenutoEducaore from "../pages/educatore/ContenutoEducatore"; // Importa il componente CorpoHomePage
+
+// Import pagine famiglia
+import ProfiloFamiglia from "../pages/famiglia/ProfiloFamiglia";
+import HomePageFamiglia from "../pages/famiglia/HomePageFamiglia";
+
+import { Route, Routes } from "react-router-dom";
 
 function RoutesPath() {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/registrazione" element={<RegisterPage/>}/>
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/chi siamo" element={<ChiSiamo />} />
-        <Route path="/esercizi" element={<EsempioEsercizio />} />
-        <Route path="/esercizio audio" element={<EsercizioAudio />} /> {/* Aggiungi questa riga per gestire gli esercizi con ID */}
-        <Route path="*" element={<HomePage />} /> {/* Questa rotta gestisce i percorsi non trovati */}
-        <Route path="/educatore" element={<EducatorPage />} />
-        <Route path="/famiglia" element={<FamilyPage />} />
-        {/* Aggiungi altre rotte qui se necessario */}
-      </Routes>
-    </>
+    <Routes>
+      {/* Routes pubbliche */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/home" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/registrazione" element={<RegisterPage />} />
+      <Route path="/chi-siamo" element={<ChiSiamo />} />
+      <Route path="/esempio-esercizio" element={<EsempioEsercizio />} />
+
+      {/* Routes studente */}
+      <Route path="/profilo-studente" element={<ProfuloStudente />} />
+      <Route path="/esercizio-audio" element={<EsercizioAudio />} />
+      <Route path="/home-studente" element={<HomePageStudente />} />
+      <Route path="/cronologia-studente" element={<CronologiaStudente />} />
+
+      {/* Routes educatore */}
+      <Route path="/profilo-educatore" element={<ProfiloEducatore />} />
+      <Route path="/home-educatore" element={<HomePageEducatore />} />
+      <Route path="/contenuto-educatore" element={<ContenutoEducaore />} />
+
+      {/* Routes famiglia */}
+      <Route path="/profilo-famiglia" element={<ProfiloFamiglia />} />
+      <Route path="/home-famiglia" element={<HomePageFamiglia />} />
+
+      {/* Route di fallback */}
+      <Route path="*" element={<HomePage />} />
+    </Routes>
   );
 }
 

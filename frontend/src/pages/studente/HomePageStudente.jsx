@@ -1,11 +1,10 @@
 import React from 'react';
 
-import Footer from '../components/footer/Footer'; // Importa il componente Footer
-import Header from '../components/Header/Header'; // Importa il componente Header
+import Footer from '../../components/footer/Footer'; // Importa il componente Footer
+import Header from '../../components/Header/HeaderStudente'; // Importa il componente Header
+import CorpoHomePage from '../../components/corpo/corpoHomePage';
 
-import CorpoHomePage from '../components/corpo/corpoHomePage';
-
-const HomePage = () => {
+const HomePageStudente = () => {
     return (
         <>
             {/* Qui puoi inserire il contenuto della tua homepage, ad esempio: */}
@@ -16,4 +15,4 @@ const HomePage = () => {
     );
 };
 
-export default HomePage;
+export default HomePageStudente;

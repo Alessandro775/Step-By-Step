@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
-import styles from './ProfilePage.module.css';
-import Header from '../components/Header/Header';
-import Footer from '../components/footer/Footer';
+import styles from '../ProfilePage.module.css';
+import Header from '../../components/Header/HeaderStudente';
+import Footer from '../../components/footer/Footer';
 
-const FamilyPage = () => {
+const ProfilePage = () => {
     // State per gestire la modalità di modifica
     const [isEditing, setIsEditing] = useState(false);
     
-    // State per memorizzare le informazioni della famiglia (rimosso istituto, aggiunti telefono e email studente)
+    // State per memorizzare le informazioni dell'utente (rimossa città)
     const [userInfo, setUserInfo] = useState({
         nome: 'Mario',
         cognome: 'Rossi',
         email: 'mario.rossi@email.com',
-        telefono: '+39 333 123 4567',
-        emailStudente: 'studente@email.com'
+        istituto: 'Università Statale di Milano',
+        classe: '3A Informatica',
+        annoAccademico: '2024/2025'
     });
 
     // Funzione per attivare/disattivare la modalità modifica
@@ -37,7 +38,7 @@ const FamilyPage = () => {
 
     // Funzione per gestire il click sulla cronologia
     const handleCronologia = () => {
-        console.log('Apertura cronologia famiglia');
+        console.log('Apertura cronologia utente');
     };
 
     return (
@@ -117,37 +118,55 @@ const FamilyPage = () => {
                             </div>
                         </div>
 
-                        {/* Telefono e Email Studente in una riga con spazio */}
-                        <div className={styles.contactRow}>
+                        {/* Istituto da solo in una riga */}
+                        <div className={styles.singleRow}>
                             <div className={styles.infoItem}>
-                                <label>Telefono</label>
+                                <label>Istituto</label>
                                 {isEditing ? (
                                     <input 
-                                        type="tel" 
-                                        value={userInfo.telefono}
-                                        onChange={(e) => handleInputChange('telefono', e.target.value)}
+                                        type="text" 
+                                        value={userInfo.istituto}
+                                        onChange={(e) => handleInputChange('istituto', e.target.value)}
                                         className={styles.inputField}
-                                        placeholder="Inserisci il tuo telefono"
+                                        placeholder="Inserisci il tuo istituto"
                                     />
                                 ) : (
-                                    <div className={styles.infoValue}>{userInfo.telefono}</div>
+                                    <div className={styles.infoValue}>{userInfo.istituto}</div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Classe e Anno Accademico in una riga con spazio */}
+                        <div className={styles.academicRow}>
+                            <div className={styles.infoItem}>
+                                <label>Classe</label>
+                                {isEditing ? (
+                                    <input 
+                                        type="text" 
+                                        value={userInfo.classe}
+                                        onChange={(e) => handleInputChange('classe', e.target.value)}
+                                        className={styles.inputField}
+                                        placeholder="Inserisci la tua classe"
+                                    />
+                                ) : (
+                                    <div className={styles.infoValue}>{userInfo.classe}</div>
                                 )}
                             </div>
                             
                             <div className={styles.fieldSpacer}></div>
                             
                             <div className={styles.infoItem}>
-                                <label>Email Studente</label>
+                                <label>Anno Accademico</label>
                                 {isEditing ? (
                                     <input 
-                                        type="email" 
-                                        value={userInfo.emailStudente}
-                                        onChange={(e) => handleInputChange('emailStudente', e.target.value)}
+                                        type="text" 
+                                        value={userInfo.annoAccademico}
+                                        onChange={(e) => handleInputChange('annoAccademico', e.target.value)}
                                         className={styles.inputField}
-                                        placeholder="Inserisci l'email dello studente"
+                                        placeholder="Es. 2024/2025"
                                     />
                                 ) : (
-                                    <div className={styles.infoValue}>{userInfo.emailStudente}</div>
+                                    <div className={styles.infoValue}>{userInfo.annoAccademico}</div>
                                 )}
                             </div>
                         </div>
@@ -196,4 +215,4 @@ const FamilyPage = () => {
     );
 };
 
-export default FamilyPage;
+export default ProfilePage;
