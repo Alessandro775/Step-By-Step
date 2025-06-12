@@ -1,7 +1,7 @@
 import React from 'react';
-import Footer from '../components/footer/Footer'; // Importa il componente Footer
-import Header from '../components/Header/Header'; // Importa il componente Header
-import CorpoEserciziSvolti from '../components/corpo/corpoEserciziSvolti';
+import Footer from '../../components/footer/Footer'; // Importa il componente Footer
+import Header from '../../components/Header/Header'; // Importa il componente Header
+import CorpoEserciziSvolti from '../../components/corpo/corpoEserciziSvolti';
 
 
 const EsempioEsercizio = () => {

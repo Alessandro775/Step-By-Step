@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import styles from './ProfilePage.module.css';
-import Header from '../components/Header/Header';
-import Footer from '../components/footer/Footer';
+import styles from '../ProfilePage.module.css';
+import Header from '../../components/Header/HeaderEducatore';
+import Footer from '../../components/footer/Footer';
 
 const EducatorProfile = () => {
     // State per gestire la modalità di modifica
@@ -146,29 +146,6 @@ const EducatorProfile = () => {
                             </button>
                         </div>
                     )}
-                </div>
-
-                {/* BLOCCO 2: Cronologia */}
-                <div className={styles.cronologiaBlock}>
-                    <h2 className={styles.cronologiaTitle}>
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
-                        </svg>
-                        Cronologia Attività
-                    </h2>
-                    
-                    <p className={styles.cronologiaDescription}>
-                        Visualizza gli esercizi svolti
-                    </p>
-                    
-                    <div className={styles.cronologiaButtonContainer}>
-                        <button className={styles.cronologiaBtn} onClick={handleCronologia}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
-                            </svg>
-                            Visualizza Cronologia Completa
-                        </button>
-                    </div>
                 </div>
             </div>
 
