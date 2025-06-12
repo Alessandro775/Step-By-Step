@@ -3,18 +3,16 @@ import styles from './ProfilePage.module.css';
 import Header from '../components/Header/Header';
 import Footer from '../components/footer/Footer';
 
-const ProfilePage = () => {
+const EducatorProfile = () => {
     // State per gestire la modalità di modifica
     const [isEditing, setIsEditing] = useState(false);
     
-    // State per memorizzare le informazioni dell'utente (rimossa città)
+    // State per memorizzare le informazioni dell'educatore (rimossi classe e anno accademico)
     const [userInfo, setUserInfo] = useState({
         nome: 'Mario',
         cognome: 'Rossi',
         email: 'mario.rossi@email.com',
-        istituto: 'Università Statale di Milano',
-        classe: '3A Informatica',
-        annoAccademico: '2024/2025'
+        istituto: 'Università Statale di Milano'
     });
 
     // Funzione per attivare/disattivare la modalità modifica
@@ -38,7 +36,7 @@ const ProfilePage = () => {
 
     // Funzione per gestire il click sulla cronologia
     const handleCronologia = () => {
-        console.log('Apertura cronologia utente');
+        console.log('Apertura cronologia educatore');
     };
 
     return (
@@ -135,41 +133,6 @@ const ProfilePage = () => {
                                 )}
                             </div>
                         </div>
-
-                        {/* Classe e Anno Accademico in una riga con spazio */}
-                        <div className={styles.academicRow}>
-                            <div className={styles.infoItem}>
-                                <label>Classe</label>
-                                {isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={userInfo.classe}
-                                        onChange={(e) => handleInputChange('classe', e.target.value)}
-                                        className={styles.inputField}
-                                        placeholder="Inserisci la tua classe"
-                                    />
-                                ) : (
-                                    <div className={styles.infoValue}>{userInfo.classe}</div>
-                                )}
-                            </div>
-                            
-                            <div className={styles.fieldSpacer}></div>
-                            
-                            <div className={styles.infoItem}>
-                                <label>Anno Accademico</label>
-                                {isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={userInfo.annoAccademico}
-                                        onChange={(e) => handleInputChange('annoAccademico', e.target.value)}
-                                        className={styles.inputField}
-                                        placeholder="Es. 2024/2025"
-                                    />
-                                ) : (
-                                    <div className={styles.infoValue}>{userInfo.annoAccademico}</div>
-                                )}
-                            </div>
-                        </div>
                     </div>
                     
                     {/* Sezione bottone salva */}
@@ -215,4 +178,4 @@ const ProfilePage = () => {
     );
 };
 
-export default ProfilePage;
+export default EducatorProfile;
