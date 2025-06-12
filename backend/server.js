@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2/promise'); // Usiamo la versione promise-based
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 const port = 3008;
@@ -11,10 +12,11 @@ app.use(express.json());
 
 // Configurazione database
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: '', // CONSIGLIO: Usa variabili d'ambiente per le credenziali
+    host: '172.29.0.201',
+    user: 'alessandro',
+    password: '123456', // CONSIGLIO: Usa variabili d'ambiente per le credenziali
     database: 'step by step', // Nota: gli spazi nel nome del database potrebbero causare problemi
+    port: process.env.DB_PORT || 3306,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -35,6 +37,21 @@ async function testDatabaseConnection() {
         if (connection) connection.release();
     }
 }
+
+// Aggiungi questa funzione per inizializzare il database
+// async function initDatabase() {
+//     try {
+//         await pool.query(createTableQuery);
+//         console.log('Tabella studente creata/verificata con successo');
+//     } catch (err) {
+//         console.error('Errore creazione tabella:', err);
+//     }
+// }
+
+// Chiamala dopo il test di connessione
+// testDatabaseConnection().then(() => {
+//     initDatabase();
+// });
 
 // Esegui il test all'avvio
 testDatabaseConnection();
@@ -87,14 +104,18 @@ process.on('unhandledRejection', (err) => {
 
 // ...existing code...
 const createAuthenticationServices = require('./autenticazioneStudente');
-const authenticationServices = createAuthenticationServices(db);
+const authenticationServices = createAuthenticationServices(pool);
 
 // Route per la registrazione
 app.post('/api/register', async (req, res) => {
+    console.log(req.body);
     try {
+        console.log('Tentativo di registrazione con dati:', req.body);
         const result = await authenticationServices.register(req.body);
+        console.log('Registrazione completata:', result);
         res.json(result);
     } catch (error) {
+        console.error('Errore registrazione:', error);
         res.status(400).json({ error: error.message });
     }
 });
@@ -102,11 +123,13 @@ app.post('/api/register', async (req, res) => {
 // Route per il login
 app.post('/api/login', async (req, res) => {
     try {
+        console.log('Tentativo di login con email:', req.body.email);
         const { email, password } = req.body;
         const result = await authenticationServices.login(email, password);
+        console.log('Login completato per:', email);
         res.json(result);
     } catch (error) {
+        console.error('Errore login:', error);
         res.status(400).json({ error: error.message });
     }
 });
-
