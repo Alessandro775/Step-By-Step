@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import styles from "./RegisterPage.module.css";
 import { useNavigate } from "react-router-dom";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:3000";
+// const BASE_URL = import.meta.env.VITE_BASE_URL || "http://172.29.0.201:3000";
+const BASE_URL ="http://localhost:3000";
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
@@ -32,33 +33,49 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Valida le password prima di inviare
+    console.log(BASE_URL);
     if (!validatePasswords()) {
       return;
     }
 
-    const userData = {
-      firstName,
-      lastName,
-      email,
-      password,
-      role: userType === "student" ? "S" : userType === "educator" ? "E" : "F",
-      ...(userType === "student" && { institute, classYear, academicYear }),
-      ...(userType === "educator" && { institute }),
-      ...(userType === "family" && { phone, studentEmail }),
-    };
+    try {
+      const userData = {
+        firstName,
+        lastName,
+        email,
+        password,
+        role: userType === "student" ? "S" : userType === "educator" ? "E" : "F",
+        ...(userType === "student" && { 
+          institute, 
+          classYear: parseInt(classYear), 
+          academicYear: parseInt(academicYear) 
+        }),
+        ...(userType === "educator" && { institute }),
+        ...(userType === "family" && { phone, studentEmail }),
+      };
+      console.log(`${BASE_URL}/api/register`);
+      const response = await fetch(`${BASE_URL}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
 
-    const response = await fetch(`${BASE_URL}/api/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
+      const data = await response.json();
 
-    if (response.ok) {
-      window.location.href = "/home";
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore durante la registrazione');
+      }
+
+      // Reindirizza alla home in caso di successo
+      navigate('/home');
+    } catch (error) {
+      console.error('Errore durante la registrazione:', error);
+      setErrors(prev => ({
+        ...prev,
+        submit: error.message
+      }));
     }
   };
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './LoginPage.module.css';
-
+const BASE_URL ="http://localhost:3000";
 const LoginPage = () => {
     const [formData, setFormData] = useState({
         email: '',
@@ -13,11 +13,24 @@ const LoginPage = () => {
             [e.target.name]: e.target.value
         });
     };
-
-    const handleSubmit = (e) => {
+    
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Add your login logic here
+        const formEmail = formData.email;
+        console.log(formEmail)
+        const formPassword = formData.password;
+        console.log(formPassword)
         console.log('Login attempt with:', formData);
+        const response = await fetch(`${BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: formEmail,
+                password: formPassword
+            })
+        });
     };
 
     return (
