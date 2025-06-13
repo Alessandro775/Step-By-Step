@@ -19,9 +19,9 @@ function RoutesPath() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registrazione" element={<RegisterPage/>}/>
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/chi siamo" element={<ChiSiamo />} />
+        <Route path="/chi_siamo" element={<ChiSiamo />} />
         <Route path="/esercizi" element={<EsempioEsercizio />} />
-        <Route path="/esercizio audio" element={<EsercizioAudio />} /> {/* Aggiungi questa riga per gestire gli esercizi con ID */}
+        <Route path="/esercizio_audio" element={<EsercizioAudio />} /> {/* Aggiungi questa riga per gestire gli esercizi con ID */}
         <Route path="*" element={<HomePage />} /> {/* Questa rotta gestisce i percorsi non trovati */}
         <Route path="/educatore" element={<EducatorPage />} />
         <Route path="/famiglia" element={<FamilyPage />} />

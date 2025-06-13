@@ -1,0 +1,280 @@
+.pronunciationApp {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #333;
+}
+
+.errorBanner {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.retryBtn {
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.retryBtn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.appHeader {
+  text-align: center;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.appHeader h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.appHeader p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.appMain {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.wordSection {
+  margin-bottom: 30px;
+}
+
+.currentWord {
+  text-align: center;
+  padding: 30px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-radius: 15px;
+  color: white;
+}
+
+.wordDisplay {
+  margin-bottom: 20px;
+}
+
+.wordText {
+  font-size: 3rem;
+  font-weight: bold;
+  display: block;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.newWordBtn {
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.newWordBtn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-2px);
+}
+
+.newWordBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.recordingSection {
+  text-align: center;
+  margin: 40px 0;
+}
+
+.instructions {
+  margin-bottom: 20px;
+}
+
+.instructions p {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+}
+
+.recordingControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.recordBtn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+}
+
+.recordBtn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+}
+
+.recordBtn.recording {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.recordBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.recordingIndicator, .loadingIndicator {
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 20px;
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff6b6b;
+  animation: fadeInOut 2s infinite;
+}
+
+.loadingIndicator {
+  background: rgba(79, 172, 254, 0.1);
+  color: #4facfe;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.feedbackSection {
+  margin-top: 30px;
+  padding: 25px;
+  border-radius: 15px;
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feedbackSuccess {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  border-left: 5px solid #00d2ff;
+}
+
+.feedbackWarning {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  border-left: 5px solid #ff8a80;
+}
+
+.feedbackError {
+  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+  border-left: 5px solid #ff5722;
+}
+
+.feedbackMain h3 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.transcription, .similarity {
+  margin: 10px 0;
+  font-size: 1.1rem;
+}
+
+.transcription strong, .similarity strong {
+  color: #555;
+}
+
+.corrections {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(255,255,255,0.3);
+}
+
+.corrections h4 {
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.corrections ul {
+  list-style: none;
+  padding: 0;
+}
+
+.corrections li {
+  background: rgba(255,255,255,0.5);
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pronunciationApp {
+    padding: 15px;
+  }
+  
+  .appHeader h1 {
+    font-size: 2rem;
+  }
+  
+  .wordText {
+    font-size: 2.5rem;
+  }
+  
+  .recordBtn {
+    width: 100px;
+    height: 100px;
+    font-size: 1.5rem;
+  }
+  
+  .appMain {
+    padding: 20px;
+  }
+}
