@@ -9,16 +9,17 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [userType, setUserType] = useState("");
-  const [institute, setInstitute] = useState("");
-  const [classYear, setClassYear] = useState("");
-  const [academicYear, setAcademicYear] = useState("");
-  const [phone, setPhone] = useState("");
-  const [studentEmail, setStudentEmail] = useState("");
+  const [nome, setNome] = useState(""); // Era firstName
+  const [cognome, setCognome] = useState(""); // Era lastName
+  const [tipoUtente, setTipoUtente] = useState(""); // Era userType
+  const [istituto, setIstituto] = useState(""); // Era institute
+  const [classe, setClasse] = useState(""); // Era classYear
+  const [annoScolastico, setAnnoScolastico] = useState(""); // Era academicYear
+  const [telefono, setTelefono] = useState(""); // Era phone
+  const [emailStudente, setEmailStudente] = useState(""); // Era studentEmail
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+
 
   const validatePasswords = () => {
     const newErrors = {};
@@ -39,28 +40,27 @@ const RegisterPage = () => {
     }
 
     try {
-      const userData = {
-        firstName,
-        lastName,
-        email,
-        password,
-        role: userType === "student" ? "S" : userType === "educator" ? "E" : "F",
-        ...(userType === "student" && { 
-          institute, 
-          classYear: parseInt(classYear), 
-          academicYear: parseInt(academicYear) 
-        }),
-        ...(userType === "educator" && { institute }),
-        ...(userType === "family" && { phone, studentEmail }),
-      };
-      console.log(`${BASE_URL}/api/register`);
+    const userData = {
+      nome,
+      cognome,
+      email,
+      password,
+      ruolo: tipoUtente === "studente" ? "S" : tipoUtente === "educatore" ? "E" : "G",
+      ...(tipoUtente === "studente" && { 
+        istituto, 
+        classe: parseInt(classe), 
+        anno_scolastico: parseInt(annoScolastico) 
+      }),
+      ...(tipoUtente === "educatore" && { istituto }),
+      ...(tipoUtente === "genitore" && { telefono, emailStudente }),
+    };
       const response = await fetch(`${BASE_URL}/api/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
 
       const data = await response.json();
 
@@ -96,79 +96,79 @@ const RegisterPage = () => {
         <form onSubmit={handleSubmit} autoComplete="off">
           <div className={styles["form-grid"]}>
             <div>
-              <label className={styles["input-label"]} htmlFor="firstName">
+              <label className={styles["input-label"]} htmlFor="nome">
               </label>
               <input
-                id="firstName"
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Nome"
-                className={styles["custom-input"]}
-                required
-              />
+  id="nome"
+  type="text"
+  value={nome} // Era firstName
+  onChange={(e) => setNome(e.target.value)} // Era setFirstName
+  placeholder="Nome"
+  className={styles["custom-input"]}
+  required
+/>
             </div>
             <div>
-              <label className={styles["input-label"]} htmlFor="lastName">
+              <label className={styles["input-label"]} htmlFor="cognome">
               </label>
               <input
-                id="lastName"
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Cognome"
-                className={styles["custom-input"]}
-                required
-              />
+  id="cognome"
+  type="text"
+  value={cognome} // Era nome
+  onChange={(e) => setCognome(e.target.value)} // Era setLastName
+  placeholder="Cognome"
+  className={styles["custom-input"]}
+  required
+/>
             </div>
             <div className={styles["full-width"]}>
-              <label className={styles["input-label"]} htmlFor="userType">
+              <label className={styles["input-label"]} htmlFor="tipoUtente">
               </label>
               <select
-                id="userType"
-                value={userType}
-                onChange={(e) => setUserType(e.target.value)}
-                className={styles["custom-select"]}
-                required
-              >
+  id="tipoUtente"
+  value={tipoUtente} // Era userType
+  onChange={(e) => setTipoUtente(e.target.value)} // Era setUserType
+  className={styles["custom-select"]}
+  required
+>
                 <option value="">Seleziona il tuo Ruolo</option>
-                <option value="student">Studente</option>
-                <option value="educator">Educatore</option>
-                <option value="family">Genitore</option>
-              </select>
+  <option value="studente">Studente</option> // Era "student"
+  <option value="educatore">Educatore</option> // Era "educator"
+  <option value="genitore">Genitore</option> // Era "family"
+</select>
             </div>
           </div>
 
-          {userType === "student" && (
+          {tipoUtente === "studente" && (
             <div className={styles["additional-fields"]}>
               <div className={styles["form-grid"]}>
                 <div>
-                  <label className={styles["input-label"]} htmlFor="institute">
+                  <label className={styles["input-label"]} htmlFor="istituto">
                   </label>
                   <input
-                    id="institute"
+                    id="istituto"
                     type="text"
-                    value={institute}
-                    onChange={(e) => setInstitute(e.target.value)}
+                    value={istituto}
+                    onChange={(e) => setistituto(e.target.value)}
                     placeholder="Instituto"
                     className={styles["custom-input"]}
                     required
                   />
                 </div>
                 <div>
-                  <label className={styles["input-label"]} htmlFor="classYear">
+                  <label className={styles["input-label"]} htmlFor="anno_scolastico">
                   </label>
                   <input
-                    id="classYear"
+                    id="anno_scolastico"
                     type="text"
-                    value={classYear}
-                    onChange={(e) => setClassYear(e.target.value)}
+                    value={annoScolastico}
+                    onChange={(e) => setannoScolastico(e.target.value)}
                     placeholder="Classe"
                     className={styles["custom-input"]}
                     required
                   />
                 </div>
-                <div>
+                {/*<div>
                   <label className={styles["input-label"]} htmlFor="academicYear">
                   </label>
                   <input
@@ -180,20 +180,20 @@ const RegisterPage = () => {
                     className={styles["custom-input"]}
                     required
                   />
-                </div>
+                </div>*/}
               </div>
             </div>
           )}
 
-          {userType === "educator" && (
+          {tipoUtente === "educatore" && (
             <div className={styles["additional-fields"]}>
-              <label className={styles["input-label"]} htmlFor="institute">
+              <label className={styles["input-label"]} htmlFor="istituto">
               </label>
               <input
-                id="institute"
+                id="istituto"
                 type="text"
-                value={institute}
-                onChange={(e) => setInstitute(e.target.value)}
+                value={istituto}
+                onChange={(e) => setistituto(e.target.value)}
                 placeholder="Instituto"
                 className={styles["custom-input"]}
                 required
@@ -201,16 +201,16 @@ const RegisterPage = () => {
             </div>
           )}
 
-          {userType === "family" && (
+          {tipoUtente === "genitore" && (
             <div className={styles["additional-fields"]} style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
               <div style={{ flex: 1 }}>
-                <label className={styles["input-label"]} htmlFor="phone">
+                <label className={styles["input-label"]} htmlFor="telefono">
                 </label>
                 <input
-                  id="phone"
+                  id="telefono"
                   type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  value={telefono}
+                  onChange={(e) => settelefono(e.target.value)}
                   placeholder="Telefono"
                   className={styles["custom-input"]}
                   pattern="[+0-9\s]{10,15}"
@@ -220,10 +220,10 @@ const RegisterPage = () => {
               <div style={{ width: "15px" }}></div>
               <div style={{ flex: 1 }}>
                 <input
-                  id="studentEmail"
+                  id="emailStudente"
                   type="email"
-                  value={studentEmail}
-                  onChange={(e) => setStudentEmail(e.target.value)}
+                  value={emailStudente}
+                  onChange={(e) => setemailStudente(e.target.value)}
                   placeholder="Email Studente"
                   className={`${styles["custom-input"]} ${styles["student-email-input"]}`}
                   required
