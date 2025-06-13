@@ -1,86 +1,92 @@
-const express = require('express');
-const mysql = require('mysql2');
-const cors = require('cors');
-const app= express();
-const port = 3000;
-const jwt = require('jsonwebtoken');
-app.use(cors());
-app.use(express.json());
-const JWT_SECRET = 'balla'; // In produzione, usa le variabili d'ambiente
+const express = require("express");
+const mysql = require("mysql2");
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
 
-const db= mysql.createConnection({
-    host: '172.29.0.201',
-    user: 'alessandro',
-    password: '123456',
-    database: 'step_by_step',
+// Configurazioni base
+const app = express();
+const port = 3000;
+const JWT_SECRET = "balla";
+
+// Middleware
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
+app.use(express.json());
+
+// Configurazione Database
+const db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "step_by_step",
     port: 3306
 });
-app.listen(port, () => {
-    console.log(`Server in ascolto sulla porta ${port}`);
+
+// Route Autenticazione
+app.post("/api/register", (req, res) => {
+    const { nome, cognome, email, password, ruolo } = req.body;
+    const query = "INSERT INTO utente (nome, cognome, email, password, ruolo) VALUES (?, ?, ?, ?, ?)";
+    
+    db.query(query, [nome, cognome, email, password, ruolo], (err, result) => {
+        if (err) {
+            console.error("Errore registrazione:", err);
+            return res.status(500).json({ error: "Errore durante la registrazione" });
+        }
+        res.json({ message: "Registrazione completata con successo" });
+    });
 });
+
+app.post("/api/login", (req, res) => {
+    const { email, password } = req.body;
+    const query = "SELECT * FROM utente WHERE email = ? AND password = ?";
+    
+    db.query(query, [email, password], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: "Errore login" });
+        }
+        if (results.length === 0) {
+            return res.status(401).json({ error: "Credenziali non valide" });
+        }
+        
+        const token = jwt.sign(
+            { id: results[0].id, ruolo: results[0].ruolo },
+            JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+        
+        res.json({ token, ruolo: results[0].ruolo });
+    });
+});
+
+// Route Studenti
+app.get('/api/studenti', (req, res) => {
+    const query = 'SELECT idStudente, nome, cognome, email FROM studente';
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Errore query:', err);
+            return res.status(500).json({ error: 'Errore database' });
+        }
+        res.json(results);
+    });
+});
+
+// Connessione DB e Avvio Server
 db.connect((err) => {
     if (err) {
-        console.error('Errore di connessione al database:', err);
-        return;
+        console.error("Errore di connessione al database:", err);
+        process.exit(1);
     }
-    console.log('Connessione al database stabilita con successo!');
+    console.log("Connessione al database stabilita con successo!");
+    
+    app.listen(port, () => {
+        console.log(`Server in ascolto sulla porta ${port}`);
+    });
 });
 
-app.post('/api/register', (req, res) => {
-    console.log(req.body); 
-    const { nome, cognome, email, password, istituto, classe, anno_scolastico } = req.body;
-    db.query(
-        'INSERT INTO studente (nome, cognome, email, password, istituto, classe, anno_scolastico) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [nome, cognome, email, password, istituto, classe, anno_scolastico],
-        (err, results) => {
-            if (err) {
-                console.error('Errore durante la registrazione:', err);
-                return res.status(500).json({ error: 'Errore durante la registrazione' });
-            }
-            res.status(201).json({ message: 'Registrazione avvenuta con successo' });
-        }
-    );});
-
-app.post('/api/login', (req, res) => {
-    const { email, password } = req.body;
-    console.log('Dati di login ricevuti:', req.body);
-
-    db.query('SELECT * FROM studente WHERE email = ?', [email], (err, results) => {
-        if (err) {
-            console.error('Errore database:', err);
-            return res.status(500).json({ error: 'Errore di connessione al database' });
-        }
-
-        if (results.length === 0) {
-            return res.status(401).json({ error: 'Utente non trovato' });
-        }
-
-        const user = results[0];
-        
-        // Verifica della password
-        if (user.PASSWORD !== password) { // Nota: PASSWORD in maiuscolo come nel DB
-            return res.status(401).json({ error: 'Password errata' });
-        }
-
-        try {
-            const token = jwt.sign(
-                { id: user.idStudente }, 
-                JWT_SECRET, 
-                { expiresIn: '24h' }
-            );
-
-            res.json({ 
-                token, 
-                user: { 
-                    id: user.idStudente, 
-                    nome: user.nome, 
-                    cognome: user.cognome, 
-                    email: user.email 
-                } 
-            });
-        } catch (error) {
-            console.error('Errore nella generazione del token:', error);
-            res.status(500).json({ error: 'Errore interno del server' });
-        }
-    });
+// Gestione errori generica
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: "Errore interno del server" });
 });
