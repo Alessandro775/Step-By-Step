@@ -12,9 +12,9 @@ const HeaderEducatore = () => {
     // Funzioni per la navigazione
     const goToHome = () => navigate('/');
     const goToStudenti = () => navigate('/studenti-educatore');
-    const goToProfilo = () => navigate('/profilo-educatore');
     const goToContenuti = () => navigate('/contenuto-educatore');
-
+    const goToProfilo = () => navigate('/profilo-educatore');
+    
     return (
         <header className={header.container}>
             {/* Modifica l'immagine wrappandola in un button */}
