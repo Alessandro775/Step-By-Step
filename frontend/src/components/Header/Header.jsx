@@ -17,7 +17,7 @@ const Header = () => {
 
     return (
         <header className={header.container}>
-            {/* Modifica l'immagine wrappandola in un button */}
+            {/* Modifica l'immagine wrappandola in un zutton */}
             <button 
                 onClick={goToHome} 
                 className={header.logoButton}
