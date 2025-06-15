@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 import whisper
 import io
 import tempfile
@@ -13,25 +12,22 @@ import random
 
 app = Flask(__name__)
 
-# Configurazione CORS
-CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"])
+# Configurazione CORS espansa
+CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"],
+     methods=['GET', 'POST', 'OPTIONS'],
+     allow_headers=['Content-Type'])
 
-# Configurazione database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///parole_italiane.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-# Modello per le parole italiane
-class ParolaItaliana(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    parola = db.Column(db.String(100), nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'parola': self.parola
-        }
+# Lista statica di parole italiane (sostituisce il database)
+PAROLE_ITALIANE = [
+    "ciao", "grazie", "prego", "scusa", "pronuncia", "bellissimo", 
+    "spaghetti", "cappuccino", "famiglia", "ragazzo", "ragazza", 
+    "giorno", "notte", "mangiare", "bere", "parlare", "ascoltare", 
+    "guardare", "studiare", "lavorare", "gnocchi", "parmigiano", 
+    "prosciutto", "mozzarella", "bruschetta", "gelato", "pizza", 
+    "amore", "casa", "strada", "macchina", "telefono", "computer",
+    "musica", "libro", "scuola", "università", "lavoro", "tempo",
+    "sole", "luna", "mare", "montagna", "città", "paese"
+]
 
 # Carica il modello Whisper
 try:
@@ -41,25 +37,41 @@ except Exception as e:
     print(f"❌ Errore caricamento Whisper: {e}")
     whisper_model = None
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Endpoint per verificare lo stato del server"""
+    return jsonify({
+        'status': 'healthy',
+        'message': 'Server Flask funzionante',
+        'available_words': len(PAROLE_ITALIANE),
+        'whisper_loaded': whisper_model is not None
+    })
+
 @app.route('/get_random_text', methods=['GET'])
 def get_random_text():
     try:
-        parole = ParolaItaliana.query.all()
-        
-        if not parole:
+        if not PAROLE_ITALIANE:
             return jsonify({
-                'error': 'Nessuna parola trovata nel database',
+                'error': 'Nessuna parola disponibile',
                 'status': 'error'
-            })
-        
-        parola_casuale = random.choice(parole)
+            }), 500
+            
+        parola_casuale = random.choice(PAROLE_ITALIANE)
+        word_id = PAROLE_ITALIANE.index(parola_casuale) + 1
         
         return jsonify({
-            'text': parola_casuale.parola,
-            'id': parola_casuale.id,
+            'text': parola_casuale,
+            'id': word_id,
             'status': 'success'
         })
         
+    except Exception as e:
+        print(f"Errore dettagliato: {str(e)}")  # Log per debug
+        return jsonify({
+            'error': f'Errore nel recupero della parola: {str(e)}',
+            'status': 'error'
+        }), 500
+    
     except Exception as e:
         return jsonify({
             'error': f'Errore nel recupero della parola: {str(e)}',
@@ -126,25 +138,25 @@ def check_pronunciation():
 
         # Prompt per valutazione parole italiane
         evaluation_prompt = f"""
-        Sei un esperto insegnante di pronuncia italiana. Valuta la pronuncia di una PAROLA ITALIANA.
+Sei un esperto insegnante di pronuncia italiana. Valuta la pronuncia di una PAROLA ITALIANA.
 
-        PAROLA DA PRONUNCIARE: "{parola_riferimento}"
-        PAROLA PRONUNCIATA: "{parola_pronunciata}"
-        SIMILARITÀ: {similarity:.2f}
+PAROLA DA PRONUNCIARE: "{parola_riferimento}"
+PAROLA PRONUNCIATA: "{parola_pronunciata}"
+SIMILARITÀ: {similarity:.2f}
 
-        CRITERI PER PAROLE ITALIANE:
-        - Pronuncia corretta dei suoni italiani (r, gl, gn, sc, ch, gh)
-        - Accento sulla sillaba giusta
-        - Chiarezza della pronuncia
-        - Riconoscibilità della parola italiana
+CRITERI PER PAROLE ITALIANE:
+- Pronuncia corretta dei suoni italiani (r, gl, gn, sc, ch, gh)
+- Accento sulla sillaba giusta
+- Chiarezza della pronuncia
+- Riconoscibilità della parola italiana
 
-        VALUTAZIONE:
-        "BRAVO" = parola italiana pronunciata correttamente
-        "PROVA A FARE DI MEGLIO" = parola riconoscibile ma con errori di pronuncia italiana
-        "SBAGLIATO" = parola non riconoscibile o completamente sbagliata
+VALUTAZIONE:
+"BRAVO" = parola italiana pronunciata correttamente
+"PROVA A FARE DI MEGLIO" = parola riconoscibile ma con errori di pronuncia italiana
+"SBAGLIATO" = parola non riconoscibile o completamente sbagliata
 
-        Rispondi SOLO con una delle tre opzioni sopra, nient'altro.
-        """
+Rispondi SOLO con una delle tre opzioni sopra, nient'altro.
+"""
 
         try:
             response = chat(
@@ -208,17 +220,16 @@ def check_pronunciation():
 def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, similarity):
     """Genera suggerimenti specifici per pronuncia italiana"""
     tips = []
-    
     ref_lower = parola_riferimento.lower()
     spoken_lower = parola_pronunciata.lower()
-    
+
     # Suggerimenti basati sulla similarità
     if similarity < 0.3:
         tips.append(f"🎯 Concentrati sui suoni italiani della parola '{parola_riferimento}'")
         tips.append("🔊 Parla più chiaramente, pronuncia ogni sillaba")
     elif similarity < 0.6:
         tips.append(f"📢 Migliora la pronuncia italiana di '{parola_riferimento}'")
-        
+
     # Suggerimenti specifici per suoni italiani
     if 'gli' in ref_lower and 'gli' not in spoken_lower:
         tips.append("🗣️ Il suono 'GLI' si pronuncia come 'LI' con la lingua sul palato")
@@ -232,46 +243,26 @@ def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, 
         tips.append("🔄 La 'R' italiana è vibrante, fai vibrare la lingua")
     elif ref_lower.endswith('e') and not spoken_lower.endswith('e'):
         tips.append("⏰ Non dimenticare la 'E' finale italiana")
-    
+
     # Suggerimenti per accento italiano
     if len(parola_riferimento) > 3:
         tips.append(f"🎵 Controlla l'accento italiano della parola '{parola_riferimento}'")
-    
-    return tips[:3]
 
-@app.route('/add_word', methods=['POST'])
-def add_word():
-    """Aggiungi una nuova parola italiana al database"""
-    try:
-        data = request.get_json()
-        
-        nuova_parola = ParolaItaliana(
-            parola=data['parola']
-        )
-        
-        db.session.add(nuova_parola)
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Parola italiana aggiunta con successo',
-            'id': nuova_parola.id,
-            'status': 'success'
-        })
-        
-    except Exception as e:
-        return jsonify({
-            'error': f'Errore nell\'aggiunta della parola: {str(e)}',
-            'status': 'error'
-        })
+    return tips[:3]
 
 @app.route('/get_all_words', methods=['GET'])
 def get_all_words():
-    """Ottieni tutte le parole italiane dal database"""
+    """Ottieni tutte le parole italiane disponibili"""
     try:
-        parole = ParolaItaliana.query.all()
+        # Crea una lista di dizionari con ID e parola
+        parole_con_id = [
+            {'id': i + 1, 'parola': parola} 
+            for i, parola in enumerate(PAROLE_ITALIANE)
+        ]
+        
         return jsonify({
-            'parole': [parola.to_dict() for parola in parole],
-            'count': len(parole),
+            'parole': parole_con_id,
+            'count': len(PAROLE_ITALIANE),
             'status': 'success'
         })
     except Exception as e:
@@ -280,46 +271,7 @@ def get_all_words():
             'status': 'error'
         })
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-    
-    # Aggiungi parole italiane di esempio se il database è vuoto
-    if ParolaItaliana.query.count() == 0:
-        parole_esempio = [
-            ParolaItaliana(parola="ciao"),
-            ParolaItaliana(parola="grazie"),
-            ParolaItaliana(parola="prego"),
-            ParolaItaliana(parola="scusa"),
-            ParolaItaliana(parola="pronuncia"),
-            ParolaItaliana(parola="bellissimo"),
-            ParolaItaliana(parola="spaghetti"),
-            ParolaItaliana(parola="cappuccino"),
-            ParolaItaliana(parola="famiglia"),
-            ParolaItaliana(parola="ragazzo"),
-            ParolaItaliana(parola="ragazza"),
-            ParolaItaliana(parola="giorno"),
-            ParolaItaliana(parola="notte"),
-            ParolaItaliana(parola="mangiare"),
-            ParolaItaliana(parola="bere"),
-            ParolaItaliana(parola="parlare"),
-            ParolaItaliana(parola="ascoltare"),
-            ParolaItaliana(parola="guardare"),
-            ParolaItaliana(parola="studiare"),
-            ParolaItaliana(parola="lavorare"),
-            ParolaItaliana(parola="gnocchi"),
-            ParolaItaliana(parola="parmigiano"),
-            ParolaItaliana(parola="prosciutto"),
-            ParolaItaliana(parola="mozzarella"),
-            ParolaItaliana(parola="bruschetta")
-        ]
-        
-        for parola in parole_esempio:
-            db.session.add(parola)
-        
-        db.session.commit()
-        print("✅ Database inizializzato con parole italiane di esempio")
-
 if __name__ == '__main__':
     print("🚀 Avviando server Flask per pronuncia italiana...")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print(f"📚 Parole italiane disponibili: {len(PAROLE_ITALIANE)}")
+    app.run(debug=True, host='127.0.0.1', port=5001)
