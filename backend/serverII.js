@@ -90,3 +90,16 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: "Errore interno del server" });
 });
+
+// Aggiungi route per le parole
+app.get('/api/parole', (req, res) => {
+    const query = 'SELECT * FROM contenuto';
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Errore query:', err);
+            return res.status(500).json({ error: 'Errore database' });
+        }
+        console.log('Risultati query:', results); // Debug
+        res.json(results);
+    });
+});
