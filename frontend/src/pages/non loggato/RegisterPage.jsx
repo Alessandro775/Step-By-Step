@@ -149,7 +149,7 @@ const RegisterPage = () => {
                     id="istituto"
                     type="text"
                     value={istituto}
-                    onChange={(e) => setistituto(e.target.value)}
+                    onChange={(e) => setIstituto(e.target.value)}
                     placeholder="Instituto"
                     className={styles["custom-input"]}
                     required
@@ -162,7 +162,7 @@ const RegisterPage = () => {
                     id="anno_scolastico"
                     type="text"
                     value={annoScolastico}
-                    onChange={(e) => setannoScolastico(e.target.value)}
+                    onChange={(e) => setAnnoScolastico(e.target.value)}
                     placeholder="Classe"
                     className={styles["custom-input"]}
                     required
@@ -193,7 +193,7 @@ const RegisterPage = () => {
                 id="istituto"
                 type="text"
                 value={istituto}
-                onChange={(e) => setistituto(e.target.value)}
+                onChange={(e) => setIstituto(e.target.value)}
                 placeholder="Instituto"
                 className={styles["custom-input"]}
                 required
@@ -210,7 +210,7 @@ const RegisterPage = () => {
                   id="telefono"
                   type="tel"
                   value={telefono}
-                  onChange={(e) => settelefono(e.target.value)}
+                  onChange={(e) => setTelefono(e.target.value)}
                   placeholder="Telefono"
                   className={styles["custom-input"]}
                   pattern="[+0-9\s]{10,15}"
@@ -223,7 +223,7 @@ const RegisterPage = () => {
                   id="emailStudente"
                   type="email"
                   value={emailStudente}
-                  onChange={(e) => setemailStudente(e.target.value)}
+                  onChange={(e) => setEmailStudente(e.target.value)}
                   placeholder="Email Studente"
                   className={`${styles["custom-input"]} ${styles["student-email-input"]}`}
                   required
