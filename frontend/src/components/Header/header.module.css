@@ -5,6 +5,8 @@
     background-color: #2e8b57;
     color: white;
     gap: 20px;
+    position: fixed;
+    width: 100vw;
 }
 
 .title {
