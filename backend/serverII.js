@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt"); 
 
 // Configurazioni base
 const app = express();
@@ -10,33 +11,60 @@ const JWT_SECRET = "balla";
 
 // Middleware
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "*",//permette di far collegare qualsiasi PC al server
     credentials: true
 }));
 app.use(express.json());
 
 // Configurazione Database
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "step_by_step",
+const db= mysql.createConnection({
+    host: '172.29.10.76',
+    user: 'alessandro',
+    password: '123456',
+    database: 'step_by_step',
     port: 3306
 });
 
 // Route Autenticazione
-app.post("/api/register", (req, res) => {
-    const { nome, cognome, email, password, ruolo } = req.body;
-    const query = "INSERT INTO utente (nome, cognome, email, password, ruolo) VALUES (?, ?, ?, ?, ?)";
+app.post("/api/register", async (req, res) => {
+    console.log("Dati ricevuti:", req.body);
+    const { nome, cognome, email, password, ruolo, istituto, classe, anno_scolastico, telefono, emailStudente } = req.body;
     
-    db.query(query, [nome, cognome, email, password, ruolo], (err, result) => {
-        if (err) {
-            console.error("Errore registrazione:", err);
-            return res.status(500).json({ error: "Errore durante la registrazione" });
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        let query, params;
+        
+        if (ruolo === "S") {
+            // Studente
+            query = "INSERT INTO studente (nome, cognome, email, password, istituto, classe, anno_scolastico) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            params = [nome, cognome, email, hashedPassword, istituto, classe, anno_scolastico];
+        } else if (ruolo === "E") {
+            // Educatore
+            query = "INSERT INTO educatore (nome, cognome, email, password, istituto) VALUES (?, ?, ?, ?, ?)";
+            params = [nome, cognome, email, hashedPassword, istituto];
+        } else if (ruolo === "G") {
+            // Genitore
+            query = "INSERT INTO genitore (nome, cognome, email, password, telefono, email_studente) VALUES (?, ?, ?, ?, ?, ?)";
+            params = [nome, cognome, email, hashedPassword, telefono, emailStudente];
         }
-        res.json({ message: "Registrazione completata con successo" });
-    });
+        
+        db.query(query, params, (err, result) => {
+            if (err) {
+                console.error("Errore registrazione:", err);
+                return res.status(500).json({ error: "Errore durante la registrazione" });
+            }
+            res.status(201).json({ message: "Registrazione completata con successo" });
+        });
+        
+    } catch (error) {
+        console.error('Errore nell\'hashing della password:', error);
+        res.status(500).json({ error: 'Errore interno del server' });
+    }
 });
+
+
 
 app.post("/api/login", (req, res) => {
     const { email, password } = req.body;
