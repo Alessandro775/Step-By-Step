@@ -4,29 +4,36 @@ import unibaLogo from "../../assets/logouniba.jpeg";
 import siteLogo from "../../assets/logosito.png";
 
 const Footer = () => (
-    <div className={styles["footer-content"]}>
-        <div className={styles["footer-logos"]}>
-            <img src={siteLogo} alt="Site Logo" className={styles["site-logo"]} />
-            <img src={unibaLogo} alt="Uniba Logo" className={styles["uniba-logo"]} />
+  <footer className={styles.footer}>
+    <div className={styles.container}>
+      <div className={styles.leftSection}>
+        <div className={styles.logoContainer}>
+          <img src={siteLogo} alt="Logo del sito" className={styles.logo} />
+          <img src={unibaLogo} alt="Logo Università di Bari" className={styles.logo} />
         </div>
-        <div className={styles["footer-contacts"]}>
-            <h3>Contatti</h3>
-            <ul>
-                <li>a.licchetta2@studenti.uniba.it</li>
-                <li>n.bello3@studenti.uniba.it</li>
-                <li>f.leone56@studenti.uniba.it</li>
-            </ul>
-            <p className={styles["footer-dipartimento"]}>
-                Dipartimento di Informatica dell’Università degli Studi di Bari "Aldo Moro"
-            </p>
+      </div>
+      
+      <div className={styles.centerSection}>
+        <h4>Dipartimento di Informatica</h4>
+        <p>Università degli Studi di Bari "Aldo Moro"</p>
+        <div className={styles.address}>
+          <span>Via Edoardo Orabona, 4</span>
+          <span>70125 Bari (BA), Italia</span>
         </div>
-        <div className={styles["footer-info"]}>
-            <h3>Informazioni</h3>
-            <p>
-                Questa web app offre servizi e strumenti interattivi per il potenziamento della fonologia nei ragazzi con DSA.
-            </p>
+      </div>
+      
+      <div className={styles.rightSection}>
+        <h4>Contatti</h4>
+        <div className={styles.contactInfo}>
+          <span>📞 +39 080 544 2264</span>
+          <span>✉️ info@di.uniba.it</span>
         </div>
+        <p className={styles.description}>
+          Web app per il potenziamento della fonologia nei ragazzi con DSA
+        </p>
+      </div>
     </div>
+  </footer>
 );
 
 export default Footer;
