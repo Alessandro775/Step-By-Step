@@ -2,70 +2,56 @@ import React, { useState, useEffect } from 'react';
 import styles from './ContenutoEducatore.module.css';
 
 const ContenutoEducatore = () => {
-    const [studenti, setStudenti] = useState([]);
-    const [error, setError] = useState(null);
+    const [parole, setParole] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchStudenti = async () => {
+        const fetchParole = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('http://localhost:3000/api/studenti', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                });
+                const response = await fetch('http://localhost:3000/api/parole');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
-                if (!Array.isArray(data)) {
-                    throw new Error('Formato dati non valido');
-                }
-                setStudenti(data);
+                console.log('Dati ricevuti:', data); // Debug
+                setParole(data);
                 setError(null);
             } catch (err) {
-                console.error('Errore fetch:', err);
-                setError('Errore nel caricamento degli studenti');
+                console.error('Errore dettagliato:', err);
+                setError('Errore nel caricamento delle parole');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchStudenti();
+        fetchParole();
     }, []);
-
-    if (loading) return <div className={styles.loading}>Caricamento studenti...</div>;
-    if (error) return <div className={styles.error}>{error}</div>;
-    if (studenti.length === 0) return <div>Nessuno studente trovato</div>;
 
     return (
         <div className={styles.container}>
-            <h2>Lista Studenti</h2>
-            <table className={styles.table}>
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Cognome</th>
-                        <th>Email</th>
-    
-                    </tr>
-                </thead>
-                <tbody>
-                    {studenti.map((studente) => (
-                        <tr key={studente.id}>
-                            <td>{studente.nome}</td>
-                            <td>{studente.cognome}</td>
-                            <td>{studente.email}</td>
-    
+            <h2>Contenuto Esercizi</h2>
+            {loading && <div>Caricamento...</div>}
+            {error && <div className={styles.error}>{error}</div>}
+            {!loading && !error && (
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Parola</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {parole.map((testo) => (
+                            <tr key={testo.idContenuto}>
+                                <td>{testo.testo}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 };

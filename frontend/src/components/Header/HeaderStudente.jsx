@@ -83,6 +83,7 @@ const HeaderStudente = () => {
       )}
     </>
   );
+
 };
 
 export default HeaderStudente;
