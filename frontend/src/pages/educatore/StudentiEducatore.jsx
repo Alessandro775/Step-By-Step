@@ -1,18 +1,16 @@
 import React from 'react';
-import Footer from '../../components/footer/Footer';
-import HeaderEducatore from '../../components/Header/HeaderEducatore';
-import StudentiEducatoreContent from '../../components/educatore/StudentiEducatore';
-import styles from './StudentiEducatore.module.css';
+import Footer from '../../components/footer/Footer'; // Importa il componente Footer
+import Header from '../../components/Header/HeaderEducatore'; // Importa il componente Header
+import Studenti from '../../components/educatore/StudentiEducatore'; 
 
 const StudentiEducatore = () => {
     return (
-        <div className={styles.pageContainer}>
-            <HeaderEducatore />
-            <main className={styles.mainContent}>
-                <StudentiEducatoreContent />
-            </main>
-            <Footer />
-        </div>
+        <>
+            {/* Qui puoi inserire il contenuto della tua homepage, ad esempio: */}
+            <Header /> {/* Aggiungi il componente Header qui */}
+            <Studenti/>
+            <Footer /> {/* Aggiungi il componente Footer qui */}
+        </>
     );
 };
 

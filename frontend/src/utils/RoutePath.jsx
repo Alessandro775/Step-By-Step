@@ -15,7 +15,7 @@ import CronologiaStudente from "../pages/studente/CronologiaStudente"; // Import
 import ProfiloEducatore from "../pages/educatore/ProfiloEducatore";
 import HomePageEducatore from "../pages/educatore/HomePageEducatore";
 import ContenutoEducatore from "../pages/educatore/ContenutoEducatore"; 
-import StudentiEducatore from "../components/educatore/StudentiEducatore";// Importa il componente CorpoHomePage
+import StudentiEducatore from "../pages/educatore/StudentiEducatore";// Importa il componente CorpoHomePage
 
 // Import pagine famiglia
 import ProfiloFamiglia from "../pages/famiglia/ProfiloFamiglia";

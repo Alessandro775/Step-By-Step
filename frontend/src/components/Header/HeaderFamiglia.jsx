@@ -10,7 +10,7 @@ const HeaderFamiglia = () => {
 
 
     // Funzioni per la navigazione
-    const goToHome = () => navigate('/');
+    const goToHome = () => navigate('/home-famiglia');
     const goToProfilo = () => navigate('/profilo-famiglia');
 
     return (
