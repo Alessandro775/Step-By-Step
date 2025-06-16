@@ -101,12 +101,45 @@ app.post("/api/register", async (req, res) => {
     
             const [result] = await db.promise().execute(query, params);
             res.status(201).json({ message: "Registrazione completata con successo" });
-            
+        });
+        
+    } catch (error) {
+        console.error('Errore nell\'hashing della password:', error);
+        res.status(500).json({ error: 'Errore interno del server' });
+    }
+});
 
+
+
+app.post("/api/login", (req, res) => {
+    const { email, password } = req.body;
+    const query = "SELECT * FROM utente WHERE email = ? AND password = ?";
     
-        } catch (error) {
-            console.error('Errore dettagliato:', error);
-            res.status(500).json({ error: `Errore durante la registrazione: ${error.message}` });
+    db.query(query, [email, password], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: "Errore login" });
+        }
+        if (results.length === 0) {
+            return res.status(401).json({ error: "Credenziali non valide" });
+        }
+        
+        const token = jwt.sign(
+            { id: results[0].id, ruolo: results[0].ruolo },
+            JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+        
+        res.json({ token, ruolo: results[0].ruolo });
+    });
+});
+
+// Route Studenti
+app.get('/api/studenti', (req, res) => {
+    const query = 'SELECT idStudente, nome, cognome, email FROM studente';
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Errore query:', err);
+            return res.status(500).json({ error: 'Errore database' });
         }
     });
     
