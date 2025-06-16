@@ -13,7 +13,7 @@ const HeaderEducatore = () => {
   const goToStudenti = () => navigate('/studenti-educatore');
   const goToProfilo = () => navigate('/profilo-educatore');
   const goToContenuti = () => navigate('/contenuto-educatore');
-
+  
   // Verifica se siamo nella pagina del profilo
   const isProfilePage = location.pathname === '/profilo-educatore';
 
@@ -42,23 +42,25 @@ const HeaderEducatore = () => {
           <img src={logo} alt="Logo" className={header.logo} />
         </button>
         
-        <h1 className={header.title}>Dashboard Educatore</h1>
+        <h1 className={header.title}>Step By Step</h1>
         
         <nav className={header.nav}>
           <ul className={header['nav-list']}>
-            <li><button onClick={goToHome}>Home</button></li>
+
             <li><button onClick={goToStudenti}>Studenti</button></li>
             <li><button onClick={goToContenuti}>Contenuti</button></li>
-            <li><button onClick={goToProfilo}>Profilo</button></li>
-            {isProfilePage && (
-              <li>
+            
+            {!isProfilePage && (
+              <button className={header.navButton} onClick={goToProfilo}>Profilo </button>
+             )}
+            {isProfilePage && ( 
                 <button 
                   className={header.logoutButton} 
                   onClick={handleLogoutClick}
                 >
                   Logout
                 </button>
-              </li>
+              
             )}
           </ul>
         </nav>

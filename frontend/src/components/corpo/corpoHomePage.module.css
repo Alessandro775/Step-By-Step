@@ -1,109 +1,135 @@
-/* Layout generale */
+/* === STRUTTURA PRINCIPALE === */
+
+/* Container principale della homepage */
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px;
-    background-color: #f0f0f0; /* grigio chiaro */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  background-color: #f0f0f0;
 }
+
+/* Area contenuto centralizzata */
 .content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
 }
 
-/* Sezioni */
+/* === ELEMENTI DI SEZIONE === */
+
+/* Wrapper per ogni sezione della pagina */
 .sezione {
-    margin-bottom: 64px;
+  margin-bottom: 64px;
 }
 
+/* Titolo principale di sezione */
 .titolo {
-    margin-bottom: 16px;
-    color: #000000; /* verde scuro */
+  margin-bottom: 16px;
+  color: #000000;
 }
 
+/* Sottotitolo di sezione */
 .sottotitolo {
-    margin-bottom: 16px;
-    color: #000000; /* verde foresta */
+  margin-bottom: 16px;
+  color: #000000;
 }
 
+/* Testo descrittivo generale */
 .testo {
-    line-height: 1.6;
-    color: #000000; /* verde scuro grigiastro */
+  line-height: 1.6;
+  color: #000000;
 }
 
-/* Disturbi */
+/* === GRIGLIA DISTURBI === */
+
+/* Container griglia per i disturbi */
 .disturbiGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Exactly 2 columns */
-    gap: 24px;
-    margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 32px;
 }
 
+/* Card singolo disturbo */
 .disturboCard {
-    display: flex;
-    align-items: flex-start;
-    padding: 24px;
-    background: #d7ddd773; /* verde molto chiaro */
-    border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  padding: 24px;
+  background: #d7ddd773;
+  border-radius: 12px;
 }
 
+/* Effetto hover per card disturbo */
 .disturboCard:hover {
-    box-shadow: 0 8px 25px #e6e0e033; /* ombra verde */
+  box-shadow: 0 8px 25px #e6e0e033;
 }
 
+/* Icona del disturbo */
 .disturboIcon {
-    margin-right: 16px;
+  margin-right: 16px;
 }
 
+/* Nome del disturbo */
 .disturboNome {
-    margin-bottom: 4px;
+  margin-bottom: 4px;
 }
 
-/* Servizi */
+/* === GRIGLIA SERVIZI === */
+
+/* Container griglia responsive per servizi */
 .serviziGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
 }
 
+/* Card singolo servizio */
 .servizioCard {
-    padding: 24px;
-    background: #e6e0e033;
-    box-shadow: 0 8px 25px #0a8f2b33; /* ombra verde */ /* verde lime a verde chiaro */
-    color: #000000; /* verde scuro */
-    border-radius: 12px;
-    transition: transform 0.3s ease;
+  padding: 24px;
+  background: #e6e0e033;
+  box-shadow: 0 8px 25px #0a8f2b33;
+  color: #000000;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
 }
 
+/* Icona del servizio */
 .servizioIcon {
-    margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 
+/* Titolo del servizio */
 .servizioTitolo {
-    margin-bottom: 8px;
+  margin-bottom: 8px;
 }
 
-/* Evidenziazione progetto */
+/* === SEZIONE PROGETTO === */
+
+/* Box evidenziato per il progetto principale */
 .progettoHighlight {
-    background: #e6e0e033; /* verde pastello chiaro */
-    padding: 32px;
-    border-radius: 12px;
-    border-left: 5px solid #228B22; /* verde foresta */
-    box-shadow: 0 4px 12px rgba(0, 100, 0, 0.05);
+  background: #e6e0e033;
+  padding: 32px;
+  border-radius: 12px;
+  border-left: 5px solid #228B22;
+  box-shadow: 0 4px 12px rgba(0, 100, 0, 0.05);
 }
 
+/* Testo evidenziato nel progetto */
 .evidenziato {
-    color: #006400;
+  color: #006400;
 }
 
-/* Missione */
+/* === SEZIONE MISSIONE === */
+
+/* Contenuto della sezione missione */
 .missioneContent {
-    margin-top: 24px;
+  margin-top: 24px;
 }
 
+/* Obiettivo aziendale */
 .obiettivo {
-    margin-top: 16px;
-    color: #e6e0e033;
+  margin-top: 16px;
+  color: #e6e0e033;
 }
