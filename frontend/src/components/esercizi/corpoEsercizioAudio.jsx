@@ -263,7 +263,7 @@ const CorpoEsercizioAudio = () => {
     return (
         <div className={styles.container}>
             <h1 className={styles.mainTitle}>
-                🇮🇹 Esercizio di Pronuncia Italiana
+                 Esercizio di Pronuncia Italiana
             </h1>
 
             {/* Status indicators */}
