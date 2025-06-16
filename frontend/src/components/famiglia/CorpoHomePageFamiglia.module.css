@@ -1,0 +1,14 @@
+.container {
+  padding: 32px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+.titolo {
+  font-size: 2.5rem;
+  color: #2e3a59;
+  font-weight: bold;
+  margin-bottom: 24px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(46, 58, 89, 0.08);
+}
