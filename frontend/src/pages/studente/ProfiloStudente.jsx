@@ -7,6 +7,7 @@ import Footer from '../../components/footer/Footer';
 const ProfilePage = () => {
   const navigate = useNavigate();
   
+  
   // State per gestire la modalità di modifica
   const [isEditing, setIsEditing] = useState(false);
   
@@ -220,7 +221,8 @@ const ProfilePage = () => {
           <p className={styles.cronologiaDescription}>
             Visualizza tutti gli esercizi che hai completato durante il tuo percorso di apprendimento.
           </p>
-          <div className={styles.cronologiaButtonContainer}>
+          <div className={styles.cronologiaButtonContainer}
+           onClick={() => navigate('/cronologia-studente')}>
             <button onClick={handleCronologia} className={styles.cronologiaBtn}>
               Visualizza gli esercizi svolti
             </button>
