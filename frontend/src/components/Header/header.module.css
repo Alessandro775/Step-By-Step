@@ -1,23 +1,72 @@
+/* Container principale dell'header */
 .container {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #2e8b57;
-    color: white;
-    gap: 20px;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #2e8b57;
+  color: white;
+  gap: 20px;
 }
 
+/* Titolo dell'header - non si riduce con flex */
 .title {
-    margin: 0;
-    font-size: 1.5rem;
-    /* Aggiungi flex-shrink: 0 per evitare che il titolo si riduca */
-    flex-shrink: 0;
+  margin: 0;
+  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
-/* Aggiungi questo stile per il nav */
+/* Navigazione - allineata a destra */
 nav {
-    margin-left: auto;  /* Spinge tutto il nav a destra */
+  margin-left: auto;
 }
+
+/* Lista di navigazione orizzontale */
+.nav-list {
+  display: flex;
+  list-style: none;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* Pulsanti della navigazione */
+.nav-list button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #1a5c37;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nav-list button:hover {
+  background-color: #dcdcdc;
+  color: black;
+}
+
+/* Logo dell'header */
+.logo {
+  width: 60px;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Pulsante contenitore del logo */
+.logoButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.logoButton:hover {
+  transform: scale(1.1);
+}
+
+/* Pulsante di logout */
 .logoutButton {
   padding: 8px 16px;
   border: none;
@@ -26,62 +75,22 @@ nav {
   color: white;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-left: 10px;
+  margin-left: 2px;
 }
 
 .logoutButton:hover {
   background-color: #c82333;
 }
 
-.nav-list {
-    display: flex;
-    list-style: none;
-    gap: 1rem;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-list button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    background-color: #1a5c37;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.nav-list button:hover {
-    background-color: #dcdcdc;
-    color: black;
-}
-
-.logo {
-    width: 60px;
-    height: auto;
-    object-fit: contain;
-    display: block;
-    /* Aggiungi flex-shrink: 0 per evitare che il logo si riduca */
-    flex-shrink: 0;
-}
-
-.logoButton {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.logoButton:hover {
-    transform: scale(1.1);
-}
-
+/* Icone nei pulsanti */
 .icon {
-    margin-right: 8px;
-    font-size: 14px;
+  margin-right: 8px;
+  font-size: 14px;
 }
-/* Stili per il modal di conferma */
+
+/* === MODAL DI CONFERMA === */
+
+/* Overlay di sfondo del modal */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -95,6 +104,7 @@ nav {
   z-index: 1000;
 }
 
+/* Contenuto del modal */
 .modalContent {
   background: white;
   padding: 2rem;
@@ -105,24 +115,28 @@ nav {
   text-align: center;
 }
 
+/* Titolo del modal */
 .modalContent h3 {
   margin: 0 0 1rem 0;
   color: #333;
   font-size: 1.25rem;
 }
 
+/* Testo del modal */
 .modalContent p {
   margin: 0 0 1.5rem 0;
   color: #666;
   font-size: 1rem;
 }
 
+/* Container dei pulsanti del modal */
 .modalButtons {
   display: flex;
   gap: 1rem;
   justify-content: center;
 }
 
+/* Pulsante di conferma */
 .confirmButton {
   padding: 8px 16px;
   border: none;
@@ -138,6 +152,7 @@ nav {
   background-color: #c82333;
 }
 
+/* Pulsante di annullamento */
 .cancelButton {
   padding: 8px 16px;
   border: 1px solid #6c757d;
