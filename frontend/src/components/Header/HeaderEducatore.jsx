@@ -42,7 +42,7 @@ const HeaderEducatore = () => {
           <img src={logo} alt="Logo" className={header.logo} />
         </button>
         
-        <h1 className={header.title}>Dashboard Educatore</h1>
+        <h1 className={header.title}>Step By Step</h1>
         
         <nav className={header.nav}>
           <ul className={header['nav-list']}>
