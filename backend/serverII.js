@@ -51,8 +51,10 @@ function autentica(req, res, next) {
 
 // Route di registrazione
 app.post("/api/register", async (req, res) => {
+
     console.log("Dati ricevuti per registrazione:", req.body);
     const { nome, cognome, email, password, ruolo, istituto, classe, anno_scolastico, telefono, emailStudente } = req.body;
+
     
     if (!nome || !cognome || !email || !password || !ruolo) {
         return res.status(400).json({ error: "Campi obbligatori mancanti" });
@@ -62,6 +64,7 @@ app.post("/api/register", async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         
+
         let query, params;
         
         if (ruolo === "S") {
@@ -89,9 +92,10 @@ app.post("/api/register", async (req, res) => {
             res.status(201).json({ message: "Registrazione completata con successo" });
         });
         
+
     } catch (error) {
         console.error('Errore nell\'hashing della password:', error);
-        res.status(500).json({ error: 'Errore interno del server' });
+        return res.status(500).json({ error: 'Errore interno del server' });
     }
 });
 
@@ -124,10 +128,10 @@ app.post("/api/login", async (req, res) => {
             result = await queryAsync("SELECT *, 'E' as ruolo FROM educatore WHERE email = ?", [email]);
         }
 
-        // Se non trovato, cerca tra i genitori
-        if (result.length === 0) {
-            result = await queryAsync("SELECT *, 'G' as ruolo FROM genitore WHERE email = ?", [email]);
-        }
+// Se non trovato, cerca tra i genitori
+if (result.length === 0) {
+    result = await queryAsync("SELECT *, 'G' as ruolo FROM famiglia WHERE email = ?", [email]);
+}
 
         if (result.length === 0) {
             console.log("Utente non trovato:", email);
