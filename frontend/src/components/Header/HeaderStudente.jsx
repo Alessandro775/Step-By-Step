@@ -15,6 +15,7 @@ const HeaderStudente = () => {
 
   // Verifica se siamo nella pagina del profilo
   const isProfilePage = location.pathname === '/profilo-studente';
+  const isCronologyPage = location.pathname === '/cronologia-studente';
 
   const handleLogoutClick = () => {
     setShowConfirm(true);
@@ -42,9 +43,13 @@ const HeaderStudente = () => {
         
         <nav className={header.nav}>
           <ul className={header['nav-list']}>
-            <li><button onClick={goToHome}>Home</button></li>
-            <li><button onClick={goToCronologia}>Cronologia</button></li>
-            <li><button onClick={goToProfilo}>Profilo</button></li>
+
+            {!isCronologyPage && (
+              <li><button className={header.navButton} onClick={goToCronologia}>Cronologia</button></li>
+            )}
+            {!isProfilePage && (
+              <button className={header.navButton} onClick={goToProfilo}>Profilo </button>
+            )}
             {isProfilePage && (
               <li>
                 <button 

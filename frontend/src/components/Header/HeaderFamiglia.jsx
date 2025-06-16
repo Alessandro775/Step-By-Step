@@ -41,7 +41,6 @@ const HeaderFamiglia = () => {
         
         <nav className={header.nav}>
           <ul className={header['nav-list']}>
-            <li><button onClick={goToHome}>Home</button></li>
             <li><button onClick={goToProfilo}>Profilo</button></li>
             {isProfilePage && (
               <li>
