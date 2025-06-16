@@ -2,19 +2,39 @@
 
 /* Container principale del componente educatore */
 .container {
+<<<<<<< EliminaProfilo
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+=======
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.title {
+    color: #2e8b57;
+    font-size: 24px;
+    margin-bottom: 20px;
+>>>>>>> main
 }
 
 /* === TABELLA DATI === */
 
 /* Tabella principale per visualizzare i dati */
 .table {
+<<<<<<< EliminaProfilo
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+=======
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+>>>>>>> main
 }
 
 /* === CELLE TABELLA === */
@@ -22,15 +42,22 @@
 /* Stile per intestazioni e celle della tabella */
 .table th,
 .table td {
+<<<<<<< EliminaProfilo
   border: 1px solid #ddd;
   padding: 12px;
   text-align: left;
+=======
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+>>>>>>> main
 }
 
 /* === INTESTAZIONI TABELLA === */
 
 /* Stile specifico per le intestazioni */
 .table th {
+<<<<<<< EliminaProfilo
   background-color: #f4f4f4;
   font-weight: bold;
 }
@@ -40,6 +67,11 @@
 /* Colore di sfondo per righe pari (zebra striping) */
 .table tr:nth-child(even) {
   background-color: #f9f9f9;
+=======
+    background-color: #2e8b57;
+    color: white;
+    font-weight: 600;
+>>>>>>> main
 }
 
 /* === EFFETTO HOVER === */
@@ -49,6 +81,7 @@
   background-color: #f5f5f5;
 }
 
+<<<<<<< EliminaProfilo
 /* === GESTIONE ERRORI === */
 
 /* Stile per messaggi di errore */
@@ -57,3 +90,16 @@
   padding: 20px;
   text-align: center;
 }
+=======
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error {
+    color: #dc3545;
+    text-align: center;
+    padding: 20px;
+}
+>>>>>>> main
