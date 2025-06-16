@@ -52,7 +52,9 @@ const RegisterPage = () => {
         anno_scolastico: parseInt(annoScolastico) 
       }),
       ...(tipoUtente === "educatore" && { istituto }),
-      ...(tipoUtente === "genitore" && { numero_telefono, email_studente, cognome_famiglia: cognome }),
+
+      ...(tipoUtente === "famiglia" && { telefono, emailStudente }),
+
     };
       const response = await fetch(`${BASE_URL}/api/register`, {
       method: "POST",
@@ -65,7 +67,15 @@ const RegisterPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Errore durante la registrazione');
+        // Errori personalizzati dal backend
+        if (data.error === 'Email già registrata') {
+          setErrors(prev => ({ ...prev, email: 'Questa email è già registrata.' }));
+        } else if (data.error === 'Email studente non trovata') {
+          setErrors(prev => ({ ...prev, emailStudente: 'Email dello studente non trovata.' }));
+        } else {
+          setErrors(prev => ({ ...prev, submit: data.error || 'Errore durante la registrazione' }));
+        }
+        return;
       }
 
       // Reindirizza alla home in caso di successo
@@ -74,7 +84,7 @@ if (tipoUtente === 'studente') {
   navigate('/home-studente');
 } else if (tipoUtente === 'educatore') {
   navigate('/home-educatore');
-} else if (tipoUtente === 'genitore') {
+} else if (tipoUtente === 'famiglia') {
   navigate('/home-famiglia');
 } else {
   navigate('/login'); // fallback nel caso il tipo non sia definito
@@ -145,7 +155,7 @@ return (
                 <option value="">Seleziona il tuo Ruolo</option>
   <option value="studente">Studente</option> // Era "student"
   <option value="educatore">Educatore</option> // Era "educator"
-  <option value="genitore">Genitore</option> // Era "family"
+  <option value="famiglia">famiglia</option> // Era "family"
 </select>
             </div>
           </div>
@@ -231,7 +241,7 @@ return (
             </div>
           )}
 
-          {tipoUtente === "genitore" && (
+          {tipoUtente === "famiglia" && (
             <div className={styles["additional-fields"]} style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
               <div style={{ flex: 1 }}>
                 <label className={styles["input-label"]} htmlFor="numero_telefono">
@@ -262,6 +272,11 @@ return (
                   className={`${styles["custom-input"]} ${styles["student-email-input"]}`}
                   required
                 />
+              {errors.emailStudente && (
+  <div className={styles["error-message"]}>{errors.emailStudente}</div>
+)}
+
+
               </div>
             </div>
           )}
@@ -279,6 +294,10 @@ return (
                 className={styles["custom-input"]}
                 required
               />
+              {errors.email && (
+  <div className={styles["error-message"]}>{errors.email}</div>
+)}
+
             </div>
             <div></div>
           </div>
