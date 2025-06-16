@@ -35,6 +35,9 @@
     font-weight: 600;
 }
 
+/* === EFFETTO HOVER === */
+
+/* Evidenziazione al passaggio del mouse sulle righe */
 .table tr:hover {
     background-color: #f5f5f5;
 }

@@ -1,3 +1,6 @@
+/* === FOOTER PRINCIPALE === */
+
+/* Container principale del footer */
 .footer {
   background: #2e8b57;
   color: white;
@@ -10,7 +13,11 @@
   justify-content: center;
 }
 
+/* === LAYOUT CONTAINER === */
+
+/* Container principale del contenuto footer */
 .container {
+  
   max-width: 1000px;
   width: 100%;
   padding: 0 30px;
@@ -20,28 +27,37 @@
   margin-left: 95px;
 }
 
+/* === SEZIONE SINISTRA === */
+
+/* Sezione sinistra con logo */
 .leftSection {
   width: 160px;
   display: flex;
   justify-content: center;
 }
 
+/* Container per i loghi */
 .logoContainer {
   display: flex;
   gap: 15px;
   align-items: center;
 }
 
+/* Stile del logo */
 .logo {
   height: 50px;
   width: auto;
   transition: transform 0.2s ease;
 }
 
+/* Effetto hover del logo */
 .logo:hover {
   transform: scale(1.05);
 }
 
+/* === SEZIONE CENTRALE === */
+
+/* Sezione centrale con informazioni principali */
 .centerSection {
   flex: 1;
   text-align: center;
@@ -52,18 +68,21 @@
   justify-content: center;
 }
 
+/* Titolo della sezione centrale */
 .centerSection h4 {
   margin: 0 0 10px 0;
   font-size: 1.1em;
   font-weight: 600;
 }
 
+/* Paragrafo della sezione centrale */
 .centerSection p {
   margin: 0 0 15px 0;
   font-size: 0.95em;
   opacity: 0.9;
 }
 
+/* Informazioni indirizzo */
 .address {
   font-size: 0.9em;
   opacity: 0.8;
@@ -71,11 +90,15 @@
   text-align: center;
 }
 
+/* Righe dell'indirizzo */
 .address span {
   display: block;
   margin-bottom: 3px;
 }
 
+/* === SEZIONE DESTRA === */
+
+/* Sezione destra con contatti */
 .rightSection {
   width: 240px;
   display: flex;
@@ -85,23 +108,27 @@
   text-align: center;
 }
 
+/* Titolo della sezione destra */
 .rightSection h4 {
   margin: 0 0 10px 0;
   font-size: 1.1em;
   font-weight: 600;
 }
 
+/* Informazioni di contatto */
 .contactInfo {
   margin-bottom: 15px;
   font-size: 0.9em;
   text-align: center;
 }
 
+/* Righe delle informazioni di contatto */
 .contactInfo span {
   display: block;
   margin-bottom: 5px;
 }
 
+/* Descrizione aziendale */
 .description {
   font-size: 0.85em;
   opacity: 0.8;
@@ -111,18 +138,24 @@
   text-align: center;
 }
 
+/* === RESPONSIVE DESIGN === */
+
+/* Layout mobile per schermi piccoli */
 @media (max-width: 768px) {
+  /* Container responsive */
   .container {
     flex-direction: column;
     gap: 25px;
     margin-left: 0;
   }
-  
+
+  /* Sezioni laterali responsive */
   .leftSection,
   .rightSection {
     width: auto;
   }
-  
+
+  /* Sezione centrale responsive */
   .centerSection {
     padding: 0;
   }

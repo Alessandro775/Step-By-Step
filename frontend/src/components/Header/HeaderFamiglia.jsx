@@ -37,11 +37,10 @@ const HeaderFamiglia = () => {
           <img src={logo} alt="Logo" className={header.logo} />
         </button>
         
-        <h1 className={header.title}>Dashboard Famiglia</h1>
+        <h1 className={header.title}>Step By Step</h1>
         
         <nav className={header.nav}>
           <ul className={header['nav-list']}>
-            <li><button onClick={goToHome}>Home</button></li>
             <li><button onClick={goToProfilo}>Profilo</button></li>
             {isProfilePage && (
               <li>

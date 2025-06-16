@@ -193,21 +193,6 @@ const FamilyPage = () => {
             </div>
           )}
         </div>
-
-        {/* BLOCCO CRONOLOGIA */}
-        <div className={styles.cronologiaBlock}>
-          <h2 className={styles.cronologiaTitle}>
-            Cronologia Esercizi
-          </h2>
-          <p className={styles.cronologiaDescription}>
-            Visualizza tutti gli esercizi che sono stati completati durante il percorso di apprendimento.
-          </p>
-          <div className={styles.cronologiaButtonContainer}>
-            <button onClick={handleCronologia} className={styles.cronologiaBtn}>
-              Visualizza gli esercizi svolti
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Finestra di conferma eliminazione */}
