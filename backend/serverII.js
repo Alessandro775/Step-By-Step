@@ -18,9 +18,9 @@ app.use(express.json());
 
 // Configurazione Database
 const db= mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
+    host: '172.29.13.94',
+    user: 'alessandro',
+    password: '123456',
     database: 'step_by_step',
     port: 3306
 });
@@ -66,27 +66,77 @@ app.post("/api/register", async (req, res) => {
 
 
 
-app.post("/api/login", (req, res) => {
+app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
-    const query = "SELECT * FROM utente WHERE email = ? AND password = ?";
-    
-    db.query(query, [email, password], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: "Errore login" });
+    console.log("Tentativo login per:", email);
+
+    // Funzione helper per promisificare le query MySQL
+    const queryAsync = (query, params) => {
+        return new Promise((resolve, reject) => {
+            db.query(query, params, (err, results) => {
+                if (err) reject(err);
+                else resolve(results);
+            });
+        });
+    };
+
+    try {
+        let result;
+        let ruolo;
+
+        // Prima cerca nella tabella studenti
+        result = await queryAsync("SELECT *, 'S' as ruolo FROM studente WHERE email = ?", [email]);
+        
+        // Se non trovato, cerca tra gli educatori
+        if (result.length === 0) {
+            result = await queryAsync("SELECT *, 'E' as ruolo FROM educatore WHERE email = ?", [email]);
         }
-        if (results.length === 0) {
+
+        // Se non trovato, cerca tra i genitori
+        if (result.length === 0) {
+            result = await queryAsync("SELECT *, 'G' as ruolo FROM genitore WHERE email = ?", [email]);
+        }
+
+        // Se non trovato in nessuna tabella
+        if (result.length === 0) {
+            console.log("Utente non trovato:", email);
             return res.status(401).json({ error: "Credenziali non valide" });
         }
-        
+
+        const user = result[0];
+
+        // Verifica la password
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            console.log("Password non valida per utente:", email);
+            return res.status(401).json({ error: "Credenziali non valide" });
+        }
+
+        // Genera il token JWT
         const token = jwt.sign(
-            { id: results[0].id, ruolo: results[0].ruolo },
+            { id: user.id, ruolo: user.ruolo },
             JWT_SECRET,
             { expiresIn: "1h" }
         );
-        
-        res.json({ token, ruolo: results[0].ruolo });
-    });
+
+        // Invia la risposta
+        res.json({
+            token,
+            ruolo: user.ruolo,
+            user: {
+                id: user.id,
+                nome: user.nome,
+                cognome: user.cognome,
+                email: user.email
+            }
+        });
+
+    } catch (error) {
+        console.error("Errore durante il login:", error);
+        res.status(500).json({ error: "Errore interno del server" });
+    }
 });
+
 
 // Route Studenti
 app.get('/api/studenti', (req, res) => {
