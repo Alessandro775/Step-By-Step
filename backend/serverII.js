@@ -91,7 +91,7 @@ app.post("/api/register", async (req, res) => {
         
     } catch (error) {
         console.error('Errore nell\'hashing della password:', error);
-        res.status(500).json({ error: 'Errore interno del server' });
+        return res.status(500).json({ error: 'Errore interno del server' });
     }
 });
 
@@ -124,10 +124,10 @@ app.post("/api/login", async (req, res) => {
             result = await queryAsync("SELECT *, 'E' as ruolo FROM educatore WHERE email = ?", [email]);
         }
 
-        // Se non trovato, cerca tra i genitori
-        if (result.length === 0) {
-            result = await queryAsync("SELECT *, 'G' as ruolo FROM genitore WHERE email = ?", [email]);
-        }
+// Se non trovato, cerca tra i genitori
+if (result.length === 0) {
+    result = await queryAsync("SELECT *, 'G' as ruolo FROM famiglia WHERE email = ?", [email]);
+}
 
         if (result.length === 0) {
             console.log("Utente non trovato:", email);

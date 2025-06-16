@@ -15,8 +15,8 @@ const RegisterPage = () => {
   const [istituto, setIstituto] = useState(""); // Era institute
   const [classe, setClasse] = useState(""); // Era classYear
   const [annoScolastico, setAnnoScolastico] = useState(""); // Era academicYear
-  const [telefono, setTelefono] = useState(""); // Era phone
-  const [emailStudente, setEmailStudente] = useState(""); // Era studentEmail
+  const [numero_telefono, setnumero_telefono] = useState(""); // Era phone
+  const [email_studente, setemail_studente] = useState(""); // Era studentEmail
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
@@ -41,7 +41,7 @@ const RegisterPage = () => {
 
     try {
     const userData = {
-      nome,
+      ...(tipoUtente !== "genitore" && { nome }), // Include nome solo se NON è genitore
       cognome,
       email,
       password,
@@ -106,25 +106,27 @@ if (tipoUtente === 'studente') {
     }
   };
 
-  return (
+return (
     <div className={styles["register-section"]}>
-      <div className={styles["form-container"]}>
-        <p className={styles["form-title"]}>Registrazione</p>
-        <form onSubmit={handleSubmit} autoComplete="off">
-          <div className={styles["form-grid"]}>
-            <div>
-              <label className={styles["input-label"]} htmlFor="nome">
-              </label>
-              <input
-  id="nome"
-  type="text"
-  value={nome} // Era firstName
-  onChange={(e) => setNome(e.target.value)} // Era setFirstName
-  placeholder="Nome"
-  className={styles["custom-input"]}
-  required
-/>
-            </div>
+        <div className={styles["form-container"]}>
+          <p className={styles["form-title"]}>Registrazione</p>
+            <form onSubmit={handleSubmit}>
+                <div className={styles["form-grid"]}>
+                    {tipoUtente !== "genitore" && (
+                        <div>
+                            <label className={styles["input-label"]} htmlFor="nome">
+                            </label>
+                            <input
+                                id="nome"
+                                type="text"
+                                value={nome}
+                                onChange={(e) => setNome(e.target.value)}
+                                placeholder="Nome"
+                                className={styles["custom-input"]}
+                                required={tipoUtente !== "genitore"}
+                            />
+                        </div>
+                    )}
             <div>
               <label className={styles["input-label"]} htmlFor="cognome">
               </label>
@@ -240,19 +242,19 @@ if (tipoUtente === 'studente') {
           {tipoUtente === "famiglia" && (
             <div className={styles["additional-fields"]} style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
               <div style={{ flex: 1 }}>
-                <label className={styles["input-label"]} htmlFor="telefono">
+                <label className={styles["input-label"]} htmlFor="numero_telefono">
                 </label>
                 <input
-  id="telefono"
+  id="numero_telefono"
   type="tel"
   pattern="[0-9]*"
   maxLength="10"
-  value={telefono}
+  value={numero_telefono}
   onChange={(e) => {
     const value = e.target.value.replace(/\D/g, ''); // Rimuove caratteri non numerici
-    setTelefono(value);
+    setnumero_telefono(value);
   }}
-  placeholder="Telefono (solo numeri)"
+  placeholder="telefono (solo numeri)"
   className={styles["custom-input"]}
   required
 />
@@ -260,10 +262,10 @@ if (tipoUtente === 'studente') {
               <div style={{ width: "15px" }}></div>
               <div style={{ flex: 1 }}>
                 <input
-                  id="emailStudente"
+                  id="email_studente"
                   type="email"
-                  value={emailStudente}
-                  onChange={(e) => setEmailStudente(e.target.value)}
+                  value={email_studente}
+                  onChange={(e) => setemail_studente(e.target.value)}
                   placeholder="Email Studente"
                   className={`${styles["custom-input"]} ${styles["student-email-input"]}`}
                   required

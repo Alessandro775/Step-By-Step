@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './corpoHomePage.module.css';
-
+import { useNavigate } from 'react-router-dom';
 const CorpoHomePage = () => {
+  const navigate = useNavigate();
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Esercizi da svolgere</h1>
@@ -35,6 +36,7 @@ const CorpoHomePage = () => {
               src="src\assets\pronuncia-removebg-preview.png" 
               alt="Pronuncia corretta" 
               className={styles.exerciseImage}
+               onClick={() => navigate('/esercizio-audio')}
             />
           </div>
           <h3 className={styles.exerciseName}>Pronuncia corretta</h3>
