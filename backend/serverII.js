@@ -28,39 +28,72 @@ const db= mysql.createConnection({
 // Route Autenticazione
 app.post("/api/register", async (req, res) => {
     console.log("Dati ricevuti:", req.body);
-    const { nome, cognome, email, password, ruolo, istituto, classe, anno_scolastico, telefono, emailStudente } = req.body;
+    const { nome, cognome, email, password, ruolo, istituto, classe, anno_scolastico, numero_telefono, email_studente, cognome_famiglia } = req.body;
     
     try {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         
-        let query, params;
-        
-        if (ruolo === "S") {
-            // Studente
-            query = "INSERT INTO studente (nome, cognome, email, password, istituto, classe, anno_scolastico) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            params = [nome, cognome, email, hashedPassword, istituto, classe, anno_scolastico];
-        } else if (ruolo === "E") {
-            // Educatore
-            query = "INSERT INTO educatore (nome, cognome, email, password, istituto) VALUES (?, ?, ?, ?, ?)";
-            params = [nome, cognome, email, hashedPassword, istituto];
-        } else if (ruolo === "G") {
-            // Genitore
-            query = "INSERT INTO genitore (nome, cognome, email, password, telefono, email_studente) VALUES (?, ?, ?, ?, ?, ?)";
-            params = [nome, cognome, email, hashedPassword, telefono, emailStudente];
-        }
-        
-        db.query(query, params, (err, result) => {
-            if (err) {
-                console.error("Errore registrazione:", err);
-                return res.status(500).json({ error: "Errore durante la registrazione" });
+        if (ruolo === "G") {
+            console.log("Registrazione famiglia in corso...");
+            
+            // Prima verifichiamo che lo studente esista
+            db.query("SELECT idStudente FROM studente WHERE email = ?", [email_studente], (err, studentResult) => {
+                if (err) {
+                    console.error("Errore verifica studente:", err);
+                    return res.status(500).json({ error: "Errore durante la verifica dello studente" });
+                }
+
+                if (studentResult.length === 0) {
+                    return res.status(400).json({ error: "Studente non trovato con l'email specificata" });
+                }
+
+                // Se lo studente esiste, procediamo con l'inserimento della famiglia
+                const insertFamigliaQuery = "INSERT INTO famiglia (cognome_famiglia, email, password, numero_telefono, email_studente) VALUES (?, ?, ?, ?, ?)";
+                const params = [cognome_famiglia, email, hashedPassword, numero_telefono, email_studente];
+
+                db.query(insertFamigliaQuery, params, (err, result) => {
+                    if (err) {
+                        console.error("Errore inserimento famiglia:", err);
+                        return res.status(500).json({ error: "Errore durante la registrazione" });
+                    }
+
+                    const idFamiglia = result.insertId;
+                    const idStudente = studentResult[0].idStudente;
+
+                    // Crea la relazione nella tabella monitora
+                    db.query("INSERT INTO monitora (idFamiglia, idStudente) VALUES (?, ?)", [idFamiglia, idStudente], (err) => {
+                        if (err) {
+                            console.error("Errore creazione relazione:", err);
+                            return res.status(500).json({ error: "Errore durante la creazione della relazione" });
+                        }
+                        return res.status(201).json({ message: "Registrazione famiglia completata con successo" });
+                    });
+                });
+            });
+        } else {
+            // Gestione altri ruoli (studente, educatore)
+            let query, params;
+            
+            if (ruolo === "S") {
+                query = "INSERT INTO studente (nome, cognome, email, password, istituto, classe, anno_scolastico) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                params = [nome, cognome, email, hashedPassword, istituto, classe, anno_scolastico];
+            } else if (ruolo === "E") {
+                query = "INSERT INTO educatore (nome, cognome, email, password, istituto) VALUES (?, ?, ?, ?, ?)";
+                params = [nome, cognome, email, hashedPassword, istituto];
             }
-            res.status(201).json({ message: "Registrazione completata con successo" });
-        });
-        
+
+            db.query(query, params, (err, result) => {
+                if (err) {
+                    console.error("Errore registrazione:", err);
+                    return res.status(500).json({ error: "Errore durante la registrazione" });
+                }
+                return res.status(201).json({ message: "Registrazione completata con successo" });
+            });
+        }
     } catch (error) {
         console.error('Errore nell\'hashing della password:', error);
-        res.status(500).json({ error: 'Errore interno del server' });
+        return res.status(500).json({ error: 'Errore interno del server' });
     }
 });
 
@@ -92,10 +125,10 @@ app.post("/api/login", async (req, res) => {
             result = await queryAsync("SELECT *, 'E' as ruolo FROM educatore WHERE email = ?", [email]);
         }
 
-        // Se non trovato, cerca tra i genitori
-        if (result.length === 0) {
-            result = await queryAsync("SELECT *, 'G' as ruolo FROM genitore WHERE email = ?", [email]);
-        }
+// Se non trovato, cerca tra i genitori
+if (result.length === 0) {
+    result = await queryAsync("SELECT *, 'G' as ruolo FROM famiglia WHERE email = ?", [email]);
+}
 
         // Se non trovato in nessuna tabella
         if (result.length === 0) {
