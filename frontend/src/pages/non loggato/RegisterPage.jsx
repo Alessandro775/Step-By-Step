@@ -127,7 +127,7 @@ return (
   type="text"
   value={cognome} // Era nome
   onChange={(e) => setCognome(e.target.value)} // Era setLastName
-  placeholder="Cognome"
+  placeholder="Cognome famiglia"
   className={styles["custom-input"]}
   required
 />
