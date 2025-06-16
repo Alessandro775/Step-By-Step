@@ -69,7 +69,16 @@ const RegisterPage = () => {
       }
 
       // Reindirizza alla home in caso di successo
-      navigate('/home');
+     // Con:
+if (tipoUtente === 'studente') {
+  navigate('/home-studente');
+} else if (tipoUtente === 'educatore') {
+  navigate('/home-educatore');
+} else if (tipoUtente === 'genitore') {
+  navigate('/home-famiglia');
+} else {
+  navigate('/login'); // fallback nel caso il tipo non sia definito
+}
     } catch (error) {
       console.error('Errore durante la registrazione:', error);
       setErrors(prev => ({
@@ -150,24 +159,43 @@ const RegisterPage = () => {
                     type="text"
                     value={istituto}
                     onChange={(e) => setIstituto(e.target.value)}
-                    placeholder="Instituto"
+                    placeholder="Istituto"
                     className={styles["custom-input"]}
                     required
                   />
                 </div>
                 <div>
-                  <label className={styles["input-label"]} htmlFor="anno_scolastico">
-                  </label>
-                  <input
-                    id="anno_scolastico"
-                    type="text"
-                    value={annoScolastico}
-                    onChange={(e) => setAnnoScolastico(e.target.value)}
-                    placeholder="Classe"
-                    className={styles["custom-input"]}
-                    required
-                  />
-                </div>
+  <label className={styles["input-label"]} htmlFor="classe">
+  </label>
+  <select
+    id="classe"
+    value={classe}
+    onChange={(e) => setClasse(e.target.value)}
+    placeholder="Classe"
+    className={styles["custom-input"]}
+    required
+  >
+    <option value="">Seleziona classe</option>
+    <option value="1">Prima</option>
+    <option value="2">Seconda</option>
+    <option value="3">Terza</option>
+    <option value="4">Quarta</option>
+    <option value="5">Quinta</option>
+  </select>
+</div>
+<div>
+  <label className={styles["input-label"]} htmlFor="anno_scolastico">
+  </label>
+  <input
+    id="anno_scolastico"
+    type="text"
+    value={annoScolastico}
+    onChange={(e) => setAnnoScolastico(e.target.value)}
+    placeholder="Anno Scolastico"
+    className={styles["custom-input"]}
+    required
+  />
+</div>
                 {/*<div>
                   <label className={styles["input-label"]} htmlFor="academicYear">
                   </label>
@@ -194,7 +222,7 @@ const RegisterPage = () => {
                 type="text"
                 value={istituto}
                 onChange={(e) => setIstituto(e.target.value)}
-                placeholder="Instituto"
+                placeholder="Istituto"
                 className={styles["custom-input"]}
                 required
               />
@@ -207,15 +235,19 @@ const RegisterPage = () => {
                 <label className={styles["input-label"]} htmlFor="telefono">
                 </label>
                 <input
-                  id="telefono"
-                  type="tel"
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
-                  placeholder="Telefono"
-                  className={styles["custom-input"]}
-                  pattern="[+0-9\s]{10,15}"
-                  required
-                />
+  id="telefono"
+  type="tel"
+  pattern="[0-9]*"
+  maxLength="10"
+  value={telefono}
+  onChange={(e) => {
+    const value = e.target.value.replace(/\D/g, ''); // Rimuove caratteri non numerici
+    setTelefono(value);
+  }}
+  placeholder="Telefono (solo numeri)"
+  className={styles["custom-input"]}
+  required
+/>
               </div>
               <div style={{ width: "15px" }}></div>
               <div style={{ flex: 1 }}>

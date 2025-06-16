@@ -1,8 +1,12 @@
 .container {
     padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    height: 75vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
+
 
 .title {
     color: #2e8b57;
@@ -45,4 +49,39 @@
     color: #dc3545;
     text-align: center;
     padding: 20px;
+}
+
+.form {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.addButton {
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.deleteButton {
+    padding: 4px 8px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.addButton:hover, .deleteButton:hover {
+    opacity: 0.9;
 }

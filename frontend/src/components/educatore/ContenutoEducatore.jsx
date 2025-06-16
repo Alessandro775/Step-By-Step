@@ -6,6 +6,48 @@ const ContenutoEducatore = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const aggiungiParola = async () => {
+        if (!nuovaParola.trim()) return;
+        
+        try {
+            const response = await fetch('http://localhost:3000/api/parole', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ testo: nuovaParola })
+            });
+
+            if (!response.ok) {
+                throw new Error('Errore nell\'aggiunta della parola');
+            }
+
+            const nuovaParolaInserita = await response.json();
+            setParole([...parole, nuovaParolaInserita]);
+            setNuovaParola('');
+        } catch (err) {
+            console.error('Errore:', err);
+            setError('Errore nell\'aggiunta della parola');
+        }
+    };
+
+    const eliminaParola = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/parole/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Errore nella eliminazione della parola');
+            }
+
+            setParole(parole.filter(parola => parola.idContenuto !== id));
+        } catch (err) {
+            console.error('Errore:', err);
+            setError('Errore nella eliminazione della parola');
+        }
+    };
+
     useEffect(() => {
         const fetchParole = async () => {
             try {
