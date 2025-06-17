@@ -419,7 +419,9 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
     const idEducatore = req.utente.id;
     const idStudente = req.params.idStudente;
   
-    console.log("Recupero contenuti per studente:", idStudente, "da educatore:", idEducatore);
+    console.log("=== DEBUG CONTENUTI (NUOVA STRUTTURA) ===");
+    console.log("ID Educatore:", idEducatore);
+    console.log("ID Studente:", idStudente);
   
     // Verifica che lo studente sia assegnato all'educatore
     const verificaAssegnazione = `
@@ -439,26 +441,60 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
         });
       }
   
-      // Recupera i contenuti assegnati allo studente
-      const query = `
-        SELECT c.*, a.data_inizio, a.data_scadenza, a.completato
-        FROM assegna a
-        JOIN contenuto c ON a.idEsercizio = c.idContenuto
-        WHERE a.idStudente = ? AND a.idEducatore = ?
-        ORDER BY a.data_inizio DESC
+      // Controlla se esistono esercizi assegnati (NUOVA QUERY)
+      const checkQuery = `
+        SELECT COUNT(*) as total FROM esercizio_assegnato 
+        WHERE idStudente = ? AND idEducatore = ?
       `;
   
-      db.query(query, [idStudente, idEducatore], (err, results) => {
+      db.query(checkQuery, [idStudente, idEducatore], (err, countResult) => {
         if (err) {
-          console.error("Errore query contenuti:", err);
+          console.error("Errore conteggio:", err);
           return res.status(500).json({ error: "Errore database" });
         }
-        
-        console.log("Contenuti trovati:", results.length);
-        res.json(results);
+  
+        console.log("Esercizi assegnati trovati:", countResult[0].total);
+  
+        if (countResult[0].total === 0) {
+          console.log("Nessun esercizio assegnato a questo studente");
+          return res.json([]);
+        }
+  
+        // NUOVA QUERY con la struttura aggiornata
+        const query = `
+          SELECT 
+            c.idContenuto,
+            c.testo as titolo,
+            c.immagine,
+            c.tipologia as descrizione,
+            ea.data_assegnazione as data_inizio,
+            ea.data_assegnazione as data_scadenza,
+            CASE 
+              WHEN r.idRisultato IS NOT NULL THEN 1 
+              ELSE 0 
+            END as completato
+          FROM esercizio_assegnato ea
+          JOIN contenuto c ON ea.idContenuto = c.idContenuto
+          LEFT JOIN risultato r ON ea.idEsercizioAssegnato = r.idEsercizioAssegnato
+          WHERE ea.idStudente = ? AND ea.idEducatore = ?
+          ORDER BY ea.data_assegnazione DESC
+        `;
+  
+        db.query(query, [idStudente, idEducatore], (err, results) => {
+          if (err) {
+            console.error("Errore query contenuti:", err);
+            console.error("Query:", query);
+            return res.status(500).json({ error: "Errore database" });
+          }
+          
+          console.log("Contenuti query risultati:", results.length);
+          console.log("Primo risultato:", results[0] || "Nessun risultato");
+          res.json(results);
+        });
       });
     });
   });
+  
   
   // Route per visualizzare la cronologia di uno studente
   app.get("/api/studenti/:idStudente/cronologia", autentica, (req, res) => {
@@ -471,7 +507,9 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
     const idEducatore = req.utente.id;
     const idStudente = req.params.idStudente;
   
-    console.log("Recupero cronologia per studente:", idStudente, "da educatore:", idEducatore);
+    console.log("=== DEBUG CRONOLOGIA (NUOVA STRUTTURA) ===");
+    console.log("ID Educatore:", idEducatore);
+    console.log("ID Studente:", idStudente);
   
     // Verifica che lo studente sia assegnato all'educatore
     const verificaAssegnazione = `
@@ -491,26 +529,64 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
         });
       }
   
-      // Recupera la cronologia dello studente
-      const query = `
-        SELECT p.*, c.titolo, c.descrizione
-        FROM progresso_studente p
-        JOIN contenuto c ON p.idEsercizio = c.idContenuto
-        WHERE p.idStudente = ?
-        ORDER BY p.data_completamento DESC, p.timestamp DESC
+      // Controlla se esistono risultati (NUOVA QUERY)
+      const checkQuery = `
+        SELECT COUNT(*) as total FROM risultato r
+        JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+        WHERE r.idStudente = ? AND ea.idEducatore = ?
       `;
   
-      db.query(query, [idStudente], (err, results) => {
+      db.query(checkQuery, [idStudente, idEducatore], (err, countResult) => {
         if (err) {
-          console.error("Errore query cronologia:", err);
+          console.error("Errore conteggio cronologia:", err);
           return res.status(500).json({ error: "Errore database" });
         }
-        
-        console.log("Record cronologia trovati:", results.length);
-        res.json(results);
+  
+        console.log("Record cronologia trovati:", countResult[0].total);
+  
+        if (countResult[0].total === 0) {
+          console.log("Nessun record di progresso per questo studente");
+          return res.json([]);
+        }
+  
+        // NUOVA QUERY con la struttura aggiornata
+        const query = `
+          SELECT 
+            r.idRisultato,
+            r.punteggio,
+            r.numero_errori as numero_errori,
+            r.tempo as tempo_impiegato,
+            r.numero_tentativi as tentativi,
+            r.traccia_audio,
+            c.testo as titolo,
+            c.tipologia as descrizione,
+            e.descrizione as tipo_esercizio,
+            ea.data_assegnazione as data_completamento
+          FROM risultato r
+          JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+          JOIN contenuto c ON ea.idContenuto = c.idContenuto
+          JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+          WHERE r.idStudente = ? AND ea.idEducatore = ?
+          ORDER BY ea.data_assegnazione DESC
+        `;
+  
+        db.query(query, [idStudente, idEducatore], (err, results) => {
+          if (err) {
+            console.error("Errore query cronologia:", err);
+            console.error("Query:", query);
+            return res.status(500).json({ error: "Errore database" });
+          }
+          
+          console.log("Cronologia query risultati:", results.length);
+          console.log("Primo risultato:", results[0] || "Nessun risultato");
+          res.json(results);
+        });
       });
     });
   });
+  
+
+  
   
 // Connessione DB e Avvio Server
 db.connect((err) => {
