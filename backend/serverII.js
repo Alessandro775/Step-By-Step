@@ -121,7 +121,7 @@ app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
     console.log("Tentativo login per:", email);
 
-    // Funzione helper per promisificare le query MySQL
+    // Funzione helper per promisificare le query  MySQL
     const queryAsync = (query, params) => {
         return new Promise((resolve, reject) => {
             db.query(query, params, (err, results) => {
