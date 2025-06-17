@@ -25,6 +25,29 @@ const db= mysql.createConnection({
     port: 3306
 });
 
+function autentica(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        console.log("Token mancante nell'header");
+        return res.status(401).json({ error: 'Token mancante' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+        console.log("Token non fornito");
+        return res.status(401).json({ error: 'Token mancante' });
+    }
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        req.utente = payload;
+        console.log("Token verificato per utente:", payload.id, "ruolo:", payload.ruolo);
+        next();
+    } catch (err) {
+        console.log("Token non valido:", err.message);
+        return res.status(403).json({ error: 'Token non valido' });
+    }
+}
+
 // Route Autenticazione
 app.post("/api/register", async (req, res) => {
     console.log("Dati ricevuti:", req.body);
@@ -52,16 +75,16 @@ app.post("/api/register", async (req, res) => {
                 const insertFamigliaQuery = "INSERT INTO famiglia (cognome_famiglia, email, password, numero_telefono, email_studente) VALUES (?, ?, ?, ?, ?)";
                 const params = [cognome_famiglia, email, hashedPassword, numero_telefono, email_studente];
 
-                db.query(insertFamigliaQuery, params, (err, result) => {
-                    if (err) {
-                        console.error("Errore inserimento famiglia:", err);
-                        return res.status(500).json({ error: "Errore durante la registrazione" });
-                    }
-                    
-                    return res.status(201).json({ 
-                        message: "Registrazione famiglia completata con successo" 
-                    });
-                });
+        db.query(query, params, (err, result) => {
+            if (err) {
+                console.error("Errore registrazione:", err);
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ error: "Email già registrata" });
+                }
+                return res.status(500).json({ error: "Errore durante la registrazione" });
+            }console.log("Registrazione completata per:", email);
+            res.status(201).json({ message: "Registrazione completata con successo" });
+        });
             });
         } else {
             // Gestione altri ruoli (studente, educatore)
@@ -76,12 +99,15 @@ app.post("/api/register", async (req, res) => {
             }
 
             db.query(query, params, (err, result) => {
-                if (err) {
-                    console.error("Errore registrazione:", err);
-                    return res.status(500).json({ error: "Errore durante la registrazione" });
+            if (err) {
+                console.error("Errore registrazione:", err);
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ error: "Email già registrata" });
                 }
-                return res.status(201).json({ message: "Registrazione completata con successo" });
-            });
+                return res.status(500).json({ error: "Errore durante la registrazione" });
+            }console.log("Registrazione completata per:", email);
+            res.status(201).json({ message: "Registrazione completata con successo" });
+        });
         }
     } catch (error) {
         console.error('Errore nell\'hashing della password:', error);
