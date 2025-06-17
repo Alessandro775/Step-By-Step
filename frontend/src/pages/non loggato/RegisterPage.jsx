@@ -53,6 +53,7 @@ const RegisterPage = () => {
       }),
       ...(tipoUtente === "educatore" && { istituto }),
       ...(tipoUtente === "genitore" && { numero_telefono, email_studente, cognome_famiglia: cognome }),
+
     };
       const response = await fetch(`${BASE_URL}/api/register`, {
       method: "POST",

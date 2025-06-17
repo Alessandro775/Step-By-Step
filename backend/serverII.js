@@ -45,7 +45,7 @@ app.post("/api/register", async (req, res) => {
                 }
 
                 if (studentResult.length === 0) {
-                    return res.status(400).json({ error: "Studente non trovato con l'email specificata" });
+                    return res.status(400).json({ error: "Studente non trovato con l'email specificata" }); 
                 }
 
                 // Se lo studente esiste, procediamo con l'inserimento della famiglia
