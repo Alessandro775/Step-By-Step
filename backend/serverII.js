@@ -48,7 +48,7 @@ function autentica(req, res, next) {
     }
 }
 
-// Route Autenticazione
+// Route Autenticazione     
 app.post("/api/register", async (req, res) => {
     console.log("Dati ricevuti:", req.body);
     const { nome, cognome, email, password, ruolo, istituto, classe, anno_scolastico, numero_telefono, email_studente, cognome_famiglia } = req.body;
