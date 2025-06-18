@@ -257,30 +257,30 @@ const StudentiEducatore = () => {
             <p>Qui puoi gestire gli studenti assegnati al tuo account educatore</p>
           </div>
 
-            {/* Form aggiunta studente */}
-            <div className={styles.formSection}>
-                <h2>Aggiungi Nuovo Studente</h2>              
-                <form onSubmit={handleAggiungiStudente} className={styles.form}>
-                    <div className={styles.inputGroup}>
-                        <input
-                            type="email"
-                            placeholder="Email dello studente"
-                            value={emailNuovoStudente}
-                            onChange={(e) => setEmailNuovoStudente(e.target.value)}
-                            required
-                            disabled={adding}
-                            className={styles.emailInput}
-                        />
-                        <button 
-                            type="submit" 
-                            disabled={adding}
-                            className={styles.addButton}
-                        >
-                            {adding ? 'Aggiungendo...' : 'Aggiungi Studente'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+          {/* Form aggiunta studente */}
+          <div className={styles.formSection}>
+            <h3>Aggiungi Nuovo Studente</h3>
+            <form onSubmit={handleAggiungiStudente} className={styles.form}>
+              <div className={styles.inputGroup}>
+                <input
+                  type="email"
+                  placeholder="Email dello studente"
+                  value={emailNuovoStudente}
+                  onChange={(e) => setEmailNuovoStudente(e.target.value)}
+                  required
+                  disabled={adding}
+                  className={styles.emailInput}
+                />
+                <button
+                  type="submit"
+                  disabled={adding}
+                  className={styles.addButton}
+                >
+                  {adding ? "Aggiungendo..." : "Aggiungi Studente"}
+                </button>
+              </div>
+            </form>
+          </div>
 
           {/* Messaggi di stato */}
           {(error || success) && (
@@ -312,60 +312,85 @@ const StudentiEducatore = () => {
             </div>
           )}
 
-            {/* Lista studenti */}
-            {!loading && (
-                <div className={styles.studentsSection}>
-                    <h2>I Tuoi Studenti ({studenti.length})</h2>
-                    
-                    {studenti.length === 0 ? (
-                        <div className={styles.emptyState}>
-                            <p>Nessuno studente associato al momento</p>
-                            <p>Aggiungi studenti utilizzando il form sopra</p>
-                        </div>
-                    ) : (
-                        <div className={styles.tableContainer}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th>Cognome</th>
-                                        <th>Email</th>
-                                        <th>Data Assegnazione</th>
-                                        <th>Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {studenti.map((studente) => (
-                                        <tr key={studente.idStudente}>
-                                            <td>{studente.nome || 'N/D'}</td>
-                                            <td>{studente.cognome || 'N/D'}</td>
-                                            <td>{studente.email}</td>
-                                            <td>
-                                                {studente.data_assegnazione 
-                                                    ? new Date(studente.data_assegnazione).toLocaleDateString('it-IT')
-                                                    : 'N/D'
-                                                }
-                                            </td>
-                                            <td>
-                                                <button
-                                                    className={styles.deleteButton}
-                                                    onClick={() => handleEliminaStudente(
-                                                        studente.idStudente, 
-                                                        `${studente.nome} ${studente.cognome}`
-                                                    )}
-                                                    title="Rimuovi studente"
-                                                >
-                                                    Rimuovi
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+          {/* Lista studenti */}
+          {!loading && (
+            <div className={styles.studentsSection}>
+              <h3>I Tuoi Studenti ({studenti.length})</h3>
+
+              {studenti.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p>Nessuno studente associato al momento</p>
+                  <p>Aggiungi studenti utilizzando il form sopra</p>
                 </div>
-            )}
+              ) : (
+                <div className={styles.tableContainer}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Nome</th>
+                        <th>Cognome</th>
+                        <th>Email</th>
+                        <th>Data Assegnazione</th>
+                        <th>Azioni</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studenti.map((studente) => (
+                        <tr key={studente.idStudente}>
+                          <td>{studente.nome || "N/D"}</td>
+                          <td>{studente.cognome || "N/D"}</td>
+                          <td>{studente.email}</td>
+                          <td>
+                            {studente.data_assegnazione
+                              ? new Date(
+                                  studente.data_assegnazione
+                                ).toLocaleDateString("it-IT")
+                              : "N/D"}
+                          </td>
+                          <td className={styles.actionsCell}>
+                            <div className={styles.buttonGroup}>
+                              <button
+                                className={styles.viewButton}
+                                onClick={() => handleVisualizzaContenuti(
+                                  studente.idStudente,
+                                  `${studente.nome} ${studente.cognome}`
+                                )}
+                                title="Visualizza contenuti assegnati"
+                              >
+                                Contenuti
+                              </button>
+
+                              <button
+                                className={styles.historyButton}
+                                onClick={() => handleVisualizzaCronologia(
+                                  studente.idStudente,
+                                  `${studente.nome} ${studente.cognome}`
+                                )}
+                                title="Visualizza cronologia studente"
+                              >
+                                Cronologia
+                              </button>
+
+                              <button
+                                className={styles.deleteButton}
+                                onClick={() => handleEliminaStudente(
+                                  studente.idStudente,
+                                  `${studente.nome} ${studente.cognome}`
+                                )}
+                                title="Rimuovi studente"
+                              >
+                                Rimuovi
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Debug info (rimuovi in produzione) */}
           {process.env.NODE_ENV === "development" && (
