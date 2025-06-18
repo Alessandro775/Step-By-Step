@@ -225,7 +225,7 @@ const StudentiEducatore = () => {
 
             {/* Form aggiunta studente */}
             <div className={styles.formSection}>
-                <h3>Aggiungi Nuovo Studente</h3>
+                <h2>Aggiungi Nuovo Studente</h2>              
                 <form onSubmit={handleAggiungiStudente} className={styles.form}>
                     <div className={styles.inputGroup}>
                         <input
@@ -277,7 +277,7 @@ const StudentiEducatore = () => {
             {/* Lista studenti */}
             {!loading && (
                 <div className={styles.studentsSection}>
-                    <h3>I Tuoi Studenti ({studenti.length})</h3>
+                    <h2>I Tuoi Studenti ({studenti.length})</h2>
                     
                     {studenti.length === 0 ? (
                         <div className={styles.emptyState}>
