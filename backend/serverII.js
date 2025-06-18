@@ -585,6 +585,175 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
     });
   });
   
+  // Route per eliminare un contenuto assegnato
+app.delete("/api/studenti/:idStudente/contenuti/:idContenuto", autentica, (req, res) => {
+    if (req.utente.ruolo !== "E") {
+      return res.status(403).json({
+        error: "Accesso negato. Solo gli educatori possono eliminare contenuti.",
+      });
+    }
+  
+    const idEducatore = req.utente.id;
+    const idStudente = req.params.idStudente;
+    const idContenuto = req.params.idContenuto;
+  
+    console.log("=== ELIMINAZIONE CONTENUTO ===");
+    console.log("Educatore:", idEducatore);
+    console.log("Studente:", idStudente);
+    console.log("Contenuto:", idContenuto);
+  
+    // Verifica che lo studente sia assegnato all'educatore
+    const verificaAssegnazione = `
+      SELECT * FROM assegnazione 
+      WHERE idEducatore = ? AND idStudente = ?
+    `;
+  
+    db.query(verificaAssegnazione, [idEducatore, idStudente], (err, assegnazione) => {
+      if (err) {
+        console.error("Errore verifica assegnazione:", err);
+        return res.status(500).json({ error: "Errore database" });
+      }
+  
+      if (assegnazione.length === 0) {
+        return res.status(403).json({ 
+          error: "Studente non assegnato a questo educatore" 
+        });
+      }
+  
+      // Prima elimina da esercizioassegnato
+      const eliminaAssegnazione = `
+        DELETE FROM esercizioassegnato 
+        WHERE idContenuto = ? AND idStudente = ? AND idEducatore = ?
+      `;
+  
+      db.query(eliminaAssegnazione, [idContenuto, idStudente, idEducatore], (err, result) => {
+        if (err) {
+          console.error("Errore eliminazione assegnazione:", err);
+          return res.status(500).json({ error: "Errore eliminazione assegnazione" });
+        }
+  
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "Contenuto non trovato o non assegnato" });
+        }
+  
+        // Poi elimina il contenuto stesso
+        const eliminaContenuto = `
+          DELETE FROM contenuto 
+          WHERE idContenuto = ? AND idEducatore = ?
+        `;
+  
+        db.query(eliminaContenuto, [idContenuto, idEducatore], (err, result2) => {
+          if (err) {
+            console.error("Errore eliminazione contenuto:", err);
+            return res.status(500).json({ error: "Errore eliminazione contenuto" });
+          }
+  
+          console.log("Contenuto eliminato con successo");
+          res.json({ message: "Contenuto eliminato con successo" });
+        });
+      });
+    });
+  });
+
+  
+  // Route per ottenere tutti gli esercizi disponibili
+app.get("/api/esercizi", autentica, (req, res) => {
+    if (req.utente.ruolo !== "E") {
+      return res.status(403).json({
+        error: "Accesso negato. Solo gli educatori possono vedere gli esercizi.",
+      });
+    }
+  
+    const query = "SELECT * FROM esercizio ORDER BY tipologia";
+    
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error("Errore query esercizi:", err);
+        return res.status(500).json({ error: "Errore database" });
+      }
+      res.json(results);
+    });
+  });
+  
+  // Route per creare un nuovo contenuto e assegnarlo a uno studente
+  app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
+    if (req.utente.ruolo !== "E") {
+      return res.status(403).json({
+        error: "Accesso negato. Solo gli educatori possono aggiungere contenuti.",
+      });
+    }
+  
+    const idEducatore = req.utente.id;
+    const idStudente = req.params.idStudente;
+    const { testo, immagine, tipologia, idEsercizio } = req.body;
+  
+    console.log("=== AGGIUNTA CONTENUTO ===");
+    console.log("Educatore:", idEducatore);
+    console.log("Studente:", idStudente);
+    console.log("Dati:", { testo, immagine, tipologia, idEsercizio });
+  
+    // Validazione dati
+    if (!testo || !tipologia || !idEsercizio) {
+      return res.status(400).json({ 
+        error: "Campi obbligatori mancanti: testo, tipologia, idEsercizio" 
+      });
+    }
+  
+    // Verifica che lo studente sia assegnato all'educatore
+    const verificaAssegnazione = `
+      SELECT * FROM assegnazione 
+      WHERE idEducatore = ? AND idStudente = ?
+    `;
+  
+    db.query(verificaAssegnazione, [idEducatore, idStudente], (err, assegnazione) => {
+      if (err) {
+        console.error("Errore verifica assegnazione:", err);
+        return res.status(500).json({ error: "Errore database" });
+      }
+  
+      if (assegnazione.length === 0) {
+        return res.status(403).json({ 
+          error: "Studente non assegnato a questo educatore" 
+        });
+      }
+  
+      // Inserisci il contenuto
+      const insertContenuto = `
+        INSERT INTO contenuto (testo, immagine, tipologia, idStudente, idEducatore) 
+        VALUES (?, ?, ?, ?, ?)
+      `;
+  
+      db.query(insertContenuto, [testo, immagine || null, tipologia, idStudente, idEducatore], (err, contenutoResult) => {
+        if (err) {
+          console.error("Errore inserimento contenuto:", err);
+          return res.status(500).json({ error: "Errore inserimento contenuto" });
+        }
+  
+        const idContenuto = contenutoResult.insertId;
+        console.log("Contenuto creato con ID:", idContenuto);
+  
+        // Assegna il contenuto allo studente
+        const insertAssegnazione = `
+          INSERT INTO esercizioassegnato (idStudente, idEsercizio, idContenuto, idEducatore, dataassegnazione) 
+          VALUES (?, ?, ?, ?, CURDATE())
+        `;
+  
+        db.query(insertAssegnazione, [idStudente, idEsercizio, idContenuto, idEducatore], (err, assegnazioneResult) => {
+          if (err) {
+            console.error("Errore assegnazione esercizio:", err);
+            return res.status(500).json({ error: "Errore assegnazione esercizio" });
+          }
+  
+          console.log("Esercizio assegnato con ID:", assegnazioneResult.insertId);
+          res.status(201).json({ 
+            message: "Contenuto creato e assegnato con successo",
+            idContenuto: idContenuto,
+            idEsercizioAssegnato: assegnazioneResult.insertId
+          });
+        });
+      });
+    });
+  });
 
   
   
