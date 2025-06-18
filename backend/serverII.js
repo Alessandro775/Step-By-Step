@@ -20,9 +20,9 @@ app.use(express.json());
 
 // Configurazione Database
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
+  host: "172.29.8.207",
+  user: "alessandro",
+  password: "123456",
   database: "step_by_step",
   port: 3306,
 });
@@ -259,6 +259,148 @@ app.post("/api/login", async (req, res) => {
     res.status(500).json({ error: "Errore interno del server" });
   }
 });
+
+// Route per ottenere i dati del profilo educatore
+app.get("/api/profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono accedere al profilo.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  console.log("Recupero profilo per educatore ID:", idEducatore);
+
+  const query = `
+    SELECT idEducatore, nome, cognome, email, istituto
+    FROM educatore 
+    WHERE idEducatore = ?
+  `;
+
+  db.query(query, [idEducatore], (err, results) => {
+    if (err) {
+      console.error("Errore query profilo:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Profilo non trovato" });
+    }
+
+    console.log("Profilo trovato per educatore:", idEducatore);
+    res.json(results[0]);
+  });
+});
+
+// Route per aggiornare i dati del profilo educatore
+app.put("/api/profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono modificare il profilo.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  const { nome, cognome, email, istituto } = req.body;
+
+  console.log("Aggiornamento profilo per educatore ID:", idEducatore);
+
+  // Validazione input
+  if (!nome || !cognome || !email || !istituto) {
+    return res.status(400).json({ 
+      error: "Tutti i campi (nome, cognome, email, istituto) sono obbligatori" 
+    });
+  }
+
+  // Verifica email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: "Formato email non valido" });
+  }
+
+  // Verifica se l'email è già in uso da un altro educatore
+  const checkEmailQuery = `
+    SELECT idEducatore FROM educatore 
+    WHERE email = ? AND idEducatore != ?
+  `;
+
+  db.query(checkEmailQuery, [email, idEducatore], (err, emailResults) => {
+    if (err) {
+      console.error("Errore verifica email:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    if (emailResults.length > 0) {
+      return res.status(409).json({ error: "Email già in uso" });
+    }
+
+    // Aggiorna il profilo
+    const updateQuery = `
+      UPDATE educatore 
+      SET nome = ?, cognome = ?, email = ?, istituto = ?
+      WHERE idEducatore = ?
+    `;
+
+    db.query(updateQuery, [nome, cognome, email, istituto, idEducatore], (err, result) => {
+      if (err) {
+        console.error("Errore aggiornamento profilo:", err);
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(409).json({ error: "Email già registrata" });
+        }
+        return res.status(500).json({ error: "Errore durante l'aggiornamento" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Profilo non trovato" });
+      }
+
+      console.log("Profilo aggiornato con successo per educatore:", idEducatore);
+      res.json({ message: "Profilo aggiornato con successo" });
+    });
+  });
+});
+
+// Route per eliminare il profilo educatore
+app.delete("/api/profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono eliminare il profilo.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  console.log("Eliminazione profilo per educatore ID:", idEducatore);
+
+  // Prima elimina le associazioni con gli studenti
+  const deleteAssegnazioniQuery = "DELETE FROM assegnazione WHERE idEducatore = ?";
+  
+  db.query(deleteAssegnazioniQuery, [idEducatore], (err, result) => {
+    if (err) {
+      console.error("Errore eliminazione assegnazioni:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    console.log("Assegnazioni eliminate:", result.affectedRows);
+
+    // Poi elimina il profilo educatore
+    const deleteEducatoreQuery = "DELETE FROM educatore WHERE idEducatore = ?";
+    
+    db.query(deleteEducatoreQuery, [idEducatore], (err, result) => {
+      if (err) {
+        console.error("Errore eliminazione educatore:", err);
+        return res.status(500).json({ error: "Errore database" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Profilo non trovato" });
+      }
+
+      console.log("Profilo educatore eliminato con successo");
+      res.json({ message: "Profilo eliminato con successo" });
+    });
+  });
+});
+
 
 // Route Studenti
 app.get("/api/studenti", autentica, (req, res) => {
