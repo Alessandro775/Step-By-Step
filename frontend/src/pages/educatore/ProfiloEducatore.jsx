@@ -1,10 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../ProfilePage.module.css';
 import Header from '../../components/Header/HeaderEducatore';
 import Footer from '../../components/footer/Footer';
 
 const EducatorProfile = () => {
+
+  useEffect(() => {
+  const loadProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3000/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore nel caricamento del profilo');
+      }
+
+      const profileData = await response.json();
+      setUserInfo(profileData);
+    } catch (error) {
+      console.error('Errore caricamento profilo:', error);
+    }
+  };
+
+  loadProfile();
+}, []);
+
   const navigate = useNavigate();
   
   // State per gestire la modalità di modifica
@@ -27,10 +52,31 @@ const EducatorProfile = () => {
   };
 
   // Funzione per salvare le modifiche
-  const handleSave = () => {
+  const handleSave = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:3000/api/profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(userInfo)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Errore nel salvataggio');
+    }
+
     setIsEditing(false);
-    console.log('Dati salvati:', userInfo);
-  };
+    console.log('Profilo salvato con successo');
+    // Aggiungi feedback visuale per l'utente
+  } catch (error) {
+    console.error('Errore salvataggio:', error);
+    // Gestisci l'errore nell'UI
+  }
+};
 
   // Funzione per gestire i cambiamenti negli input
   const handleInputChange = (field, value) => {
@@ -51,18 +97,34 @@ const EducatorProfile = () => {
   };
 
   // Funzione per confermare l'eliminazione
-  const confirmDelete = () => {
-    console.log('Profilo eliminato');
+ const confirmDelete = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:3000/api/profile', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Errore nell\'eliminazione');
+    }
+
     setShowDeleteConfirm(false);
     
     // Effettua il logout
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('userData');
+    localStorage.removeItem('token');
+    localStorage.removeItem('ruolo');
     
     // Redirect alla home
     navigate('/');
-  };
+  } catch (error) {
+    console.error('Errore eliminazione profilo:', error);
+    // Gestisci l'errore nell'UI
+  }
+};
 
   // Funzione per annullare l'eliminazione
   const cancelDelete = () => {
