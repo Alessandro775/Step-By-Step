@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../ProfilePage.module.css';
 import Header from '../../components/Header/HeaderFamiglia';
@@ -13,14 +13,45 @@ const FamilyPage = () => {
   // State per la finestra di conferma eliminazione
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // State per memorizzare le informazioni della famiglia
+  // State per memorizzare le informazioni della famiglia (AGGIORNATO per DB)
   const [userInfo, setUserInfo] = useState({
-    nome: 'Mario',
-    cognome: 'Rossi',
-    email: 'mario.rossi@email.com',
-    telefono: '+39 333 123 4567',
-    emailStudente: 'studente@email.com'
+    cognome_famiglia: '',
+    email: '',
+    numero_telefono: '',
+    email_studente: ''
   });
+
+  // useEffect per caricare i dati del profilo dal database
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const response = await fetch('http://localhost:3000/api/family-profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Errore nel caricamento del profilo');
+        }
+
+        const profileData = await response.json();
+        setUserInfo(profileData);
+      } catch (error) {
+        console.error('Errore caricamento profilo:', error);
+        alert('Errore nel caricamento del profilo: ' + error.message);
+      }
+    };
+
+    loadProfile();
+  }, [navigate]);
+
 
   // Funzione per attivare/disattivare la modalità modifica
   const handleEdit = () => {

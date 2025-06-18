@@ -20,7 +20,7 @@ app.use(express.json());
 
 // Configurazione Database
 const db = mysql.createConnection({
-  host: "172.29.8.207",
+  host: "172.29.3.5",
   user: "alessandro",
   password: "123456",
   database: "step_by_step",
@@ -293,72 +293,59 @@ app.get("/api/profile", autentica, (req, res) => {
 });
 
 // Route per aggiornare i dati del profilo educatore
-app.put("/api/profile", autentica, (req, res) => {
-  if (req.utente.ruolo !== "E") {
+// Route per aggiornare i dati del profilo studente (SENZA email)
+app.put("/api/student-profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "S") {
     return res.status(403).json({
-      error: "Accesso negato. Solo gli educatori possono modificare il profilo.",
+      error: "Accesso negato. Solo gli studenti possono modificare il profilo.",
     });
   }
 
-  const idEducatore = req.utente.id;
-  const { nome, cognome, email, istituto } = req.body;
+  const idStudente = req.utente.id;
+  const { nome, cognome, istituto, classe, anno_scolastico } = req.body;
 
-  console.log("Aggiornamento profilo per educatore ID:", idEducatore);
+  console.log("Aggiornamento profilo per studente ID:", idStudente);
 
-  // Validazione input
-  if (!nome || !cognome || !email || !istituto) {
+  // Validazione input (EMAIL RIMOSSA)
+  if (!nome || !cognome || !istituto || !classe || !anno_scolastico) {
     return res.status(400).json({ 
-      error: "Tutti i campi (nome, cognome, email, istituto) sono obbligatori" 
+      error: "Tutti i campi (nome, cognome, istituto, classe, anno scolastico) sono obbligatori" 
     });
   }
 
-  // Verifica email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ error: "Formato email non valido" });
+  // Validazione specifica per la classe
+  const classiValide = ['1', '2', '3', '4', '5'];
+  if (!classiValide.includes(classe)) {
+    return res.status(400).json({ 
+      error: "La classe deve essere un valore tra 1 e 5" 
+    });
   }
 
-  // Verifica se l'email è già in uso da un altro educatore
-  const checkEmailQuery = `
-    SELECT idEducatore FROM educatore 
-    WHERE email = ? AND idEducatore != ?
+  // Aggiorna il profilo SENZA L'EMAIL
+  const updateQuery = `
+    UPDATE studente 
+    SET nome = ?, cognome = ?, istituto = ?, classe = ?, anno_scolastico = ?
+    WHERE idStudente = ?
   `;
 
-  db.query(checkEmailQuery, [email, idEducatore], (err, emailResults) => {
+  db.query(updateQuery, [nome, cognome, istituto, classe, anno_scolastico, idStudente], (err, result) => {
     if (err) {
-      console.error("Errore verifica email:", err);
-      return res.status(500).json({ error: "Errore database" });
+      console.error("Errore aggiornamento profilo studente:", err);
+      return res.status(500).json({ error: "Errore durante l'aggiornamento" });
     }
 
-    if (emailResults.length > 0) {
-      return res.status(409).json({ error: "Email già in uso" });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Profilo non trovato" });
     }
 
-    // Aggiorna il profilo
-    const updateQuery = `
-      UPDATE educatore 
-      SET nome = ?, cognome = ?, email = ?, istituto = ?
-      WHERE idEducatore = ?
-    `;
-
-    db.query(updateQuery, [nome, cognome, email, istituto, idEducatore], (err, result) => {
-      if (err) {
-        console.error("Errore aggiornamento profilo:", err);
-        if (err.code === "ER_DUP_ENTRY") {
-          return res.status(409).json({ error: "Email già registrata" });
-        }
-        return res.status(500).json({ error: "Errore durante l'aggiornamento" });
-      }
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "Profilo non trovato" });
-      }
-
-      console.log("Profilo aggiornato con successo per educatore:", idEducatore);
-      res.json({ message: "Profilo aggiornato con successo" });
+    console.log("Profilo studente aggiornato con successo:", idStudente);
+    res.json({ 
+      message: "Profilo aggiornato con successo",
+      note: "L'email non può essere modificata per motivi di sicurezza"
     });
   });
 });
+
 
 // Route per eliminare il profilo educatore
 app.delete("/api/profile", autentica, (req, res) => {
@@ -403,32 +390,35 @@ app.delete("/api/profile", autentica, (req, res) => {
 
 
 // Route Studenti
-app.get("/api/studenti", autentica, (req, res) => {
-  if (req.utente.ruolo !== "E") {
-    console.log("Accesso negato - ruolo:", req.utente.ruolo);
+// Route per ottenere i dati del profilo studente
+app.get("/api/student-profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "S") {
     return res.status(403).json({
-      error: "Accesso negato. Solo gli educatori possono vedere gli studenti.",
+      error: "Accesso negato. Solo gli studenti possono accedere al profilo.",
     });
   }
 
-  const idEducatore = req.utente.id;
-  console.log("Caricamento studenti per educatore ID:", idEducatore);
+  const idStudente = req.utente.id;
+  console.log("Recupero profilo per studente ID:", idStudente);
 
   const query = `
-        SELECT s.idStudente, s.nome, s.cognome, s.email, a.data_assegnazione
-        FROM assegnazione a
-        JOIN studente s ON a.idStudente = s.idStudente
-        WHERE a.idEducatore = ?
-        ORDER BY s.cognome, s.nome
-    `;
+    SELECT idStudente, nome, cognome, email, istituto, classe, anno_scolastico
+    FROM studente 
+    WHERE idStudente = ?
+  `;
 
-  db.query(query, [idEducatore], (err, results) => {
+  db.query(query, [idStudente], (err, results) => {
     if (err) {
-      console.error("Errore query studenti:", err);
+      console.error("Errore query profilo studente:", err);
       return res.status(500).json({ error: "Errore database" });
     }
-    console.log("Studenti trovati:", results.length);
-    res.json(results);
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Profilo non trovato" });
+    }
+
+    console.log("Profilo trovato per studente:", idStudente);
+    res.json(results[0]);
   });
 });
 
@@ -727,8 +717,142 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
     });
   });
   
+// Route per ottenere i dati del profilo famiglia
+app.get("/api/family-profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "G") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo le famiglie possono accedere al profilo.",
+    });
+  }
 
+  const idFamiglia = req.utente.id;
+  console.log("Recupero profilo per famiglia ID:", idFamiglia);
+
+  const query = `
+    SELECT idFamiglia, cognome_famiglia, email, numero_telefono, email_studente
+    FROM famiglia 
+    WHERE idFamiglia = ?
+  `;
+
+  db.query(query, [idFamiglia], (err, results) => {
+    if (err) {
+      console.error("Errore query profilo famiglia:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Profilo non trovato" });
+    }
+
+    console.log("Profilo trovato per famiglia:", idFamiglia);
+    res.json(results[0]);
+  });
+});
+
+  // Route per aggiornare i dati del profilo famiglia (SENZA email)
+app.put("/api/family-profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "G") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo le famiglie possono modificare il profilo.",
+    });
+  }
+
+  const idFamiglia = req.utente.id;
+  const { cognome_famiglia, numero_telefono, email_studente } = req.body;
+
+  console.log("Aggiornamento profilo per famiglia ID:", idFamiglia);
+
+  // Validazione input (EMAIL RIMOSSA per sicurezza)
+  if (!cognome_famiglia || !numero_telefono || !email_studente) {
+    return res.status(400).json({ 
+      error: "Tutti i campi (cognome famiglia, telefono, email studente) sono obbligatori" 
+    });
+  }
+
+  // Validazione formato telefono (opzionale)
+  const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+  if (!phoneRegex.test(numero_telefono)) {
+    return res.status(400).json({ 
+      error: "Formato numero di telefono non valido" 
+    });
+  }
+
+  // Validazione formato email studente
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email_studente)) {
+    return res.status(400).json({ error: "Formato email studente non valido" });
+  }
+
+  // Verifica che lo studente esista
+  const checkStudenteQuery = "SELECT idStudente FROM studente WHERE email = ?";
   
+  db.query(checkStudenteQuery, [email_studente], (err, studentResults) => {
+    if (err) {
+      console.error("Errore verifica studente:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    if (studentResults.length === 0) {
+      return res.status(400).json({ 
+        error: "Studente non trovato con l'email specificata" 
+      });
+    }
+
+    // Aggiorna il profilo SENZA L'EMAIL
+    const updateQuery = `
+      UPDATE famiglia 
+      SET cognome_famiglia = ?, numero_telefono = ?, email_studente = ?
+      WHERE idFamiglia = ?
+    `;
+
+    db.query(updateQuery, [cognome_famiglia, numero_telefono, email_studente, idFamiglia], (err, result) => {
+      if (err) {
+        console.error("Errore aggiornamento profilo famiglia:", err);
+        return res.status(500).json({ error: "Errore durante l'aggiornamento" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Profilo non trovato" });
+      }
+
+      console.log("Profilo famiglia aggiornato con successo:", idFamiglia);
+      res.json({ 
+        message: "Profilo aggiornato con successo",
+        note: "L'email non può essere modificata per motivi di sicurezza"
+      });
+    });
+  });
+});
+
+// Route per eliminare il profilo famiglia
+app.delete("/api/family-profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "G") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo le famiglie possono eliminare il profilo.",
+    });
+  }
+
+  const idFamiglia = req.utente.id;
+  console.log("Eliminazione profilo per famiglia ID:", idFamiglia);
+
+  // Elimina direttamente il profilo famiglia
+  const deleteFamigliaQuery = "DELETE FROM famiglia WHERE idFamiglia = ?";
+  
+  db.query(deleteFamigliaQuery, [idFamiglia], (err, result) => {
+    if (err) {
+      console.error("Errore eliminazione famiglia:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Profilo non trovato" });
+    }
+
+    console.log("Profilo famiglia eliminato con successo");
+    res.json({ message: "Profilo eliminato con successo" });
+  });
+});
+
   
 // Connessione DB e Avvio Server
 db.connect((err) => {

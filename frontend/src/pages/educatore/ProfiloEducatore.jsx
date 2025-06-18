@@ -55,13 +55,19 @@ const EducatorProfile = () => {
   const handleSave = async () => {
   try {
     const token = localStorage.getItem('token');
+    // Invia solo i campi modificabili (escludi l'email)
+    const updateData = {
+      nome: userInfo.nome,
+      cognome: userInfo.cognome,
+      istituto: userInfo.istituto
+    };
     const response = await fetch('http://localhost:3000/api/profile', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(userInfo)
+      body: JSON.stringify(updateData)
     });
 
     if (!response.ok) {
@@ -184,22 +190,19 @@ const EducatorProfile = () => {
               </div>
             </div>
 
-            {/* Riga Email */}
-            <div className={styles.singleRow}>
-              <div className={styles.infoItem}>
-                <label>Email</label>
-                {isEditing ? (
-                  <input
-                    type="email"
-                    value={userInfo.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={styles.inputField}
-                  />
-                ) : (
-                  <div className={styles.infoValue}>{userInfo.email}</div>
-                )}
-              </div>
-            </div>
+            {/* Riga Email - SEMPRE IN SOLA LETTURA */}
+<div className={styles.singleRow}>
+  <div className={styles.infoItem}>
+    <label>Email</label>
+    <div className={styles.infoValue}>{userInfo.email}</div>
+    {isEditing && (
+      <small className={styles.emailNote}>
+        L'email non può essere modificata
+      </small>
+    )}
+  </div>
+</div>
+
 
             {/* Riga Istituto */}
             <div className={styles.singleRow}>
