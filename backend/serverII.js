@@ -20,9 +20,9 @@ app.use(express.json());
 
 // Configurazione Database
 const db = mysql.createConnection({
-  host: "172.29.8.207",
-  user: "alessandro",
-  password: "123456",
+  host: "localhost",
+  user: "root",
+  password: "",
   database: "step_by_step",
   port: 3306,
 });
@@ -296,7 +296,8 @@ app.get("/api/profile", autentica, (req, res) => {
 app.put("/api/profile", autentica, (req, res) => {
   if (req.utente.ruolo !== "E") {
     return res.status(403).json({
-      error: "Accesso negato. Solo gli educatori possono modificare il profilo.",
+      error:
+        "Accesso negato. Solo gli educatori possono modificare il profilo.",
     });
   }
 
@@ -307,8 +308,8 @@ app.put("/api/profile", autentica, (req, res) => {
 
   // Validazione input
   if (!nome || !cognome || !email || !istituto) {
-    return res.status(400).json({ 
-      error: "Tutti i campi (nome, cognome, email, istituto) sono obbligatori" 
+    return res.status(400).json({
+      error: "Tutti i campi (nome, cognome, email, istituto) sono obbligatori",
     });
   }
 
@@ -341,22 +342,31 @@ app.put("/api/profile", autentica, (req, res) => {
       WHERE idEducatore = ?
     `;
 
-    db.query(updateQuery, [nome, cognome, email, istituto, idEducatore], (err, result) => {
-      if (err) {
-        console.error("Errore aggiornamento profilo:", err);
-        if (err.code === "ER_DUP_ENTRY") {
-          return res.status(409).json({ error: "Email già registrata" });
+    db.query(
+      updateQuery,
+      [nome, cognome, email, istituto, idEducatore],
+      (err, result) => {
+        if (err) {
+          console.error("Errore aggiornamento profilo:", err);
+          if (err.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({ error: "Email già registrata" });
+          }
+          return res
+            .status(500)
+            .json({ error: "Errore durante l'aggiornamento" });
         }
-        return res.status(500).json({ error: "Errore durante l'aggiornamento" });
-      }
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "Profilo non trovato" });
-      }
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "Profilo non trovato" });
+        }
 
-      console.log("Profilo aggiornato con successo per educatore:", idEducatore);
-      res.json({ message: "Profilo aggiornato con successo" });
-    });
+        console.log(
+          "Profilo aggiornato con successo per educatore:",
+          idEducatore
+        );
+        res.json({ message: "Profilo aggiornato con successo" });
+      }
+    );
   });
 });
 
@@ -372,8 +382,9 @@ app.delete("/api/profile", autentica, (req, res) => {
   console.log("Eliminazione profilo per educatore ID:", idEducatore);
 
   // Prima elimina le associazioni con gli studenti
-  const deleteAssegnazioniQuery = "DELETE FROM assegnazione WHERE idEducatore = ?";
-  
+  const deleteAssegnazioniQuery =
+    "DELETE FROM assegnazione WHERE idEducatore = ?";
+
   db.query(deleteAssegnazioniQuery, [idEducatore], (err, result) => {
     if (err) {
       console.error("Errore eliminazione assegnazioni:", err);
@@ -384,7 +395,7 @@ app.delete("/api/profile", autentica, (req, res) => {
 
     // Poi elimina il profilo educatore
     const deleteEducatoreQuery = "DELETE FROM educatore WHERE idEducatore = ?";
-    
+
     db.query(deleteEducatoreQuery, [idEducatore], (err, result) => {
       if (err) {
         console.error("Errore eliminazione educatore:", err);
@@ -400,7 +411,6 @@ app.delete("/api/profile", autentica, (req, res) => {
     });
   });
 });
-
 
 // Route Studenti
 app.get("/api/studenti", autentica, (req, res) => {
@@ -578,68 +588,45 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
       }
   
       if (assegnazione.length === 0) {
-        return res.status(403).json({ 
-          error: "Studente non assegnato a questo educatore" 
+        return res.status(403).json({
+          error: "Studente non assegnato a questo educatore",
         });
       }
   
-      // Controlla se esistono esercizi assegnati (NUOVA QUERY)
-      const checkQuery = `
-        SELECT COUNT(*) as total FROM esercizio_assegnato 
-        WHERE idStudente = ? AND idEducatore = ?
+      // Query corretta per la nuova struttura
+      const query = `
+        SELECT 
+          ea.idEsercizioAssegnato,
+          ea.testo as titolo,
+          ea.immagine,
+          ea.data_assegnazione as data_inizio,
+          e.tipologia as tipologia,
+          e.descrizione as descrizione,
+          CASE 
+            WHEN r.idRisultato IS NOT NULL THEN 1 
+            ELSE 0 
+          END as completato
+        FROM esercizio_assegnato ea
+        JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+        LEFT JOIN risultato r ON ea.idEsercizioAssegnato = r.idEsercizioAssegnato
+        WHERE ea.idStudente = ? AND ea.idEducatore = ?
+        ORDER BY ea.data_assegnazione DESC
       `;
   
-      db.query(checkQuery, [idStudente, idEducatore], (err, countResult) => {
+      db.query(query, [idStudente, idEducatore], (err, results) => {
         if (err) {
-          console.error("Errore conteggio:", err);
+          console.error("Errore query contenuti:", err);
           return res.status(500).json({ error: "Errore database" });
         }
   
-        console.log("Esercizi assegnati trovati:", countResult[0].total);
-  
-        if (countResult[0].total === 0) {
-          console.log("Nessun esercizio assegnato a questo studente");
-          return res.json([]);
-        }
-  
-        // NUOVA QUERY con la struttura aggiornata
-        const query = `
-          SELECT 
-            c.idContenuto,
-            c.testo as titolo,
-            c.immagine,
-            c.tipologia as descrizione,
-            ea.data_assegnazione as data_inizio,
-            ea.data_assegnazione as data_scadenza,
-            CASE 
-              WHEN r.idRisultato IS NOT NULL THEN 1 
-              ELSE 0 
-            END as completato
-          FROM esercizio_assegnato ea
-          JOIN contenuto c ON ea.idContenuto = c.idContenuto
-          LEFT JOIN risultato r ON ea.idEsercizioAssegnato = r.idEsercizioAssegnato
-          WHERE ea.idStudente = ? AND ea.idEducatore = ?
-          ORDER BY ea.data_assegnazione DESC
-        `;
-  
-        db.query(query, [idStudente, idEducatore], (err, results) => {
-          if (err) {
-            console.error("Errore query contenuti:", err);
-            console.error("Query:", query);
-            return res.status(500).json({ error: "Errore database" });
-          }
-          
-          console.log("Contenuti query risultati:", results.length);
-          console.log("Primo risultato:", results[0] || "Nessun risultato");
-          res.json(results);
-        });
+        console.log("Contenuti trovati:", results.length);
+        res.json(results);
       });
     });
   });
-  
-  
-  // Route per visualizzare la cronologia di uno studente
-  app.get("/api/studenti/:idStudente/cronologia", autentica, (req, res) => {
+
+// Route per visualizzare la cronologia di uno studente
+app.get("/api/studenti/:idStudente/cronologia", autentica, (req, res) => {
     if (req.utente.ruolo !== "E") {
       return res.status(403).json({
         error: "Accesso negato. Solo gli educatori possono visualizzare la cronologia.",
@@ -649,7 +636,7 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
     const idEducatore = req.utente.id;
     const idStudente = req.params.idStudente;
   
-    console.log("=== DEBUG CRONOLOGIA (NUOVA STRUTTURA) ===");
+    console.log("=== DEBUG CRONOLOGIA ===");
     console.log("ID Educatore:", idEducatore);
     console.log("ID Studente:", idStudente);
   
@@ -666,69 +653,46 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
       }
   
       if (assegnazione.length === 0) {
-        return res.status(403).json({ 
-          error: "Studente non assegnato a questo educatore" 
+        return res.status(403).json({
+          error: "Studente non assegnato a questo educatore",
         });
       }
   
-      // Controlla se esistono risultati (NUOVA QUERY)
-      const checkQuery = `
-        SELECT COUNT(*) as total FROM risultato r
-        JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
-        WHERE r.idStudente = ? AND ea.idEducatore = ?
-      `;
+      // Query semplificata che funziona con la struttura attuale
+      const query = `
+       SELECT 
+      r.idRisultato,
+      r.punteggio,
+      r.numero_errori as numero_errori,
+      r.tempo as tempo_impiegato,
+      r.numero_tentativi as tentativi,
+      r.traccia_audio as traccia_audio,
+      ea.testo as titolo,
+      e.descrizione as tipo_esercizio,
+      e.tipologia as descrizione,
+      r.data_esecuzione as data_completamento,
+      r.idStudente
+    FROM risultato r
+    JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+    JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+    WHERE r.idStudente = ? AND ea.idEducatore = ?
+    ORDER BY r.data_esecuzione DESC  
+  `;
   
-      db.query(checkQuery, [idStudente, idEducatore], (err, countResult) => {
+      db.query(query, [idStudente, idEducatore], (err, results) => {
         if (err) {
-          console.error("Errore conteggio cronologia:", err);
+          console.error("Errore query cronologia:", err);
           return res.status(500).json({ error: "Errore database" });
         }
   
-        console.log("Record cronologia trovati:", countResult[0].total);
-  
-        if (countResult[0].total === 0) {
-          console.log("Nessun record di progresso per questo studente");
-          return res.json([]);
-        }
-  
-        // NUOVA QUERY con la struttura aggiornata
-        const query = `
-          SELECT 
-            r.idRisultato,
-            r.punteggio,
-            r.numero_errori as numero_errori,
-            r.tempo as tempo_impiegato,
-            r.numero_tentativi as tentativi,
-            r.traccia_audio,
-            c.testo as titolo,
-            c.tipologia as descrizione,
-            e.descrizione as tipo_esercizio,
-            ea.data_assegnazione as data_completamento
-          FROM risultato r
-          JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
-          JOIN contenuto c ON ea.idContenuto = c.idContenuto
-          JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
-          WHERE r.idStudente = ? AND ea.idEducatore = ?
-          ORDER BY ea.data_assegnazione DESC
-        `;
-  
-        db.query(query, [idStudente, idEducatore], (err, results) => {
-          if (err) {
-            console.error("Errore query cronologia:", err);
-            console.error("Query:", query);
-            return res.status(500).json({ error: "Errore database" });
-          }
-          
-          console.log("Cronologia query risultati:", results.length);
-          console.log("Primo risultato:", results[0] || "Nessun risultato");
-          res.json(results);
-        });
+        console.log("Record cronologia trovati:", results.length);
+        res.json(results);
       });
     });
   });
-  
-  // Route per eliminare un contenuto assegnato
-app.delete("/api/studenti/:idStudente/contenuti/:idContenuto", autentica, (req, res) => {
+
+// Route per eliminare un contenuto assegnato
+app.delete("/api/studenti/:idStudente/contenuti/:idEsercizioAssegnato", autentica, (req, res) => {
     if (req.utente.ruolo !== "E") {
       return res.status(403).json({
         error: "Accesso negato. Solo gli educatori possono eliminare contenuti.",
@@ -737,12 +701,12 @@ app.delete("/api/studenti/:idStudente/contenuti/:idContenuto", autentica, (req, 
   
     const idEducatore = req.utente.id;
     const idStudente = req.params.idStudente;
-    const idContenuto = req.params.idContenuto;
+    const idEsercizioAssegnato = req.params.idEsercizioAssegnato;
   
-    console.log("=== ELIMINAZIONE CONTENUTO ===");
+    console.log("=== ELIMINAZIONE CONTENUTO (NUOVA STRUTTURA) ===");
     console.log("Educatore:", idEducatore);
     console.log("Studente:", idStudente);
-    console.log("Contenuto:", idContenuto);
+    console.log("EsercizioAssegnato:", idEsercizioAssegnato);
   
     // Verifica che lo studente sia assegnato all'educatore
     const verificaAssegnazione = `
@@ -757,37 +721,37 @@ app.delete("/api/studenti/:idStudente/contenuti/:idContenuto", autentica, (req, 
       }
   
       if (assegnazione.length === 0) {
-        return res.status(403).json({ 
-          error: "Studente non assegnato a questo educatore" 
+        return res.status(403).json({
+          error: "Studente non assegnato a questo educatore",
         });
       }
   
-      // Prima elimina da esercizioassegnato
-      const eliminaAssegnazione = `
-        DELETE FROM esercizioassegnato 
-        WHERE idContenuto = ? AND idStudente = ? AND idEducatore = ?
+      // Prima elimina eventuali risultati collegati
+      const eliminaRisultati = `
+        DELETE FROM risultato 
+        WHERE idEsercizioAssegnato = ?
       `;
   
-      db.query(eliminaAssegnazione, [idContenuto, idStudente, idEducatore], (err, result) => {
+      db.query(eliminaRisultati, [idEsercizioAssegnato], (err, result) => {
         if (err) {
-          console.error("Errore eliminazione assegnazione:", err);
-          return res.status(500).json({ error: "Errore eliminazione assegnazione" });
+          console.error("Errore eliminazione risultati:", err);
+          return res.status(500).json({ error: "Errore eliminazione risultati" });
         }
   
-        if (result.affectedRows === 0) {
-          return res.status(404).json({ error: "Contenuto non trovato o non assegnato" });
-        }
-  
-        // Poi elimina il contenuto stesso
-        const eliminaContenuto = `
-          DELETE FROM contenuto 
-          WHERE idContenuto = ? AND idEducatore = ?
+        // Poi elimina l'esercizio assegnato
+        const eliminaEsercizio = `
+          DELETE FROM esercizio_assegnato 
+          WHERE idEsercizioAssegnato = ? AND idStudente = ? AND idEducatore = ?
         `;
   
-        db.query(eliminaContenuto, [idContenuto, idEducatore], (err, result2) => {
+        db.query(eliminaEsercizio, [idEsercizioAssegnato, idStudente, idEducatore], (err, result) => {
           if (err) {
-            console.error("Errore eliminazione contenuto:", err);
-            return res.status(500).json({ error: "Errore eliminazione contenuto" });
+            console.error("Errore eliminazione esercizio:", err);
+            return res.status(500).json({ error: "Errore eliminazione esercizio" });
+          }
+  
+          if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Contenuto non trovato o non assegnato" });
           }
   
           console.log("Contenuto eliminato con successo");
@@ -797,28 +761,28 @@ app.delete("/api/studenti/:idStudente/contenuti/:idContenuto", autentica, (req, 
     });
   });
 
-  
-  // Route per ottenere tutti gli esercizi disponibili
+// Route per ottenere tutti gli esercizi disponibili
 app.get("/api/esercizi", autentica, (req, res) => {
-    if (req.utente.ruolo !== "E") {
-      return res.status(403).json({
-        error: "Accesso negato. Solo gli educatori possono vedere gli esercizi.",
-      });
-    }
-  
-    const query = "SELECT * FROM esercizio ORDER BY tipologia";
-    
-    db.query(query, (err, results) => {
-      if (err) {
-        console.error("Errore query esercizi:", err);
-        return res.status(500).json({ error: "Errore database" });
-      }
-      res.json(results);
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono vedere gli esercizi.",
     });
+  }
+
+  const query = "SELECT * FROM esercizio ORDER BY tipologia";
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Errore query esercizi:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+    res.json(results);
   });
-  
-  // Route per creare un nuovo contenuto e assegnarlo a uno studente
-  app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
+});
+
+// Route per creare un nuovo contenuto e assegnarlo a uno studente
+// Route per creare un nuovo contenuto e assegnarlo a uno studente
+app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
     if (req.utente.ruolo !== "E") {
       return res.status(403).json({
         error: "Accesso negato. Solo gli educatori possono aggiungere contenuti.",
@@ -827,17 +791,17 @@ app.get("/api/esercizi", autentica, (req, res) => {
   
     const idEducatore = req.utente.id;
     const idStudente = req.params.idStudente;
-    const { testo, immagine, tipologia, idEsercizio } = req.body;
+    const { testo, immagine, idEsercizio } = req.body;
   
-    console.log("=== AGGIUNTA CONTENUTO ===");
+    console.log("=== AGGIUNTA CONTENUTO (NUOVA STRUTTURA) ===");
     console.log("Educatore:", idEducatore);
     console.log("Studente:", idStudente);
-    console.log("Dati:", { testo, immagine, tipologia, idEsercizio });
+    console.log("Dati:", { testo, immagine, idEsercizio });
   
     // Validazione dati
-    if (!testo || !tipologia || !idEsercizio) {
-      return res.status(400).json({ 
-        error: "Campi obbligatori mancanti: testo, tipologia, idEsercizio" 
+    if (!testo || !idEsercizio) {
+      return res.status(400).json({
+        error: "Campi obbligatori mancanti: testo, idEsercizio",
       });
     }
   
@@ -854,51 +818,32 @@ app.get("/api/esercizi", autentica, (req, res) => {
       }
   
       if (assegnazione.length === 0) {
-        return res.status(403).json({ 
-          error: "Studente non assegnato a questo educatore" 
+        return res.status(403).json({
+          error: "Studente non assegnato a questo educatore",
         });
       }
   
-      // Inserisci il contenuto
-      const insertContenuto = `
-        INSERT INTO contenuto (testo, immagine, tipologia, idStudente, idEducatore) 
-        VALUES (?, ?, ?, ?, ?)
+      // Inserisci direttamente in esercizioassegnato
+      const insertQuery = `
+        INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine) 
+        VALUES (?, ?, ?, CURDATE(), ?, ?)
       `;
   
-      db.query(insertContenuto, [testo, immagine || null, tipologia, idStudente, idEducatore], (err, contenutoResult) => {
+      db.query(insertQuery, [idStudente, idEsercizio, idEducatore, testo, immagine || null], (err, result) => {
         if (err) {
           console.error("Errore inserimento contenuto:", err);
           return res.status(500).json({ error: "Errore inserimento contenuto" });
         }
   
-        const idContenuto = contenutoResult.insertId;
-        console.log("Contenuto creato con ID:", idContenuto);
-  
-        // Assegna il contenuto allo studente
-        const insertAssegnazione = `
-          INSERT INTO esercizioassegnato (idStudente, idEsercizio, idContenuto, idEducatore, dataassegnazione) 
-          VALUES (?, ?, ?, ?, CURDATE())
-        `;
-  
-        db.query(insertAssegnazione, [idStudente, idEsercizio, idContenuto, idEducatore], (err, assegnazioneResult) => {
-          if (err) {
-            console.error("Errore assegnazione esercizio:", err);
-            return res.status(500).json({ error: "Errore assegnazione esercizio" });
-          }
-  
-          console.log("Esercizio assegnato con ID:", assegnazioneResult.insertId);
-          res.status(201).json({ 
-            message: "Contenuto creato e assegnato con successo",
-            idContenuto: idContenuto,
-            idEsercizioAssegnato: assegnazioneResult.insertId
-          });
+        res.status(201).json({
+          message: "Contenuto creato e assegnato con successo",
+          idEsercizioAssegnato: result.insertId,
         });
       });
     });
   });
+  
 
-  
-  
 // Connessione DB e Avvio Server
 db.connect((err) => {
   if (err) {
@@ -918,15 +863,3 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Errore interno del server" });
 });
 
-// Aggiungi route per le parole
-app.get("/api/parole", (req, res) => {
-  const query = "SELECT * FROM contenuto";
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Errore query:", err);
-      return res.status(500).json({ error: "Errore database" });
-    }
-    console.log("Risultati query:", results); // Debug
-    res.json(results);
-  });
-});

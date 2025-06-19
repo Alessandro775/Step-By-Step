@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import styles from './CronologiaStudente.module.css';
 
 const CronologiaStudente = () => {
-    const { idStudente } = useParams();
-    const navigate = useNavigate();
     const [cronologia, setCronologia] = useState([]);
     const [studenteInfo, setStudenteInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchCronologia();
-    }, [idStudente]);
+        // Get student info from sessionStorage
+        const studenteData = sessionStorage.getItem('studenteSelezionato');
+        if (studenteData) {
+            const parsedData = JSON.parse(studenteData);
+            setStudenteInfo(parsedData);
+            fetchCronologia(parsedData.id);
+        } else {
+            setError('Informazioni studente non trovate');
+            setLoading(false);
+        }
+    }, []);
 
-    const fetchCronologia = async () => {
+    const fetchCronologia = async (idStudente) => {
         try {
             setLoading(true);
             setError(null);
@@ -24,6 +30,10 @@ const CronologiaStudente = () => {
             console.log("=== FETCH CRONOLOGIA FRONTEND ===");
             console.log("ID Studente:", idStudente);
             console.log("Token presente:", !!token);
+            
+            if (!token) {
+                throw new Error('Token non presente');
+            }
             
             const response = await fetch(`http://localhost:3000/api/studenti/${idStudente}/cronologia`, {
                 method: 'GET',
@@ -55,13 +65,6 @@ const CronologiaStudente = () => {
             
             setCronologia(data);
             
-            // Ottieni info studente dal sessionStorage se disponibile
-            const studenteData = sessionStorage.getItem('studenteSelezionato');
-            if (studenteData) {
-                console.log("Info studente da session:", JSON.parse(studenteData));
-                setStudenteInfo(JSON.parse(studenteData));
-            }
-            
         } catch (err) {
             console.error("Errore catch:", err);
             setError('Errore nel caricamento della cronologia: ' + err.message);
@@ -69,10 +72,11 @@ const CronologiaStudente = () => {
             setLoading(false);
         }
     };
-    
 
     const handleTornaIndietro = () => {
-        navigate('/studenti');
+        // Dispatch evento personalizzato per comunicare con StudentiEducatore
+        const event = new CustomEvent('backToStudenti');
+        window.dispatchEvent(event);
     };
 
     if (loading) {
@@ -108,6 +112,7 @@ const CronologiaStudente = () => {
                 {cronologia.length === 0 ? (
                     <div className={styles.emptyState}>
                         <p>Nessuna attività registrata per questo studente</p>
+                        <p>Gli esercizi completati appariranno qui una volta che lo studente avrà iniziato a lavorare.</p>
                     </div>
                 ) : (
                     <div className={styles.tableContainer}>
@@ -115,30 +120,32 @@ const CronologiaStudente = () => {
                             <thead>
                                 <tr>
                                     <th>Esercizio</th>
+                                    <th>Tipo</th>
                                     <th>Punteggio</th>
                                     <th>Tempo Impiegato</th>
                                     <th>Data Completamento</th>
                                     <th>Tentativi</th>
+                                    <th>Errori</th>
                                 </tr>
                             </thead>
-                            // Nel render della tabella
-<tbody>
-  {cronologia.map((record, index) => (
-    <tr key={record.idRisultato || index}>
-      <td>{record.titolo || 'N/D'}</td>
-      <td>{record.punteggio || 'N/D'}</td>
-      <td>{record.tempo_impiegato || 'N/D'}</td>
-      <td>
-        {record.data_completamento 
-          ? new Date(record.data_completamento).toLocaleString('it-IT')
-          : 'N/D'
-        }
-      </td>
-      <td>{record.tentativi || 'N/D'}</td>
-    </tr>
-  ))}
-</tbody>
-
+                            <tbody>
+                                {cronologia.map((record, index) => (
+                                    <tr key={record.idRisultato || index}>
+                                        <td>{record.titolo || 'N/D'}</td>
+                                        <td>{record.tipo_esercizio || record.descrizione || 'N/D'}</td>
+                                        <td>{record.punteggio !== null ? record.punteggio : 'N/D'}</td>
+                                        <td>{record.tempo_impiegato || record.tempo || 'N/D'}</td>
+                                        <td>
+                                            {record.data_completamento 
+                                                ? new Date(record.data_completamento).toLocaleString('it-IT')
+                                                : 'N/D'
+                                            }
+                                        </td>
+                                        <td>{record.tentativi || record.numerotentativi || 'N/D'}</td>
+                                        <td>{record.numero_errori || record.numeroerrorieri || 'N/D'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
                         </table>
                     </div>
                 )}

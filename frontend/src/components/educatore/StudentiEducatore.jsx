@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import styles from "./StudentiEducatore.module.css";
+// IMPORT DEI COMPONENTI ESTERNI
+import ContenutoStudente from "./ContenutoStudente";
+import CronologiaStudente from "./CronologiaStudente";
 
 const StudentiEducatore = () => {
   // Stati per gestire le viste
@@ -16,6 +19,12 @@ const StudentiEducatore = () => {
 
   // Funzioni per gestire le viste
   const handleVisualizzaContenuti = (idStudente, nomeStudente) => {
+    // Salva le info dello studente nel sessionStorage per il componente ContenutoStudente
+    sessionStorage.setItem('studenteSelezionato', JSON.stringify({
+      id: idStudente,
+      nome: nomeStudente
+    }));
+    
     setSelectedStudente({
       id: idStudente,
       nome: nomeStudente
@@ -24,6 +33,12 @@ const StudentiEducatore = () => {
   };
 
   const handleVisualizzaCronologia = (idStudente, nomeStudente) => {
+    // Salva le info dello studente nel sessionStorage per il componente CronologiaStudente
+    sessionStorage.setItem('studenteSelezionato', JSON.stringify({
+      id: idStudente,
+      nome: nomeStudente
+    }));
+    
     setSelectedStudente({
       id: idStudente,
       nome: nomeStudente
@@ -34,7 +49,22 @@ const StudentiEducatore = () => {
   const handleBackToStudenti = () => {
     setCurrentView("studenti");
     setSelectedStudente(null);
+    // Pulisci sessionStorage quando torni alla lista studenti
+    sessionStorage.removeItem('studenteSelezionato');
   };
+
+  // Listener per il pulsante "Torna ai Studenti" dei componenti esterni
+  useEffect(() => {
+    const handleBackEvent = () => {
+      handleBackToStudenti();
+    };
+
+    window.addEventListener('backToStudenti', handleBackEvent);
+
+    return () => {
+      window.removeEventListener('backToStudenti', handleBackEvent);
+    };
+  }, []);
 
   useEffect(() => {
     // Debug iniziale del token
@@ -140,7 +170,7 @@ const StudentiEducatore = () => {
 
   const handleAggiungiStudente = async (e) => {
     e.preventDefault();
-
+    
     if (!emailNuovoStudente.trim()) {
       setError("Inserisci un'email valida");
       return;
@@ -415,245 +445,16 @@ const StudentiEducatore = () => {
           )}
         </>
       ) : currentView === "contenuti" ? (
-        // Vista contenuti studente
-        <ContenutoStudenteWrapper 
-          idStudente={selectedStudente.id} 
-          nomeStudente={selectedStudente.nome}
-          onBack={handleBackToStudenti}
-        />
-      ) : (
-        // Vista cronologia studente
-        <CronologiaStudenteWrapper 
-          idStudente={selectedStudente.id} 
-          nomeStudente={selectedStudente.nome}
-          onBack={handleBackToStudenti}
-        />
-      )}
-    </div>
-  );
-};
-
-// Componente wrapper per i contenuti
-const ContenutoStudenteWrapper = ({ idStudente, nomeStudente, onBack }) => {
-  const [contenuti, setContenuti] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchContenuti();
-  }, [idStudente]);
-
-  const fetchContenuti = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`http://localhost:3000/api/studenti/${idStudente}/contenuti`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Errore nel caricamento dei contenuti');
-      }
-
-      const data = await response.json();
-      setContenuti(data);
-      
-    } catch (err) {
-      setError('Errore nel caricamento dei contenuti: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <span>Caricamento contenuti...</span>
+        // Vista contenuti studente - USA IL COMPONENTE ESTERNO
+        <div className={styles.subComponentContainer}>
+          <ContenutoStudente />
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <button onClick={onBack} className={styles.backButton}>
-          ← Torna ai Studenti
-        </button>
-        <h2>Contenuti Assegnati</h2>
-        <p>Studente: <strong>{nomeStudente}</strong></p>
-      </div>
-
-      {error && (
-        <div className={styles.error}>
-          {error}
+      ) : currentView === "cronologia" ? (
+        // Vista cronologia studente - USA IL COMPONENTE ESTERNO
+        <div className={styles.subComponentContainer}>
+          <CronologiaStudente />
         </div>
-      )}
-
-      <div className={styles.contentSection}>
-        {contenuti.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>Nessun contenuto assegnato a questo studente</p>
-          </div>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Titolo</th>
-                  <th>Descrizione</th>
-                  <th>Data Inizio</th>
-                  <th>Scadenza</th>
-                  <th>Completato</th>
-                </tr>
-              </thead>
-              <tbody>
-                {contenuti.map((contenuto) => (
-                  <tr key={contenuto.idContenuto}>
-                    <td>{contenuto.titolo}</td>
-                    <td>{contenuto.descrizione}</td>
-                    <td>
-                      {contenuto.data_inizio 
-                        ? new Date(contenuto.data_inizio).toLocaleDateString('it-IT')
-                        : 'N/D'
-                      }
-                    </td>
-                    <td>
-                      {contenuto.data_scadenza 
-                        ? new Date(contenuto.data_scadenza).toLocaleDateString('it-IT')
-                        : 'N/D'
-                      }
-                    </td>
-                    <td>
-                      <span className={contenuto.completato ? styles.completed : styles.pending}>
-                        {contenuto.completato ? 'Sì' : 'No'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Componente wrapper per la cronologia
-const CronologiaStudenteWrapper = ({ idStudente, nomeStudente, onBack }) => {
-  const [cronologia, setCronologia] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchCronologia();
-  }, [idStudente]);
-
-  const fetchCronologia = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`http://localhost:3000/api/studenti/${idStudente}/cronologia`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Errore nel caricamento della cronologia');
-      }
-
-      const data = await response.json();
-      setCronologia(data);
-      
-    } catch (err) {
-      setError('Errore nel caricamento della cronologia: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <span>Caricamento cronologia...</span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <button onClick={onBack} className={styles.backButton}>
-          ← Torna ai Studenti
-        </button>
-        <h2>Cronologia Attività</h2>
-        <p>Studente: <strong>{nomeStudente}</strong></p>
-      </div>
-
-      {error && (
-        <div className={styles.error}>
-          {error}
-        </div>
-      )}
-
-      <div className={styles.contentSection}>
-        {cronologia.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>Nessuna attività registrata per questo studente</p>
-          </div>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Esercizio</th>
-                  <th>Punteggio</th>
-                  <th>Tempo Impiegato</th>
-                  <th>Data Completamento</th>
-                  <th>Tentativi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cronologia.map((record, index) => (
-                  <tr key={index}>
-                    <td>{record.titolo || 'N/D'}</td>
-                    <td>{record.punteggio || 'N/D'}</td>
-                    <td>{record.tempo_impiegato || 'N/D'}</td>
-                    <td>
-                      {record.data_completamento 
-                        ? new Date(record.data_completamento).toLocaleString('it-IT')
-                        : 'N/D'
-                      }
-                    </td>
-                    <td>{record.tentativi || 'N/D'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      ) : null}
     </div>
   );
 };

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import styles from './ContenutoStudente.module.css';
 
 const ContenutoStudente = () => {
-    const { idStudente } = useParams();
-    const navigate = useNavigate();
     const [contenuti, setContenuti] = useState([]);
     const [studenteInfo, setStudenteInfo] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -14,17 +11,25 @@ const ContenutoStudente = () => {
     const [formData, setFormData] = useState({
         testo: '',
         immagine: '',
-        tipologia: '',
         idEsercizio: ''
     });
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        fetchContenuti();
+        // Get student info from sessionStorage
+        const studenteData = sessionStorage.getItem('studenteSelezionato');
+        if (studenteData) {
+            const parsedData = JSON.parse(studenteData);
+            setStudenteInfo(parsedData);
+            fetchContenuti(parsedData.id);
+        } else {
+            setError('Informazioni studente non trovate');
+            setLoading(false);
+        }
         fetchEsercizi();
-    }, [idStudente]);
+    }, []);
 
-    const fetchContenuti = async () => {
+    const fetchContenuti = async (idStudente) => {
         try {
             setLoading(true);
             setError(null);
@@ -42,23 +47,14 @@ const ContenutoStudente = () => {
                 },
             });
 
-            console.log("Response status:", response.status);
-
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error("Errore response:", errorData);
                 throw new Error(errorData.error || 'Errore nel caricamento dei contenuti');
             }
 
             const data = await response.json();
             console.log("Contenuti ricevuti:", data);
             setContenuti(data);
-            
-            // Ottieni info studente dal sessionStorage se disponibile
-            const studenteData = sessionStorage.getItem('studenteSelezionato');
-            if (studenteData) {
-                setStudenteInfo(JSON.parse(studenteData));
-            }
             
         } catch (err) {
             console.error("Errore fetch contenuti:", err);
@@ -100,7 +96,7 @@ const ContenutoStudente = () => {
     const handleSubmitContenuto = async (e) => {
         e.preventDefault();
         
-        if (!formData.testo || !formData.tipologia || !formData.idEsercizio) {
+        if (!formData.testo || !formData.idEsercizio) {
             setError('Compila tutti i campi obbligatori');
             return;
         }
@@ -109,7 +105,7 @@ const ContenutoStudente = () => {
         try {
             const token = localStorage.getItem('token');
             
-            const response = await fetch(`http://localhost:3000/api/studenti/${idStudente}/contenuti`, {
+            const response = await fetch(`http://localhost:3000/api/studenti/${studenteInfo.id}/contenuti`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -127,12 +123,11 @@ const ContenutoStudente = () => {
             setFormData({
                 testo: '',
                 immagine: '',
-                tipologia: '',
                 idEsercizio: ''
             });
             setShowForm(false);
             setError(null);
-            await fetchContenuti();
+            await fetchContenuti(studenteInfo.id);
             
         } catch (err) {
             setError('Errore nell\'aggiunta del contenuto: ' + err.message);
@@ -141,8 +136,7 @@ const ContenutoStudente = () => {
         }
     };
 
-    // NUOVA FUNZIONE: Eliminazione contenuto
-    const handleEliminaContenuto = async (idContenuto, titolo) => {
+    const handleEliminaContenuto = async (idEsercizioAssegnato, titolo) => {
         const conferma = window.confirm(`Sei sicuro di voler eliminare il contenuto "${titolo}"?`);
         
         if (!conferma) return;
@@ -150,10 +144,7 @@ const ContenutoStudente = () => {
         try {
             const token = localStorage.getItem('token');
             
-            console.log("=== ELIMINAZIONE CONTENUTO ===");
-            console.log("ID Contenuto:", idContenuto);
-            
-            const response = await fetch(`http://localhost:3000/api/studenti/${idStudente}/contenuti/${idContenuto}`, {
+            const response = await fetch(`http://localhost:3000/api/studenti/${studenteInfo.id}/contenuti/${idEsercizioAssegnato}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -166,8 +157,7 @@ const ContenutoStudente = () => {
                 throw new Error(errorData.error || 'Errore nell\'eliminazione del contenuto');
             }
 
-            // Ricarica la lista contenuti
-            await fetchContenuti();
+            await fetchContenuti(studenteInfo.id);
             
         } catch (err) {
             setError('Errore nell\'eliminazione del contenuto: ' + err.message);
@@ -175,7 +165,8 @@ const ContenutoStudente = () => {
     };
 
     const handleTornaIndietro = () => {
-        navigate('/studenti');
+        const event = new CustomEvent('backToStudenti');
+        window.dispatchEvent(event);
     };
 
     if (loading) {
@@ -197,12 +188,12 @@ const ContenutoStudente = () => {
                 </button>
                 
                 <div className={styles.headerContent}>
-                    <h2>Parole/Contenuti Assegnati</h2>
+                    <h2>Contenuti/Esercizi Assegnati</h2>
                     <button 
                         onClick={() => setShowForm(!showForm)}
                         className={styles.addButton}
                     >
-                        {showForm ? 'Annulla' : '+ Aggiungi Parola/Contenuto'}
+                        {showForm ? 'Annulla' : '+ Aggiungi Contenuto'}
                     </button>
                 </div>
                 
@@ -220,10 +211,10 @@ const ContenutoStudente = () => {
             {/* Form per aggiungere contenuto */}
             {showForm && (
                 <div className={styles.formContainer}>
-                    <h3>Aggiungi Nuova Parola/Contenuto</h3>
+                    <h3>Aggiungi Nuovo Contenuto/Esercizio</h3>
                     <form onSubmit={handleSubmitContenuto} className={styles.form}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="testo">Parola/Testo *</label>
+                            <label htmlFor="testo">Testo/Contenuto *</label>
                             <input
                                 type="text"
                                 id="testo"
@@ -231,26 +222,8 @@ const ContenutoStudente = () => {
                                 value={formData.testo}
                                 onChange={handleFormChange}
                                 required
-                                placeholder="Inserisci la parola o il testo"
+                                placeholder="Inserisci il testo o il contenuto"
                             />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="tipologia">Tipologia *</label>
-                            <select
-                                id="tipologia"
-                                name="tipologia"
-                                value={formData.tipologia}
-                                onChange={handleFormChange}
-                                required
-                            >
-                                <option value="">Seleziona tipologia</option>
-                                <option value="lettura">Lettura</option>
-                                <option value="scrittura">Scrittura</option>
-                                <option value="sillabe">Sillabe</option>
-                                <option value="pronuncia">Pronuncia</option>
-                                <option value="comprensione">Comprensione</option>
-                            </select>
                         </div>
 
                         <div className={styles.formGroup}>
@@ -306,16 +279,17 @@ const ContenutoStudente = () => {
             <div className={styles.contentSection}>
                 {contenuti.length === 0 ? (
                     <div className={styles.emptyState}>
-                        <p>Nessuna parola/contenuto assegnato a questo studente</p>
-                        <p>Usa il pulsante "Aggiungi Parola/Contenuto" per iniziare!</p>
+                        <p>Nessun contenuto assegnato a questo studente</p>
+                        <p>Usa il pulsante "Aggiungi Contenuto" per iniziare!</p>
                     </div>
                 ) : (
                     <div className={styles.tableContainer}>
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th>Parola/Titolo</th>
-                                    <th>Tipologia</th>
+                                    <th>Testo/Contenuto</th>
+                                    <th>Tipo Esercizio</th>
+                                    <th>Immagine</th>
                                     <th>Data Assegnazione</th>
                                     <th>Completato</th>
                                     <th>Azioni</th>
@@ -323,16 +297,22 @@ const ContenutoStudente = () => {
                             </thead>
                             <tbody>
                                 {contenuti.map((contenuto) => (
-                                    <tr key={contenuto.idContenuto}>
+                                    <tr key={contenuto.idEsercizioAssegnato}>
                                         <td>
-                                            <div className={styles.contenutoInfo}>
-                                                <strong>{contenuto.titolo}</strong>
-                                                {contenuto.immagine && (
-                                                    <small>🖼️ Con immagine</small>
-                                                )}
-                                            </div>
+                                            <strong>{contenuto.titolo}</strong>
                                         </td>
-                                        <td>{contenuto.descrizione}</td>
+                                        <td>
+                                            {contenuto.tipologia} - {contenuto.descrizione}
+                                        </td>
+                                        <td>
+                                            {contenuto.immagine ? (
+                                                <a href={contenuto.immagine} target="_blank" rel="noopener noreferrer">
+                                                    🖼️ Visualizza
+                                                </a>
+                                            ) : (
+                                                'Nessuna immagine'
+                                            )}
+                                        </td>
                                         <td>
                                             {contenuto.data_inizio 
                                                 ? new Date(contenuto.data_inizio).toLocaleDateString('it-IT')
@@ -341,12 +321,12 @@ const ContenutoStudente = () => {
                                         </td>
                                         <td>
                                             <span className={contenuto.completato ? styles.completed : styles.pending}>
-                                                {contenuto.completato ? 'Sì' : 'No'}
+                                                {contenuto.completato ? '✅ Sì' : '❌ No'}
                                             </span>
                                         </td>
                                         <td>
                                             <button
-                                                onClick={() => handleEliminaContenuto(contenuto.idContenuto, contenuto.titolo)}
+                                                onClick={() => handleEliminaContenuto(contenuto.idEsercizioAssegnato, contenuto.titolo)}
                                                 className={styles.deleteButton}
                                                 title="Elimina contenuto"
                                             >
