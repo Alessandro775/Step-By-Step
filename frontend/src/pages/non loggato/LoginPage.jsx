@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './LoginPage.module.css';
 const BASE_URL ="http://localhost:3000";
+
 const LoginPage = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -49,7 +50,7 @@ const LoginPage = () => {
                 navigate('/home-studente');
                 break;
             case 'E':
-                navigate('/home-educatore');
+                navigate('/studenti-educatore');
                 break;
             case 'G':
                 navigate('/home-famiglia');
@@ -89,11 +90,14 @@ const LoginPage = () => {
                 />
             </div>
             <button type="submit">Invia</button>
-            <a href="#" className={styles["forgot-password"]}>Hai dimenticato la password?</a>
+            <div className={styles.divider}>
+             <span>Non hai un account?</span>
+            </div>
             <button type="button" onClick={() => window.location.href = '/registrazione'}>Registrati</button>
             </form>
         </div>
     );
+    
 };
 
 export default LoginPage;

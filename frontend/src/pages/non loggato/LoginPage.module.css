@@ -59,3 +59,24 @@
 .login-form a:hover {
     text-decoration: underline;
 }
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.divider span {
+  padding: 0 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
