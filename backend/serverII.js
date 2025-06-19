@@ -21,9 +21,9 @@ app.use(express.json());
 // Configurazione Database
 const db = mysql.createConnection({
 
-  host: "localhost",
-  user: "root",
-  password: "",
+  host: "172.29.9.225",
+  user: "alessandro",
+  password: "123456",
   database: "step_by_step",
   port: 3306,
 });
@@ -109,7 +109,8 @@ app.post("/api/register", async (req, res) => {
             email_studente,
           ];
 
-          db.query(query, params, (err, result) => {
+          // CORREZIONE: usa insertFamigliaQuery invece di query
+          db.query(insertFamigliaQuery, params, (err, result) => {
             if (err) {
               console.error("Errore registrazione:", err);
               if (err.code === "ER_DUP_ENTRY") {
@@ -169,6 +170,7 @@ app.post("/api/register", async (req, res) => {
     return res.status(500).json({ error: "Errore interno del server" });
   }
 });
+
 
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
@@ -760,6 +762,117 @@ app.get("/api/studenti/:idStudente/cronologia", autentica, (req, res) => {
     });
   });
 
+// Route per cronologia studente (per lo studente stesso)
+app.get("/api/student-cronologia", autentica, (req, res) => {
+  if (req.utente.ruolo !== "S") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli studenti possono accedere alla propria cronologia.",
+    });
+  }
+
+  const idStudente = req.utente.id;
+  console.log("=== CRONOLOGIA STUDENTE PERSONALE ===");
+  console.log("ID Studente:", idStudente);
+
+  const query = `
+    SELECT 
+      r.idRisultato,
+      r.punteggio,
+      r.numero_errori as numero_errori,
+      r.tempo as tempo_impiegato,
+      r.numero_tentativi as tentativi,
+      r.traccia_audio as traccia_audio,
+      ea.testo as titolo,
+      e.descrizione as tipo_esercizio,
+      e.tipologia as descrizione,
+      r.data_esecuzione as data_completamento,
+      r.idStudente
+    FROM risultato r
+    JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+    JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+    WHERE r.idStudente = ?
+    ORDER BY r.data_esecuzione DESC  
+  `;
+
+  db.query(query, [idStudente], (err, results) => {
+    if (err) {
+      console.error("Errore query cronologia studente:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    console.log("Record cronologia studente trovati:", results.length);
+    res.json(results);
+  });
+});
+
+// Route per cronologia famiglia (per vedere cronologia del figlio)
+app.get("/api/family-cronologia", autentica, (req, res) => {
+  if (req.utente.ruolo !== "G") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo le famiglie possono accedere alla cronologia.",
+    });
+  }
+
+  const idFamiglia = req.utente.id;
+  console.log("=== CRONOLOGIA FAMIGLIA ===");
+  console.log("ID Famiglia:", idFamiglia);
+
+  // Prima trova lo studente collegato alla famiglia
+  const findStudentQuery = `
+    SELECT s.idStudente, s.nome, s.cognome
+    FROM famiglia f
+    JOIN studente s ON f.email_studente = s.email
+    WHERE f.idFamiglia = ?
+  `;
+
+  db.query(findStudentQuery, [idFamiglia], (err, studentResults) => {
+    if (err) {
+      console.error("Errore ricerca studente:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    if (studentResults.length === 0) {
+      return res.status(404).json({ error: "Studente non trovato per questa famiglia" });
+    }
+
+    const studente = studentResults[0];
+    console.log("Studente trovato:", studente);
+
+    // Poi recupera la cronologia dello studente
+    const cronologiaQuery = `
+      SELECT 
+        r.idRisultato,
+        r.punteggio,
+        r.numero_errori as numero_errori,
+        r.tempo as tempo_impiegato,
+        r.numero_tentativi as tentativi,
+        r.traccia_audio as traccia_audio,
+        ea.testo as titolo,
+        e.descrizione as tipo_esercizio,
+        e.tipologia as descrizione,
+        r.data_esecuzione as data_completamento,
+        r.idStudente
+      FROM risultato r
+      JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+      JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+      WHERE r.idStudente = ?
+      ORDER BY r.data_esecuzione DESC  
+    `;
+
+    db.query(cronologiaQuery, [studente.idStudente], (err, results) => {
+      if (err) {
+        console.error("Errore query cronologia famiglia:", err);
+        return res.status(500).json({ error: "Errore database" });
+      }
+
+      console.log("Record cronologia famiglia trovati:", results.length);
+      res.json({
+        studente: studente,
+        cronologia: results
+      });
+    });
+  });
+});
 
 // Route per eliminare un contenuto assegnato
 app.delete("/api/studenti/:idStudente/contenuti/:idEsercizioAssegnato", autentica, (req, res) => {
