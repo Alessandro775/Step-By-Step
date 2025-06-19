@@ -9,7 +9,7 @@ const HeaderEducatore = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Funzioni per la navigazione
-  const goToHome = () => navigate('/home-educatore');
+  const goToHome = () => navigate('/studenti-educatore');
   const goToStudenti = () => navigate('/studenti-educatore');
   const goToProfilo = () => navigate('/profilo-educatore');
   
