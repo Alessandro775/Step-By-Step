@@ -10,7 +10,6 @@ const HeaderEducatore = () => {
 
   // Funzioni per la navigazione
   const goToHome = () => navigate('/studenti-educatore');
-  const goToStudenti = () => navigate('/studenti-educatore');
   const goToProfilo = () => navigate('/profilo-educatore');
   
   // Verifica se siamo nella pagina del profilo
@@ -44,11 +43,7 @@ const HeaderEducatore = () => {
         <h1 className={header.title}>Step By Step</h1>
         
         <nav className={header.nav}>
-          <ul className={header['nav-list']}>
-
-            <li><button onClick={goToStudenti}>Studenti</button></li>
-
-            
+          <ul className={header['nav-list']}>           
             {!isProfilePage && (
               <button className={header.navButton} onClick={goToProfilo}>Profilo </button>
              )}
