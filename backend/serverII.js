@@ -172,7 +172,6 @@ app.use((error, req, res, next) => {
 
 // Configurazione Database
 const db = mysql.createConnection({
-
   host: "192.168.1.174",
   user: "alessandro",
   password: "123456",
