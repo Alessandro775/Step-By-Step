@@ -146,7 +146,7 @@ align-items: center;
 }
 
 .custom-input {
-
+  width: 100%; /* Aggiungi questa riga se non c'è */
   padding: 12px;
   border: 1px solid #cccccc;
   border-radius: 4px;
@@ -155,6 +155,7 @@ align-items: center;
   color: #333333;
   transition: border-color 0.3s ease;
 }
+
 
 .custom-input:focus {
   outline: none;
