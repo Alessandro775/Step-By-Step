@@ -1,17 +1,15 @@
 import React from 'react';
-
-import Footer from '../../components/footer/Footer'; // Importa il componente Footer
-import Header from '../../components/Header/HeaderStudente'; // Importa il componente Header
-import CorpoEsercizioAudio from '../../components/esercizi/corpoEsercizioAudio';
+import Footer from '../../components/footer/Footer';
+import Header from '../../components/Header/HeaderStudente';
+import CorpoEsercizioAudio from '../../components/studente/corpoEsercizioAudio'; // ✅ Importa il componente corretto
 
 
 const EsercizioAudio = () => {
     return (
         <>
-            {/* Qui puoi inserire il contenuto della tua homepage, ad esempio: */}
-            <Header /> {/* Aggiungi il componente Header qui */}
-            <CorpoEsercizioAudio /> 
-            <Footer /> {/* Aggiungi il componente Footer qui */}
+            <Header />
+            <CorpoEsercizioAudio /> {/* ✅ Usa il componente integrato che gestisce tutto */}
+            <Footer />
         </>
     );
 };
