@@ -9,17 +9,16 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [nome, setNome] = useState(""); // Era firstName
-  const [cognome, setCognome] = useState(""); // Era lastName
-  const [tipoUtente, setTipoUtente] = useState(""); // Era userType
-  const [istituto, setIstituto] = useState(""); // Era institute
-  const [classe, setClasse] = useState(""); // Era classYear
-  const [annoScolastico, setAnnoScolastico] = useState(""); // Era academicYear
-  const [numero_telefono, setnumero_telefono] = useState(""); // Era phone
-  const [email_studente, setemail_studente] = useState(""); // Era studentEmail
+  const [nome, setNome] = useState(""); 
+  const [cognome, setCognome] = useState(""); 
+  const [tipoUtente, setTipoUtente] = useState(""); 
+  const [istituto, setIstituto] = useState(""); 
+  const [classe, setClasse] = useState(""); 
+  const [annoScolastico, setAnnoScolastico] = useState(""); 
+  const [numero_telefono, setnumero_telefono] = useState(""); 
+  const [email_studente, setemail_studente] = useState(""); 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-
 
   const validatePasswords = () => {
     const newErrors = {};
@@ -35,51 +34,77 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(BASE_URL);
+    
     if (!validatePasswords()) {
       return;
     }
 
     try {
-    const userData = {
-      ...(tipoUtente !== "genitore" && { nome }), // Include nome solo se NON è genitore
-      cognome,
-      email,
-      password,
-      ruolo: tipoUtente === "studente" ? "S" : tipoUtente === "educatore" ? "E" : "G",
-      ...(tipoUtente === "studente" && { 
-        istituto, 
-        classe: parseInt(classe), 
-        anno_scolastico: parseInt(annoScolastico) 
-      }),
-      ...(tipoUtente === "educatore" && { istituto }),
-      ...(tipoUtente === "genitore" && { numero_telefono, email_studente, cognome_famiglia: cognome }),
+      const userData = {
+        ...(tipoUtente !== "genitore" && { nome }), 
+        cognome,
+        email,
+        password,
+        ruolo: tipoUtente === "studente" ? "S" : tipoUtente === "educatore" ? "E" : "G",
+        ...(tipoUtente === "studente" && { 
+          istituto, 
+          classe: parseInt(classe), 
+          anno_scolastico: parseInt(annoScolastico) 
+        }),
+        ...(tipoUtente === "educatore" && { istituto }),
+        ...(tipoUtente === "genitore" && { numero_telefono, email_studente, cognome_famiglia: cognome }),
+      };
 
-    };
+      console.log("=== REGISTRAZIONE ===");
+      console.log("Dati inviati:", userData);
+
       const response = await fetch(`${BASE_URL}/api/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
 
       const data = await response.json();
+      console.log("Risposta registrazione:", data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Errore durante la registrazione');
       }
 
-      // Reindirizza alla home in caso di successo
-     // Con:
-if (tipoUtente === 'studente') {
-  navigate('/home-studente');
-} else if (tipoUtente === 'educatore') {
-  navigate('/home-educatore');
-} else if (tipoUtente === 'genitore') {
-  navigate('/home-famiglia');
-} else {
-  navigate('/login'); // fallback nel caso il tipo non sia definito
-}
+      // ✅ GESTIONE TOKEN E AUTO-LOGIN
+      if (data.token) {
+        console.log("Token ricevuto, salvando nel localStorage...");
+        
+        // Salva token e ruolo nel localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('ruolo', data.ruolo);
+        
+        console.log("Token salvato:", data.token);
+        console.log("Ruolo salvato:", data.ruolo);
+        
+        // ✅ REINDIRIZZAMENTO BASATO SUL RUOLO
+        if (data.ruolo === 'S') {
+          console.log("Reindirizzamento a dashboard studente");
+          navigate('/home-studente');
+        } else if (data.ruolo === 'E') {
+          console.log("Reindirizzamento a dashboard educatore");
+          navigate('/home-educatore');
+        } else if (data.ruolo === 'G') {
+          console.log("Reindirizzamento a dashboard famiglia");
+          navigate('/home-famiglia');
+        } else {
+          console.log("Ruolo non riconosciuto, reindirizzamento al login");
+          navigate('/login');
+        }
+      } else {
+        // ✅ FALLBACK: Se non c'è token, reindirizza al login
+        console.log("Nessun token ricevuto, reindirizzamento al login");
+        alert('Registrazione completata! Effettua il login per continuare.');
+        navigate('/login');
+      }
+
     } catch (error) {
       console.error('Errore durante la registrazione:', error);
       setErrors(prev => ({
@@ -99,55 +124,52 @@ if (tipoUtente === 'studente') {
     }
   };
 
-return (
+  return (
     <div className={styles["register-section"]}>
-        <div className={styles["form-container"]}>
-          <p className={styles["form-title"]}>Registrazione</p>
-            <form onSubmit={handleSubmit}>
-                <div className={styles["form-grid"]}>
-                    {tipoUtente !== "genitore" && (
-                        <div>
-                            <label className={styles["input-label"]} htmlFor="nome">
-                            </label>
-                            <input
-                                id="nome"
-                                type="text"
-                                value={nome}
-                                onChange={(e) => setNome(e.target.value)}
-                                placeholder="Nome"
-                                className={styles["custom-input"]}
-                                required={tipoUtente !== "genitore"}
-                            />
-                        </div>
-                    )}
+      <div className={styles["form-container"]}>
+        <p className={styles["form-title"]}>Registrazione</p>
+        <form onSubmit={handleSubmit}>
+          <div className={styles["form-grid"]}>
+            {tipoUtente !== "genitore" && (
+              <div>
+                <label className={styles["input-label"]} htmlFor="nome"></label>
+                <input
+                  id="nome"
+                  type="text"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  placeholder="Nome"
+                  className={styles["custom-input"]}
+                  required={tipoUtente !== "genitore"}
+                />
+              </div>
+            )}
             <div>
-              <label className={styles["input-label"]} htmlFor="cognome">
-              </label>
+              <label className={styles["input-label"]} htmlFor="cognome"></label>
               <input
-  id="cognome"
-  type="text"
-  value={cognome} // Era nome
-  onChange={(e) => setCognome(e.target.value)} // Era setLastName
-  placeholder="Cognome"
-  className={styles["custom-input"]}
-  required
-/>
+                id="cognome"
+                type="text"
+                value={cognome}
+                onChange={(e) => setCognome(e.target.value)}
+                placeholder="Cognome"
+                className={styles["custom-input"]}
+                required
+              />
             </div>
             <div className={styles["full-width"]}>
-              <label className={styles["input-label"]} htmlFor="tipoUtente">
-              </label>
+              <label className={styles["input-label"]} htmlFor="tipoUtente"></label>
               <select
-  id="tipoUtente"
-  value={tipoUtente} // Era userType
-  onChange={(e) => setTipoUtente(e.target.value)} // Era setUserType
-  className={styles["custom-select"]}
-  required
->
+                id="tipoUtente"
+                value={tipoUtente}
+                onChange={(e) => setTipoUtente(e.target.value)}
+                className={styles["custom-select"]}
+                required
+              >
                 <option value="">Seleziona il tuo Ruolo</option>
-  <option value="studente">Studente</option> // Era "student"
-  <option value="educatore">Educatore</option> // Era "educator"
-  <option value="genitore">Genitore</option> // Era "family"
-</select>
+                <option value="studente">Studente</option>
+                <option value="educatore">Educatore</option>
+                <option value="genitore">Genitore</option>
+              </select>
             </div>
           </div>
 
@@ -155,8 +177,7 @@ return (
             <div className={styles["additional-fields"]}>
               <div className={styles["form-grid"]}>
                 <div>
-                  <label className={styles["input-label"]} htmlFor="istituto">
-                  </label>
+                  <label className={styles["input-label"]} htmlFor="istituto"></label>
                   <input
                     id="istituto"
                     type="text"
@@ -168,58 +189,42 @@ return (
                   />
                 </div>
                 <div>
-  <label className={styles["input-label"]} htmlFor="classe">
-  </label>
-  <select
-    id="classe"
-    value={classe}
-    onChange={(e) => setClasse(e.target.value)}
-    placeholder="Classe"
-    className={styles["custom-input"]}
-    required
-  >
-    <option value="">Seleziona classe</option>
-    <option value="1">Prima</option>
-    <option value="2">Seconda</option>
-    <option value="3">Terza</option>
-    <option value="4">Quarta</option>
-    <option value="5">Quinta</option>
-  </select>
-</div>
-<div>
-  <label className={styles["input-label"]} htmlFor="anno_scolastico">
-  </label>
-  <input
-    id="anno_scolastico"
-    type="text"
-    value={annoScolastico}
-    onChange={(e) => setAnnoScolastico(e.target.value)}
-    placeholder="Anno Scolastico"
-    className={styles["custom-input"]}
-    required
-  />
-</div>
-                {/*<div>
-                  <label className={styles["input-label"]} htmlFor="academicYear">
-                  </label>
+                  <label className={styles["input-label"]} htmlFor="classe"></label>
+                  <select
+                    id="classe"
+                    value={classe}
+                    onChange={(e) => setClasse(e.target.value)}
+                    placeholder="Classe"
+                    className={styles["custom-input"]}
+                    required
+                  >
+                    <option value="">Seleziona classe</option>
+                    <option value="1">Prima</option>
+                    <option value="2">Seconda</option>
+                    <option value="3">Terza</option>
+                    <option value="4">Quarta</option>
+                    <option value="5">Quinta</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={styles["input-label"]} htmlFor="anno_scolastico"></label>
                   <input
-                    id="academicYear"
+                    id="anno_scolastico"
                     type="text"
-                    value={academicYear}
-                    onChange={(e) => setAcademicYear(e.target.value)}
-                    placeholder="Anno Accademico"
+                    value={annoScolastico}
+                    onChange={(e) => setAnnoScolastico(e.target.value)}
+                    placeholder="Anno Scolastico"
                     className={styles["custom-input"]}
                     required
                   />
-                </div>*/}
+                </div>
               </div>
             </div>
           )}
 
           {tipoUtente === "educatore" && (
             <div className={styles["additional-fields"]}>
-              <label className={styles["input-label"]} htmlFor="istituto">
-              </label>
+              <label className={styles["input-label"]} htmlFor="istituto"></label>
               <input
                 id="istituto"
                 type="text"
@@ -235,22 +240,21 @@ return (
           {tipoUtente === "genitore" && (
             <div className={styles["additional-fields"]} style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
               <div style={{ flex: 1 }}>
-                <label className={styles["input-label"]} htmlFor="numero_telefono">
-                </label>
+                <label className={styles["input-label"]} htmlFor="numero_telefono"></label>
                 <input
-  id="numero_telefono"
-  type="tel"
-  pattern="[0-9]*"
-  maxLength="10"
-  value={numero_telefono}
-  onChange={(e) => {
-    const value = e.target.value.replace(/\D/g, ''); // Rimuove caratteri non numerici
-    setnumero_telefono(value);
-  }}
-  placeholder="telefono (solo numeri)"
-  className={styles["custom-input"]}
-  required
-/>
+                  id="numero_telefono"
+                  type="tel"
+                  pattern="[0-9]*"
+                  maxLength="10"
+                  value={numero_telefono}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setnumero_telefono(value);
+                  }}
+                  placeholder="telefono (solo numeri)"
+                  className={styles["custom-input"]}
+                  required
+                />
               </div>
               <div style={{ width: "15px" }}></div>
               <div style={{ flex: 1 }}>
@@ -269,8 +273,7 @@ return (
 
           <div className={styles["form-grid"]}>
             <div>
-              <label className={styles["input-label"]} htmlFor="email">
-              </label>
+              <label className={styles["input-label"]} htmlFor="email"></label>
               <input
                 id="email"
                 type="email"
@@ -286,8 +289,7 @@ return (
 
           <div className={styles["password-grid"]}>
             <div>
-              <label className={styles["input-label"]} htmlFor="password">
-              </label>
+              <label className={styles["input-label"]} htmlFor="password"></label>
               <input
                 id="password"
                 type="password"
@@ -299,8 +301,7 @@ return (
               />
             </div>
             <div>
-              <label className={styles["input-label"]} htmlFor="confirmPassword">
-              </label>
+              <label className={styles["input-label"]} htmlFor="confirmPassword"></label>
               <input
                 id="confirmPassword"
                 type="password"
@@ -317,6 +318,13 @@ return (
               )}
             </div>
           </div>
+
+          {/* ✅ MOSTRA ERRORI DI SUBMIT */}
+          {errors.submit && (
+            <div className={styles["error-message"]} style={{ marginBottom: "1rem", textAlign: "center" }}>
+              {errors.submit}
+            </div>
+          )}
 
           <button type="submit" className={styles["submit-button"]}>
             Crea Account
