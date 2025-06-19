@@ -80,3 +80,23 @@
   color: #666;
   font-size: 0.9rem;
 }
+
+.error-message {
+    color: #ff0000;
+    text-align: center;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+
+
+.login-form input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.login-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
