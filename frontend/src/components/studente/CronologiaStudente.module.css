@@ -352,3 +352,23 @@
         padding: 0.75rem;
     }
 }
+
+/* Versione minimale usando solo lo stile confirmButtons */
+.chartsToggleButton {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 2rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chartsToggleButton:hover {
+  background: #5a67d8;
+}

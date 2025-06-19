@@ -14,9 +14,13 @@ const ContenutoStudente = () => {
         idEsercizio: ''
     });
     const [submitting, setSubmitting] = useState(false);
+    
+    // Stati per upload immagine
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     useEffect(() => {
-        // Get student info from sessionStorage
         const studenteData = sessionStorage.getItem('studenteSelezionato');
         if (studenteData) {
             const parsedData = JSON.parse(studenteData);
@@ -85,6 +89,65 @@ const ContenutoStudente = () => {
         }
     };
 
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setPreviewUrl(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleUploadImage = async () => {
+        if (!selectedFile) {
+            setError('Seleziona prima un\'immagine');
+            return;
+        }
+
+        setUploadingImage(true);
+        try {
+            const token = localStorage.getItem('token');
+            const uploadFormData = new FormData();
+            uploadFormData.append('image', selectedFile);
+
+            console.log('Caricando immagine:', selectedFile.name);
+
+            const response = await fetch('http://localhost:3000/api/upload-image', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: uploadFormData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Errore upload immagine');
+            }
+
+            const data = await response.json();
+            console.log('Risposta upload:', data);
+            
+            setFormData(prev => ({
+                ...prev,
+                immagine: data.imageUrl
+            }));
+            
+            setError(null);
+            alert('Immagine caricata con successo!');
+            
+        } catch (err) {
+            console.error('Errore upload:', err);
+            setError('Errore upload immagine: ' + err.message);
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -105,6 +168,8 @@ const ContenutoStudente = () => {
         try {
             const token = localStorage.getItem('token');
             
+            console.log('Inviando dati:', formData);
+            
             const response = await fetch(`http://localhost:3000/api/studenti/${studenteInfo.id}/contenuti`, {
                 method: 'POST',
                 headers: {
@@ -119,17 +184,20 @@ const ContenutoStudente = () => {
                 throw new Error(errorData.error || 'Errore nell\'aggiunta del contenuto');
             }
 
-            // Reset form e ricarica contenuti
+            // Reset form
             setFormData({
                 testo: '',
                 immagine: '',
                 idEsercizio: ''
             });
+            setSelectedFile(null);
+            setPreviewUrl(null);
             setShowForm(false);
             setError(null);
             await fetchContenuti(studenteInfo.id);
             
         } catch (err) {
+            console.error('Errore submit:', err);
             setError('Errore nell\'aggiunta del contenuto: ' + err.message);
         } finally {
             setSubmitting(false);
@@ -182,29 +250,26 @@ const ContenutoStudente = () => {
 
     return (
         <div className={styles.container}>
+            {/* Header */}
             <div className={styles.header}>
                 <button onClick={handleTornaIndietro} className={styles.backButton}>
-                    ← Torna ai Studenti
+                    ← Torna agli Studenti
                 </button>
-                
-                <div className={styles.headerContent}>
-                    <h2>Contenuti/Esercizi Assegnati</h2>
-                    <button 
-                        onClick={() => setShowForm(!showForm)}
-                        className={styles.addButton}
-                    >
-                        {showForm ? 'Annulla' : '+ Aggiungi Contenuto'}
-                    </button>
-                </div>
-                
-                {studenteInfo && (
-                    <p>Studente: <strong>{studenteInfo.nome}</strong></p>
-                )}
+                <h1>Contenuti per {studenteInfo?.nome} {studenteInfo?.cognome}</h1>
+                <button 
+                    onClick={() => setShowForm(true)} 
+                    className={styles.addButton}
+                    disabled={showForm}
+                >
+                    + Aggiungi Contenuto
+                </button>
             </div>
 
+            {/* Errori */}
             {error && (
                 <div className={styles.error}>
-                    {error}
+                    <span>⚠️ {error}</span>
+                    <button onClick={() => setError(null)}>✕</button>
                 </div>
             )}
 
@@ -244,22 +309,81 @@ const ContenutoStudente = () => {
                             </select>
                         </div>
 
+                        {/* Sezione Upload immagine */}
                         <div className={styles.formGroup}>
-                            <label htmlFor="immagine">URL Immagine (opzionale)</label>
-                            <input
-                                type="url"
-                                id="immagine"
-                                name="immagine"
-                                value={formData.immagine}
-                                onChange={handleFormChange}
-                                placeholder="https://esempio.com/immagine.jpg"
-                            />
+                            <label>Immagine</label>
+                            
+                            {/* Upload file */}
+                            <div className={styles.imageUploadSection}>
+                                <h4>Carica da computer:</h4>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileSelect}
+                                    className={styles.fileInput}
+                                />
+                                
+                                {previewUrl && (
+                                    <div className={styles.imagePreview}>
+                                        <img src={previewUrl} alt="Preview" style={{maxWidth: '200px', maxHeight: '200px'}} />
+                                    </div>
+                                )}
+                                
+                                {selectedFile && (
+                                    <button
+                                        type="button"
+                                        onClick={handleUploadImage}
+                                        disabled={uploadingImage}
+                                        className={styles.uploadButton}
+                                    >
+                                        {uploadingImage ? 'Caricando...' : 'Carica Immagine'}
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* URL manuale */}
+                            <div className={styles.urlSection}>
+                                <h4>Oppure inserisci URL:</h4>
+                                <input
+                                    type="url"
+                                    name="immagine"
+                                    value={formData.immagine}
+                                    onChange={handleFormChange}
+                                    placeholder="https://esempio.com/immagine.jpg"
+                                    className={styles.urlInput}
+                                />
+                            </div>
+
+                            {/* Immagine corrente */}
+                            {formData.immagine && (
+                                <div className={styles.currentImage}>
+                                    <h4>Immagine selezionata:</h4>
+                                    <img 
+                                        src={formData.immagine} 
+                                        alt="Immagine selezionata" 
+                                        style={{maxWidth: '200px', maxHeight: '200px'}}
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                        }}
+                                    />
+                                    <p><small>{formData.immagine}</small></p>
+                                </div>
+                            )}
                         </div>
 
                         <div className={styles.formActions}>
                             <button 
                                 type="button" 
-                                onClick={() => setShowForm(false)}
+                                onClick={() => {
+                                    setShowForm(false);
+                                    setSelectedFile(null);
+                                    setPreviewUrl(null);
+                                    setFormData({
+                                        testo: '',
+                                        immagine: '',
+                                        idEsercizio: ''
+                                    });
+                                }}
                                 className={styles.cancelButton}
                             >
                                 Annulla
@@ -276,67 +400,43 @@ const ContenutoStudente = () => {
                 </div>
             )}
 
-            <div className={styles.contentSection}>
+            {/* Lista contenuti */}
+            <div className={styles.contenutiList}>
+                <h2>Contenuti Assegnati ({contenuti.length})</h2>
                 {contenuti.length === 0 ? (
-                    <div className={styles.emptyState}>
-                        <p>Nessun contenuto assegnato a questo studente</p>
-                        <p>Usa il pulsante "Aggiungi Contenuto" per iniziare!</p>
+                    <div className={styles.noContent}>
+                        <p>Nessun contenuto assegnato a questo studente.</p>
                     </div>
                 ) : (
-                    <div className={styles.tableContainer}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>Testo/Contenuto</th>
-                                    <th>Tipo Esercizio</th>
-                                    <th>Immagine</th>
-                                    <th>Data Assegnazione</th>
-                                    <th>Completato</th>
-                                    <th>Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {contenuti.map((contenuto) => (
-                                    <tr key={contenuto.idEsercizioAssegnato}>
-                                        <td>
-                                            <strong>{contenuto.titolo}</strong>
-                                        </td>
-                                        <td>
-                                            {contenuto.tipologia} - {contenuto.descrizione}
-                                        </td>
-                                        <td>
-                                            {contenuto.immagine ? (
-                                                <a href={contenuto.immagine} target="_blank" rel="noopener noreferrer">
-                                                    🖼️ Visualizza
-                                                </a>
-                                            ) : (
-                                                'Nessuna immagine'
-                                            )}
-                                        </td>
-                                        <td>
-                                            {contenuto.data_inizio 
-                                                ? new Date(contenuto.data_inizio).toLocaleDateString('it-IT')
-                                                : 'N/D'
-                                            }
-                                        </td>
-                                        <td>
-                                            <span className={contenuto.completato ? styles.completed : styles.pending}>
-                                                {contenuto.completato ? '✅ Sì' : '❌ No'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={() => handleEliminaContenuto(contenuto.idEsercizioAssegnato, contenuto.titolo)}
-                                                className={styles.deleteButton}
-                                                title="Elimina contenuto"
-                                            >
-                                                🗑️ Elimina
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className={styles.contenutiGrid}>
+                        {contenuti.map((contenuto) => (
+                            <div key={contenuto.idEsercizioAssegnato} className={styles.contenutoCard}>
+                                <div className={styles.contenutoHeader}>
+                                    <h3>{contenuto.testo}</h3>
+                                    <button 
+                                        onClick={() => handleEliminaContenuto(contenuto.idEsercizioAssegnato, contenuto.testo)}
+                                        className={styles.deleteButton}
+                                    >
+                                        🗑️
+                                    </button>
+                                </div>
+                                <p><strong>Tipo:</strong> {contenuto.tipologia}</p>
+                                <p><strong>Descrizione:</strong> {contenuto.descrizione}</p>
+                                <p><strong>Assegnato il:</strong> {new Date(contenuto.data_assegnazione).toLocaleDateString()}</p>
+                                
+                                {contenuto.immagine && (
+                                    <div className={styles.contenutoImage}>
+                                        <img 
+                                            src={contenuto.immagine} 
+                                            alt={contenuto.testo}
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>

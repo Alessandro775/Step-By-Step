@@ -353,3 +353,52 @@
     padding: 40px;
     color: #666;
 }
+.imageUploadSection {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.urlSection {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.fileInput {
+    margin-bottom: 10px;
+}
+
+.uploadButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.uploadButton:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.imagePreview, .currentImage {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.imagePreview img, .currentImage img {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.urlInput {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
