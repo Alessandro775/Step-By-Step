@@ -10,11 +10,20 @@ const LoginPage = () => {
         password: ''
     });
 
+     // Aggiungi stato per gestire gli errori
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
+        
+        // Pulisce l'errore quando l'utente inizia a digitare
+        if (error) {
+            setError('');
+        }
     };
     
     const handleSubmit = async (e) => {
@@ -60,9 +69,11 @@ const LoginPage = () => {
         }
 
     } catch (error) {
-        console.error('Errore login:', error);
-        // Qui puoi aggiungere un feedback visuale per l'utente
-    }
+    console.error('Errore login:', error);
+    setError(error.message || 'Errore durante il login');
+    setLoading(false); // Aggiungi anche questo se usi loading
+}
+
 };
 
     return (
@@ -89,6 +100,12 @@ const LoginPage = () => {
                     required
                 />
             </div>
+                             {/* Mostra il messaggio di errore */}
+{error && (
+    <div className={styles["error-message"]}>
+        {error}
+    </div>
+)}
             <button type="submit">Invia</button>
             <div className={styles.divider}>
              <span>Non hai un account?</span>
