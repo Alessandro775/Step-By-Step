@@ -21,7 +21,7 @@ app.use(express.json());
 // Configurazione Database
 const db = mysql.createConnection({
 
-  host: "172.29.9.225",
+  host: "1",
   user: "alessandro",
   password: "123456",
   database: "step_by_step",
@@ -109,7 +109,6 @@ app.post("/api/register", async (req, res) => {
             email_studente,
           ];
 
-          // CORREZIONE: usa insertFamigliaQuery invece di query
           db.query(insertFamigliaQuery, params, (err, result) => {
             if (err) {
               console.error("Errore registrazione:", err);
@@ -120,10 +119,33 @@ app.post("/api/register", async (req, res) => {
                 .status(500)
                 .json({ error: "Errore durante la registrazione" });
             }
-            console.log("Registrazione completata per:", email);
-            res
-              .status(201)
-              .json({ message: "Registrazione completata con successo" });
+            
+            console.log("Registrazione famiglia completata per:", email);
+            
+            // ✅ GENERA TOKEN DOPO REGISTRAZIONE FAMIGLIA
+            const newUserId = result.insertId;
+            const token = jwt.sign(
+              {
+                id: newUserId,
+                ruolo: "G",
+              },
+              JWT_SECRET,
+              {
+                expiresIn: "1h",
+              }
+            );
+
+            // ✅ RESTITUISCI TOKEN E DATI UTENTE
+            res.status(201).json({
+              message: "Registrazione completata con successo",
+              token,
+              ruolo: "G",
+              user: {
+                id: newUserId,
+                cognome_famiglia,
+                email,
+              },
+            });
           });
         }
       );
@@ -159,10 +181,34 @@ app.post("/api/register", async (req, res) => {
             .status(500)
             .json({ error: "Errore durante la registrazione" });
         }
+        
         console.log("Registrazione completata per:", email);
-        res
-          .status(201)
-          .json({ message: "Registrazione completata con successo" });
+        
+        // ✅ GENERA TOKEN DOPO REGISTRAZIONE STUDENTE/EDUCATORE
+        const newUserId = result.insertId;
+        const token = jwt.sign(
+          {
+            id: newUserId,
+            ruolo: ruolo,
+          },
+          JWT_SECRET,
+          {
+            expiresIn: "1h",
+          }
+        );
+
+        // ✅ RESTITUISCI TOKEN E DATI UTENTE
+        res.status(201).json({
+          message: "Registrazione completata con successo",
+          token,
+          ruolo: ruolo,
+          user: {
+            id: newUserId,
+            nome,
+            cognome,
+            email,
+          },
+        });
       });
     }
   } catch (error) {
@@ -170,6 +216,7 @@ app.post("/api/register", async (req, res) => {
     return res.status(500).json({ error: "Errore interno del server" });
   }
 });
+
 
 
 app.post("/api/login", async (req, res) => {
