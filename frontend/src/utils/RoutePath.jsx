@@ -9,7 +9,8 @@ import EsempioEsercizio from "../pages/non loggato/EsempioEsercizio";
 import ProfuloStudente from "../pages/studente/ProfiloStudente";
 import EsercizioAudio from "../pages/studente/EsercizioAudio";
 import HomePageStudente from "../pages/studente/HomePageStudente";  
-import CronologiaStudente from "../pages/studente/CronologiaStudente"; // Importa il componente CorpoHomePage
+import CronologiaStudente from "../pages/studente/CronologiaStudente";
+ // Importa il componente CorpoHomePage
 
 // Import pagine educatore
 import ProfiloEducatore from "../pages/educatore/ProfiloEducatore";

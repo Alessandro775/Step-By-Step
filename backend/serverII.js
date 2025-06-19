@@ -3,28 +3,179 @@ const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const multer = require("multer"); // NUOVO
+const path = require("path"); // NUOVO
+const fs = require("fs"); // NUOVO
 
 // Configurazioni base
 const app = express();
 const port = 3000;
 const JWT_SECRET = "balla";
 
-// Middleware
+// Middleware esistenti
 app.use(
   cors({
-    origin: "*", //permette di far collegare qualsiasi PC al server
+    origin: "*",
     credentials: true,
   })
 );
 app.use(express.json());
 
+// NUOVO: Servire file statici dalla cartella uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// NUOVO: Configurazione Multer per upload immagini
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(__dirname, 'uploads', 'images');
+    
+    // Crea la cartella se non esiste
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    // Genera nome file unico: timestamp + nome originale
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = path.extname(file.originalname);
+    cb(null, 'img-' + uniqueSuffix + extension);
+  }
+});
+
+// Filtro per accettare solo immagini
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Tipo di file non supportato. Usa JPG, PNG, GIF o WebP'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // Limite 5MB
+  }
+});
+
+// NUOVA ROUTE: Upload immagine
+app.post("/api/upload-image", autentica, upload.single('image'), (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono caricare immagini.",
+    });
+  }
+
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nessun file caricato' });
+    }
+
+    // Costruisci l'URL dell'immagine
+    const imageUrl = `http://localhost:${port}/uploads/images/${req.file.filename}`;
+    
+    console.log('Immagine caricata:', req.file.filename);
+    
+    res.json({
+      message: 'Immagine caricata con successo',
+      imageUrl: imageUrl,
+      filename: req.file.filename
+    });
+    
+  } catch (error) {
+    console.error('Errore upload immagine:', error);
+    res.status(500).json({ error: 'Errore durante il caricamento dell\'immagine' });
+  }
+});
+
+// MODIFICA la route esistente per creare contenuti
+app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono aggiungere contenuti.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  const idStudente = req.params.idStudente;
+  const { testo, immagine, idEsercizio } = req.body;
+
+  console.log("=== AGGIUNTA CONTENUTO CON IMMAGINE ===");
+  console.log("Educatore:", idEducatore);
+  console.log("Studente:", idStudente);
+  console.log("Dati:", { testo, immagine, idEsercizio });
+
+  // Validazione dati
+  if (!testo || !idEsercizio) {
+    return res.status(400).json({
+      error: "Campi obbligatori mancanti: testo, idEsercizio",
+    });
+  }
+
+  // Verifica che lo studente sia assegnato all'educatore
+  const verificaAssegnazione = `
+    SELECT * FROM assegnazione 
+    WHERE idEducatore = ? AND idStudente = ?
+  `;
+
+  db.query(verificaAssegnazione, [idEducatore, idStudente], (err, assegnazione) => {
+    if (err) {
+      console.error("Errore verifica assegnazione:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    if (assegnazione.length === 0) {
+      return res.status(403).json({
+        error: "Studente non assegnato a questo educatore",
+      });
+    }
+
+    // Inserisci in esercizio_assegnato con l'URL dell'immagine
+    const insertQuery = `
+      INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine) 
+      VALUES (?, ?, ?, CURDATE(), ?, ?)
+    `;
+
+    db.query(insertQuery, [idStudente, idEsercizio, idEducatore, testo, immagine || null], (err, result) => {
+      if (err) {
+        console.error("Errore inserimento contenuto:", err);
+        return res.status(500).json({ error: "Errore inserimento contenuto" });
+      }
+
+      res.status(201).json({
+        message: "Contenuto creato e assegnato con successo",
+        idEsercizioAssegnato: result.insertId,
+      });
+    });
+  });
+});
+
+// Gestione errori Multer
+app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'File troppo grande. Massimo 5MB' });
+    }
+  }
+  
+  if (error.message === 'Tipo di file non supportato. Usa JPG, PNG, GIF o WebP') {
+    return res.status(400).json({ error: error.message });
+  }
+  
+  next(error);
+});
+
 // Configurazione Database
 const db = mysql.createConnection({
-
-  host: "localhost",
+   host: "localhost",
   user: "root",
   password: "",
-  database: "step_by_step",
+=  database: "step_by_step",
   port: 3306,
 });
 
