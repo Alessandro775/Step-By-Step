@@ -1,40 +1,65 @@
+/* Container principale */
 .container {
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
+/* Header section */
 .header {
-    margin-bottom: 30px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
 }
 
+.headerLeft {
+    flex: 0 0 auto;
+}
+
+.headerCenter {
+    flex: 1;
+    text-align: center;
+}
+
+.headerCenter h2 {
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.headerCenter p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.headerRight {
+    flex: 0 0 auto;
+}
+
+/* Back Button */
 .backButton {
-    background-color: #6c757d;
+    background-color: #6b7280;
     color: white;
     border: none;
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 6px;
+    font-size: 0.9rem;
     cursor: pointer;
-    margin-bottom: 15px;
-    font-size: 14px;
+    transition: background-color 0.2s;
 }
 
 .backButton:hover {
-    background-color: #5a6268;
+    background-color: #4b5563;
 }
 
-.header h2 {
-    margin: 10px 0;
-    color: #333;
-}
-
-.header p {
-    margin: 5px 0;
-    color: #666;
-}
-
+/* Loading state */
 .loading {
     display: flex;
     align-items: center;
@@ -57,6 +82,7 @@
     100% { transform: rotate(360deg); }
 }
 
+/* Error state */
 .error {
     background-color: #f8d7da;
     color: #721c24;
@@ -66,12 +92,19 @@
     border: 1px solid #f5c6cb;
 }
 
+/* Empty state */
 .emptyState {
     text-align: center;
     padding: 50px;
     color: #666;
 }
 
+/* Content section */
+.contentSection {
+    margin-top: 1rem;
+}
+
+/* Table styles */
 .tableContainer {
     overflow-x: auto;
     background: white;
@@ -105,6 +138,7 @@
     background-color: #f8f9fa;
 }
 
+/* Status indicators */
 .completed {
     color: #28a745;
     font-weight: bold;
@@ -113,4 +147,208 @@
 .pending {
     color: #dc3545;
     font-weight: bold;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 1rem 0.5rem;
+    }
+    
+    .headerLeft,
+    .headerCenter,
+    .headerRight {
+        flex: none;
+    }
+    
+    .headerCenter h2 {
+        font-size: 1.25rem;
+    }
+    
+    .headerCenter p {
+        font-size: 0.9rem;
+    }
+    
+    .backButton {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    
+    .table {
+        font-size: 12px;
+    }
+    
+    .table th,
+    .table td {
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 0.75rem 0.25rem;
+    }
+    
+    .headerCenter h2 {
+        font-size: 1.1rem;
+    }
+    
+    .headerCenter p {
+        font-size: 0.8rem;
+    }
+    
+    .table {
+        min-width: 500px;
+    }
+}
+.chartsFullScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #f8fafc;
+    z-index: 1000;
+    overflow-y: auto;
+    animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.chartsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: white;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.chartsHeader .headerCenter h1 {
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.chartsHeader .headerCenter p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.chartsContent {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.chartsFullScreen .chartContainer {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.chartsFullScreen .chartContainer h3 {
+    margin: 0 0 1.5rem 0;
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Pulsante per visualizzare i grafici */
+.chartsButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+}
+
+.chartsButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.chartsButton:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive per la vista grafici */
+@media (max-width: 768px) {
+    .chartsHeader {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .chartsHeader .headerLeft,
+    .chartsHeader .headerCenter,
+    .chartsHeader .headerRight {
+        flex: none;
+    }
+    
+    .chartsHeader .headerCenter h1 {
+        font-size: 1.5rem;
+    }
+    
+    .chartsContent {
+        padding: 1rem;
+    }
+    
+    .chartsFullScreen .chartContainer {
+        padding: 1rem;
+    }
+    
+    .chartsFullScreen .chartContainer h3 {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .chartsContent {
+        padding: 0.5rem;
+    }
+    
+    .chartsFullScreen .chartContainer {
+        padding: 0.75rem;
+    }
 }

@@ -471,6 +471,46 @@ app.get("/api/student-profile", autentica, (req, res) => {
   });
 });
 
+// Route per ottenere studenti dell'educatore
+app.get('/api/studenti', autentica, (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono vedere gli studenti.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  
+  console.log("=== FETCH STUDENTI BACKEND ===");
+  console.log("ID Educatore:", idEducatore);
+  
+  const query = `
+    SELECT 
+      s.idStudente, 
+      s.nome, 
+      s.cognome, 
+      s.email, 
+      s.istituto, 
+      s.classe, 
+      s.anno_scolastico,
+      a.data_assegnazione
+    FROM studente s
+    JOIN assegnazione a ON s.idStudente = a.idStudente
+    WHERE a.idEducatore = ?
+    ORDER BY s.cognome, s.nome
+  `;
+  
+  db.query(query, [idEducatore], (err, results) => {
+    if (err) {
+      console.error('Errore query studenti:', err);
+      return res.status(500).json({ error: 'Errore nel caricamento studenti' });
+    }
+    
+    console.log("Studenti trovati:", results.length);
+    res.json(results);
+  });
+});
+
 // Route per aggiungere studente (solo educatori)
 app.post("/api/studenti", autentica, (req, res) => {
   if (req.utente.ruolo !== "E") {
