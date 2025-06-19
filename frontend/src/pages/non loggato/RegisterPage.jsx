@@ -70,8 +70,22 @@ const RegisterPage = () => {
       console.log("Risposta registrazione:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Errore durante la registrazione');
+      // Gestisci diversi tipi di errore
+      if (response.status === 409 || (data.error && data.error.toLowerCase().includes('email'))) {
+        // Errore specifico per email già esistente
+        setErrors(prev => ({
+          ...prev,
+          email: 'Questa email è già registrata'
+        }));
+      } else {
+        // Altri errori generici
+        setErrors(prev => ({
+          ...prev,
+          submit: data.error || 'Errore durante la registrazione'
+        }));
       }
+      return;
+    }
 
       // ✅ GESTIONE TOKEN E AUTO-LOGIN
       if (data.token) {
@@ -272,20 +286,33 @@ const RegisterPage = () => {
           )}
 
           <div className={styles["form-grid"]}>
-            <div>
-              <label className={styles["input-label"]} htmlFor="email"></label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                className={styles["custom-input"]}
-                required
-              />
-            </div>
-            <div></div>
-          </div>
+  <div>
+    <label className={styles["input-label"]} htmlFor="email"></label>
+    <input
+      id="email"
+      type="email"
+      value={email}
+      onChange={(e) => {
+        setEmail(e.target.value);
+        // Pulisci l'errore email quando l'utente digita
+        if (errors.email) {
+          setErrors(prev => ({ ...prev, email: "" }));
+        }
+      }}
+      placeholder="Email"
+      className={`${styles["custom-input"]} ${errors.email ? styles["input-error"] : ""}`}
+      required
+    />
+    {/* Messaggio di errore specifico per email */}
+    {errors.email && (
+      <div className={styles["error-message"]}>
+        {errors.email}
+      </div>
+    )}
+  </div>
+  <div></div>
+</div>
+
 
           <div className={styles["password-grid"]}>
             <div>
