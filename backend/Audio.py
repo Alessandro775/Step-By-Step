@@ -22,7 +22,7 @@ CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://loc
 
 # Configurazione Database
 DB_CONFIG = {
-    'host': '172.29.9.225',
+    'host': '192.168.1.174',
     'user': 'alessandro',
     'password': '123456',
     'database': 'step_by_step',
@@ -64,10 +64,19 @@ def get_parole_per_studente(id_studente):
             testo = row[1]
             immagine = row[2]
             
-            # Validazione e correzione del link dell'immagine
+            # Gestione migliorata delle immagini
             if immagine and isinstance(immagine, str) and immagine.strip():
                 immagine = immagine.strip()
-                if not immagine.startswith(('http://', 'https://')):
+                
+                # Se inizia con 'http://localhost:3000/uploads', è un file locale del backend Node.js
+                if immagine.startswith('http://localhost:3000/uploads'):
+                    # Mantieni l'URL così com'è
+                    pass
+                # Se inizia con '/', è un file locale - aggiungi il dominio del frontend
+                elif immagine.startswith('/'):
+                    immagine = f'http://localhost:3000{immagine}'
+                # Se non inizia con http, aggiungilo
+                elif not immagine.startswith(('http://', 'https://')):
                     if immagine.startswith('//'):
                         immagine = 'https:' + immagine
                     else:
@@ -95,6 +104,7 @@ def get_parole_per_studente(id_studente):
         if connection.is_connected():
             cursor.close()
             connection.close()
+
 
 def get_parole_italiane_from_db():
     """Recupera tutte le parole italiane dal database (per compatibilità)"""

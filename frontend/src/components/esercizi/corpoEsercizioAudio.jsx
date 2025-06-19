@@ -215,6 +215,50 @@ const CorpoEsercizioAudio = () => {
         }
     };
 
+    // Aggiungi questo stato per gestire meglio il caricamento
+const [imageLoading, setImageLoading] = useState(false);
+
+// Modifica la sezione delle immagini nel JSX
+{parolaRiferimento && (
+    <div className={styles.imageContainer}>
+        {immagineParola && !imageError ? (
+            <>
+                {imageLoading && (
+                    <div className={styles.imageLoader}>
+                        <p>🔄 Caricamento immagine...</p>
+                    </div>
+                )}
+                <img 
+                    src={immagineParola} 
+                    alt={parolaRiferimento}
+                    className={styles.wordImage}
+                    style={{ display: imageLoading ? 'none' : 'block' }}
+                    onLoadStart={() => {
+                        console.log('🔄 Inizio caricamento immagine:', immagineParola);
+                        setImageLoading(true);
+                    }}
+                    onLoad={() => {
+                        console.log('✅ Immagine caricata con successo:', immagineParola);
+                        setImageLoading(false);
+                    }}
+                    onError={(e) => {
+                        console.error('❌ Errore caricamento immagine:', immagineParola);
+                        setImageError(true);
+                        setImageLoading(false);
+                        e.target.style.display = 'none';
+                    }}
+                    crossOrigin="anonymous"
+                />
+            </>
+        ) : (
+            <div className={styles.placeholderImage}>
+                <h3>📝 {parolaRiferimento}</h3>
+                <p>Immagine non disponibile</p>
+            </div>
+        )}
+    </div>
+)}
+
     const sendAudioForEvaluation = async (audioBlob) => {
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.wav');
@@ -282,7 +326,7 @@ const CorpoEsercizioAudio = () => {
 
     const getServerStatusText = () => {
         switch (serverStatus) {
-            case 'connected': return `🟢 Server connesso (${availableWords} parole disponibili)`;
+            case 'connected': return `🟢 Server connesso`;
             case 'disconnected': return '🔴 Server disconnesso';
             case 'error': return '🟡 Errore server';
             default: return '🔄 Verificando server...';
