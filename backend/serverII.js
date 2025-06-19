@@ -1142,8 +1142,90 @@ app.put("/api/family-profile", autentica, (req, res) => {
   });
 });
 
+// Route per eliminare il profilo studente
+app.delete("/api/student-profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "S") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli studenti possono eliminare il profilo.",
+    });
+  }
 
-// Route per eliminare il profilo famiglia
+  const idStudente = req.utente.id;
+  console.log("Eliminazione profilo per studente ID:", idStudente);
+
+  // STEP 1: Elimina tutti i risultati degli esercizi dello studente
+  const deleteRisultatiQuery = `
+    DELETE r FROM risultato r
+    JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+    WHERE ea.idStudente = ?
+  `;
+
+  db.query(deleteRisultatiQuery, [idStudente], (err, result1) => {
+    if (err) {
+      console.error("Errore eliminazione risultati studente:", err);
+      return res.status(500).json({ error: "Errore eliminazione risultati" });
+    }
+
+    console.log("Risultati studente eliminati:", result1.affectedRows);
+
+    // STEP 2: Elimina tutti gli esercizi assegnati allo studente
+    const deleteEserciziAssegnatiQuery = "DELETE FROM esercizio_assegnato WHERE idStudente = ?";
+
+    db.query(deleteEserciziAssegnatiQuery, [idStudente], (err, result2) => {
+      if (err) {
+        console.error("Errore eliminazione esercizi assegnati studente:", err);
+        return res.status(500).json({ error: "Errore eliminazione esercizi assegnati" });
+      }
+
+      console.log("Esercizi assegnati studente eliminati:", result2.affectedRows);
+
+      // STEP 3: Elimina le assegnazioni studente-educatori
+      const deleteAssegnazioniQuery = "DELETE FROM assegnazione WHERE idStudente = ?";
+
+      db.query(deleteAssegnazioniQuery, [idStudente], (err, result3) => {
+        if (err) {
+          console.error("Errore eliminazione assegnazioni studente:", err);
+          return res.status(500).json({ error: "Errore eliminazione assegnazioni" });
+        }
+
+        console.log("Assegnazioni studente eliminate:", result3.affectedRows);
+
+        // STEP 4: Elimina il profilo studente
+        const deleteStudenteQuery = "DELETE FROM studente WHERE idStudente = ?";
+
+        db.query(deleteStudenteQuery, [idStudente], (err, result4) => {
+          if (err) {
+            console.error("Errore eliminazione studente:", err);
+            return res.status(500).json({ error: "Errore eliminazione studente" });
+          }
+
+          if (result4.affectedRows === 0) {
+            return res.status(404).json({ error: "Profilo studente non trovato" });
+          }
+
+          console.log("Profilo studente eliminato con successo");
+          console.log("Riepilogo eliminazione studente:");
+          console.log("- Risultati eliminati:", result1.affectedRows);
+          console.log("- Esercizi assegnati eliminati:", result2.affectedRows);
+          console.log("- Assegnazioni eliminate:", result3.affectedRows);
+          console.log("- Studente eliminato:", result4.affectedRows);
+          
+          res.json({ 
+            message: "Profilo eliminato con successo",
+            dettagli: {
+              risultati: result1.affectedRows,
+              esercizi_assegnati: result2.affectedRows,
+              assegnazioni: result3.affectedRows,
+              studente: result4.affectedRows
+            }
+          });
+        });
+      });
+    });
+  });
+});
+
+// Route per eliminare il profilo famiglia (già esistente, ma migliorata)
 app.delete("/api/family-profile", autentica, (req, res) => {
   if (req.utente.ruolo !== "G") {
     return res.status(403).json({
@@ -1154,7 +1236,7 @@ app.delete("/api/family-profile", autentica, (req, res) => {
   const idFamiglia = req.utente.id;
   console.log("Eliminazione profilo per famiglia ID:", idFamiglia);
 
-  // Elimina direttamente il profilo famiglia
+  // Elimina direttamente il profilo famiglia (non ha dipendenze)
   const deleteFamigliaQuery = "DELETE FROM famiglia WHERE idFamiglia = ?";
   
   db.query(deleteFamigliaQuery, [idFamiglia], (err, result) => {
@@ -1164,14 +1246,207 @@ app.delete("/api/family-profile", autentica, (req, res) => {
     }
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Profilo non trovato" });
+      return res.status(404).json({ error: "Profilo famiglia non trovato" });
     }
 
     console.log("Profilo famiglia eliminato con successo");
-    res.json({ message: "Profilo eliminato con successo" });
+    console.log("Riepilogo eliminazione famiglia:");
+    console.log("- Famiglia eliminata:", result.affectedRows);
+    
+    res.json({ 
+      message: "Profilo eliminato con successo",
+      dettagli: {
+        famiglia: result.affectedRows
+      }
+    });
   });
 });
 
+
+// ==================== ELIMINAZIONE PROFILO EDUCATORE ====================
+app.delete("/api/profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono eliminare il profilo.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  console.log("=== ELIMINAZIONE EDUCATORE ===");
+  console.log("ID Educatore:", idEducatore);
+
+  // STEP 1: Elimina tutti i risultati degli esercizi assegnati dall'educatore
+  const deleteRisultatiQuery = `
+    DELETE r FROM risultato r
+    JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+    WHERE ea.idEducatore = ?
+  `;
+
+  db.query(deleteRisultatiQuery, [idEducatore], (err, result1) => {
+    if (err) {
+      console.error("Errore eliminazione risultati:", err);
+      return res.status(500).json({ error: "Errore eliminazione risultati" });
+    }
+    console.log("Risultati eliminati:", result1.affectedRows);
+
+    // STEP 2: Elimina tutti gli esercizi assegnati dall'educatore
+    const deleteEserciziAssegnatiQuery = "DELETE FROM esercizio_assegnato WHERE idEducatore = ?";
+
+    db.query(deleteEserciziAssegnatiQuery, [idEducatore], (err, result2) => {
+      if (err) {
+        console.error("Errore eliminazione esercizi assegnati:", err);
+        return res.status(500).json({ error: "Errore eliminazione esercizi assegnati" });
+      }
+      console.log("Esercizi assegnati eliminati:", result2.affectedRows);
+
+      // STEP 3: Elimina le assegnazioni studenti-educatore
+      const deleteAssegnazioniQuery = "DELETE FROM assegnazione WHERE idEducatore = ?";
+
+      db.query(deleteAssegnazioniQuery, [idEducatore], (err, result3) => {
+        if (err) {
+          console.error("Errore eliminazione assegnazioni:", err);
+          return res.status(500).json({ error: "Errore eliminazione assegnazioni" });
+        }
+        console.log("Assegnazioni eliminate:", result3.affectedRows);
+
+        // STEP 4: Elimina il profilo educatore
+        const deleteEducatoreQuery = "DELETE FROM educatore WHERE idEducatore = ?";
+
+        db.query(deleteEducatoreQuery, [idEducatore], (err, result4) => {
+          if (err) {
+            console.error("Errore eliminazione educatore:", err);
+            return res.status(500).json({ error: "Errore eliminazione educatore" });
+          }
+
+          if (result4.affectedRows === 0) {
+            return res.status(404).json({ error: "Profilo educatore non trovato" });
+          }
+
+          console.log("=== EDUCATORE ELIMINATO CON SUCCESSO ===");
+          res.json({ 
+            message: "Profilo eliminato con successo",
+            dettagli: {
+              risultati: result1.affectedRows,
+              esercizi_assegnati: result2.affectedRows,
+              assegnazioni: result3.affectedRows,
+              educatore: result4.affectedRows
+            }
+          });
+        });
+      });
+    });
+  });
+});
+
+// ==================== ELIMINAZIONE PROFILO STUDENTE ====================
+app.delete("/api/student-profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "S") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli studenti possono eliminare il profilo.",
+    });
+  }
+
+  const idStudente = req.utente.id;
+  console.log("=== ELIMINAZIONE STUDENTE ===");
+  console.log("ID Studente:", idStudente);
+
+  // STEP 1: Elimina tutti i risultati degli esercizi dello studente
+  const deleteRisultatiQuery = `
+    DELETE r FROM risultato r
+    JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+    WHERE ea.idStudente = ? OR r.idStudente = ?
+  `;
+
+  db.query(deleteRisultatiQuery, [idStudente, idStudente], (err, result1) => {
+    if (err) {
+      console.error("Errore eliminazione risultati studente:", err);
+      return res.status(500).json({ error: "Errore eliminazione risultati" });
+    }
+    console.log("Risultati studente eliminati:", result1.affectedRows);
+
+    // STEP 2: Elimina tutti gli esercizi assegnati allo studente
+    const deleteEserciziAssegnatiQuery = "DELETE FROM esercizio_assegnato WHERE idStudente = ?";
+
+    db.query(deleteEserciziAssegnatiQuery, [idStudente], (err, result2) => {
+      if (err) {
+        console.error("Errore eliminazione esercizi assegnati studente:", err);
+        return res.status(500).json({ error: "Errore eliminazione esercizi assegnati" });
+      }
+      console.log("Esercizi assegnati studente eliminati:", result2.affectedRows);
+
+      // STEP 3: Elimina le assegnazioni studente-educatori
+      const deleteAssegnazioniQuery = "DELETE FROM assegnazione WHERE idStudente = ?";
+
+      db.query(deleteAssegnazioniQuery, [idStudente], (err, result3) => {
+        if (err) {
+          console.error("Errore eliminazione assegnazioni studente:", err);
+          return res.status(500).json({ error: "Errore eliminazione assegnazioni" });
+        }
+        console.log("Assegnazioni studente eliminate:", result3.affectedRows);
+
+        // STEP 4: Elimina il profilo studente
+        const deleteStudenteQuery = "DELETE FROM studente WHERE idStudente = ?";
+
+        db.query(deleteStudenteQuery, [idStudente], (err, result4) => {
+          if (err) {
+            console.error("Errore eliminazione studente:", err);
+            return res.status(500).json({ error: "Errore eliminazione studente" });
+          }
+
+          if (result4.affectedRows === 0) {
+            return res.status(404).json({ error: "Profilo studente non trovato" });
+          }
+
+          console.log("=== STUDENTE ELIMINATO CON SUCCESSO ===");
+          res.json({ 
+            message: "Profilo eliminato con successo",
+            dettagli: {
+              risultati: result1.affectedRows,
+              esercizi_assegnati: result2.affectedRows,
+              assegnazioni: result3.affectedRows,
+              studente: result4.affectedRows
+            }
+          });
+        });
+      });
+    });
+  });
+});
+
+// ==================== ELIMINAZIONE PROFILO FAMIGLIA ====================
+app.delete("/api/family-profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "G") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo le famiglie possono eliminare il profilo.",
+    });
+  }
+
+  const idFamiglia = req.utente.id;
+  console.log("=== ELIMINAZIONE FAMIGLIA ===");
+  console.log("ID Famiglia:", idFamiglia);
+
+  // La famiglia non ha dipendenze dirette nel database, elimina direttamente
+  const deleteFamigliaQuery = "DELETE FROM famiglia WHERE idFamiglia = ?";
+  
+  db.query(deleteFamigliaQuery, [idFamiglia], (err, result) => {
+    if (err) {
+      console.error("Errore eliminazione famiglia:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Profilo famiglia non trovato" });
+    }
+
+    console.log("=== FAMIGLIA ELIMINATA CON SUCCESSO ===");
+    res.json({ 
+      message: "Profilo eliminato con successo",
+      dettagli: {
+        famiglia: result.affectedRows
+      }
+    });
+  });
+});
 
   
 

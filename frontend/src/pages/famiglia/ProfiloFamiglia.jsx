@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../ProfilePage.module.css';
-import Header from '../../components/Header/HeaderFamiglia';
-import Footer from '../../components/footer/Footer';
 
-const FamilyPage = () => {
+const profiloFamilgia = () => {
   const navigate = useNavigate();
   
-  // State per gestire la modalità di modifica
   const [isEditing, setIsEditing] = useState(false);
-  
-  // State per la finestra di conferma eliminazione
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  // State per memorizzare le informazioni della famiglia (CORRETTO per DB)
   const [userInfo, setUserInfo] = useState({
     cognome_famiglia: '',
     email: '',
@@ -21,16 +14,10 @@ const FamilyPage = () => {
     email_studente: ''
   });
 
-  // useEffect per caricare i dati del profilo dal database
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-
         const response = await fetch('http://localhost:3000/api/family-profile', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -45,36 +32,25 @@ const FamilyPage = () => {
         setUserInfo(profileData);
       } catch (error) {
         console.error('Errore caricamento profilo:', error);
-        alert('Errore nel caricamento del profilo: ' + error.message);
       }
     };
 
     loadProfile();
-  }, [navigate]);
+  }, []);
 
-  // Funzione per attivare/disattivare la modalità modifica
   const handleEdit = () => {
     setIsEditing(!isEditing);
   };
 
-  // Funzione per salvare le modifiche (IMPLEMENTATA)
   const handleSave = async () => {
     try {
-      // Validazione locale
-      if (!userInfo.cognome_famiglia || !userInfo.numero_telefono || !userInfo.email_studente) {
-        alert('Tutti i campi sono obbligatori');
-        return;
-      }
-
       const token = localStorage.getItem('token');
-      
-      // Invia solo i campi modificabili (ESCLUDI L'EMAIL principale)
       const updateData = {
         cognome_famiglia: userInfo.cognome_famiglia,
         numero_telefono: userInfo.numero_telefono,
         email_studente: userInfo.email_studente
       };
-
+      
       const response = await fetch('http://localhost:3000/api/family-profile', {
         method: 'PUT',
         headers: {
@@ -90,14 +66,13 @@ const FamilyPage = () => {
       }
 
       setIsEditing(false);
-      console.log('Profilo salvato con successo');
+      alert('Profilo salvato con successo!');
     } catch (error) {
       console.error('Errore salvataggio:', error);
-      alert('Errore durante il salvataggio: ' + error.message);
+      alert(`Errore nel salvataggio: ${error.message}`);
     }
   };
 
-  // Funzione per gestire i cambiamenti negli input
   const handleInputChange = (field, value) => {
     setUserInfo(prev => ({
       ...prev,
@@ -105,11 +80,13 @@ const FamilyPage = () => {
     }));
   };
 
-  // Funzione per confermare l'eliminazione (IMPLEMENTATA)
+  const handleDeleteProfile = () => {
+    setShowDeleteConfirm(true);
+  };
+
   const confirmDelete = async () => {
     try {
       const token = localStorage.getItem('token');
-      
       const response = await fetch('http://localhost:3000/api/family-profile', {
         method: 'DELETE',
         headers: {
@@ -118,55 +95,46 @@ const FamilyPage = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Errore nell\'eliminazione del profilo');
+        const errorData = await response.json();
+        console.error('Errore dal server:', errorData);
+        throw new Error(errorData.error || 'Errore nell\'eliminazione');
       }
 
-      // Effettua il logout
-      localStorage.removeItem('token');
-      localStorage.removeItem('userType');
-      localStorage.removeItem('userData');
+      const result = await response.json();
+      console.log('Eliminazione completata:', result);
+
+      setShowDeleteConfirm(false);
       
-      // Redirect alla home
+      // Logout completo
+      localStorage.removeItem('token');
+      localStorage.removeItem('ruolo');
+      
+      alert('Profilo famiglia eliminato con successo!');
       navigate('/');
     } catch (error) {
-      console.error('Errore eliminazione:', error);
-      alert('Errore durante l\'eliminazione: ' + error.message);
+      console.error('Errore eliminazione profilo:', error);
+      alert(`Errore nell'eliminazione del profilo: ${error.message}`);
+      setShowDeleteConfirm(false);
     }
-    
-    setShowDeleteConfirm(false);
   };
 
-  // Funzione per annullare l'eliminazione
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
   };
 
-  // Funzione per mostrare la conferma di eliminazione
-  const handleDeleteProfile = () => {
-    setShowDeleteConfirm(true);
-  };
-
   return (
     <div className={styles.profileContainer}>
-      <Header />
-      
       <div className={styles.profileContent}>
-        {/* BLOCCO INFORMAZIONI PERSONALI */}
         <div className={styles.infoBlock}>
           <div className={styles.blockHeader}>
-            <h2 className={styles.blockTitle}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-              </svg>
-              Informazioni Famiglia
-            </h2>
+            <h2 className={styles.blockTitle}>Profilo Famiglia</h2>
             <button onClick={handleEdit} className={styles.editBtn}>
               {isEditing ? 'Annulla' : 'Modifica'}
             </button>
           </div>
 
           <div className={styles.infoGrid}>
-            {/* Riga Cognome Famiglia */}
+            {/* Cognome Famiglia */}
             <div className={styles.singleRow}>
               <div className={styles.infoItem}>
                 <label>Cognome Famiglia</label>
@@ -183,27 +151,28 @@ const FamilyPage = () => {
               </div>
             </div>
 
-            {/* Riga Email (NON MODIFICABILE) */}
+            {/* Email - SEMPRE READONLY */}
             <div className={styles.singleRow}>
               <div className={styles.infoItem}>
                 <label>Email</label>
                 <div className={styles.infoValue}>{userInfo.email}</div>
                 {isEditing && (
-                  <small className={styles.helpText}>L'email non può essere modificata</small>
+                  <small className={styles.emailNote}>L'email non può essere modificata</small>
                 )}
               </div>
             </div>
 
-            {/* Riga Telefono */}
+            {/* Numero Telefono */}
             <div className={styles.singleRow}>
               <div className={styles.infoItem}>
-                <label>Numero Telefono</label>
+                <label>Numero di Telefono</label>
                 {isEditing ? (
                   <input
                     type="tel"
                     value={userInfo.numero_telefono}
                     onChange={(e) => handleInputChange('numero_telefono', e.target.value)}
                     className={styles.inputField}
+                    placeholder="es. 333 123 4567"
                   />
                 ) : (
                   <div className={styles.infoValue}>{userInfo.numero_telefono}</div>
@@ -211,7 +180,7 @@ const FamilyPage = () => {
               </div>
             </div>
 
-            {/* Riga Email Studente */}
+            {/* Email Studente */}
             <div className={styles.singleRow}>
               <div className={styles.infoItem}>
                 <label>Email Studente</label>
@@ -221,12 +190,22 @@ const FamilyPage = () => {
                     value={userInfo.email_studente}
                     onChange={(e) => handleInputChange('email_studente', e.target.value)}
                     className={styles.inputField}
+                    placeholder="es. studente@email.com"
                   />
                 ) : (
                   <div className={styles.infoValue}>{userInfo.email_studente}</div>
                 )}
               </div>
             </div>
+
+            {/* Sezione salvataggio */}
+            {isEditing && (
+              <div className={styles.saveSection}>
+                <button onClick={handleSave} className={styles.saveBtn}>
+                  Salva Modifiche
+                </button>
+              </div>
+            )}
 
             {/* Pulsante Elimina Profilo */}
             <div className={styles.deleteSection}>
@@ -238,15 +217,6 @@ const FamilyPage = () => {
               </button>
             </div>
           </div>
-
-          {/* Sezione salvataggio */}
-          {isEditing && (
-            <div className={styles.saveSection}>
-              <button onClick={handleSave} className={styles.saveBtn}>
-                Salva Modifiche
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -254,8 +224,12 @@ const FamilyPage = () => {
       {showDeleteConfirm && (
         <div className={styles.confirmOverlay}>
           <div className={styles.confirmDialog}>
-            <h3>Conferma Eliminazione</h3>
-            <p>Sei sicuro di voler eliminare il tuo profilo?</p>
+            <h3>⚠️ Conferma Eliminazione</h3>
+            <p>Sei sicuro di voler eliminare il profilo famiglia?</p>
+            <div className={styles.warningBox}>
+              <p><strong>ATTENZIONE:</strong></p>
+              <p>Questa operazione è <strong>irreversibile</strong>.</p>
+            </div>
             <div className={styles.confirmButtons}>
               <button 
                 onClick={confirmDelete}
@@ -273,10 +247,8 @@ const FamilyPage = () => {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 };
 
-export default FamilyPage;
+export default profiloFamilgia;

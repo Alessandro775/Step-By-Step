@@ -481,3 +481,278 @@ select.inputField {
   border-radius: 4px;
   color: #555;
 }
+
+.profileContainer {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 20px;
+}
+
+.profileContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.infoBlock {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.blockHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.blockTitle {
+  color: #1e293b;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.editBtn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editBtn:hover {
+  background-color: #2563eb;
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.nameRow {
+  display: grid;
+  grid-template-columns: 1fr 20px 1fr;
+  gap: 1rem;
+  align-items: end;
+}
+
+.singleRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoItem label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.infoValue {
+  padding: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #1e293b;
+  min-height: 20px;
+}
+
+.inputField {
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.emailNote {
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
+.saveSection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.saveBtn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.saveBtn:hover {
+  background-color: #059669;
+}
+
+.deleteSection {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.deleteBtn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.deleteBtn:hover {
+  background-color: #dc2626;
+}
+
+/* Finestra di conferma */
+.confirmOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmDialog {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.25);
+}
+
+.confirmDialog h3 {
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+}
+
+.confirmDialog p {
+  color: #4b5563;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.warningBox {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.warningBox p {
+  color: #dc2626;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.warningBox ul {
+  color: #7f1d1d;
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.warningBox li {
+  margin-bottom: 0.25rem;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.confirmBtn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.confirmBtn:hover {
+  background-color: #dc2626;
+}
+
+.cancelBtn {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelBtn:hover {
+  background-color: #4b5563;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profileContainer {
+    padding: 10px;
+  }
+  
+  .infoBlock {
+    padding: 1rem;
+  }
+  
+  .nameRow {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .confirmDialog {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .confirmButtons {
+    flex-direction: column;
+  }
+}
