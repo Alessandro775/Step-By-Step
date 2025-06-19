@@ -221,6 +221,15 @@ const EducatorProfile = () => {
               </div>
             </div>
 
+          {/* Sezione salvataggio */}
+          {isEditing && (
+            <div className={styles.saveSection}>
+              <button onClick={handleSave} className={styles.saveBtn}>
+                Salva Modifiche
+              </button>
+            </div>
+          )}
+
             {/* Pulsante Elimina Profilo */}
             <div className={styles.deleteSection}>
               <button 
@@ -232,14 +241,7 @@ const EducatorProfile = () => {
             </div>
           </div>
 
-          {/* Sezione salvataggio */}
-          {isEditing && (
-            <div className={styles.saveSection}>
-              <button onClick={handleSave} className={styles.saveBtn}>
-                Salva Modifiche
-              </button>
-            </div>
-          )}
+         
         </div>
         </div>
   
