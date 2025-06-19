@@ -9,6 +9,9 @@ import base64
 import difflib
 import ffmpeg
 import random
+import mysql.connector
+from mysql.connector import Error
+import requests
 
 app = Flask(__name__)
 
@@ -17,17 +20,84 @@ CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://loc
      methods=['GET', 'POST', 'OPTIONS'],
      allow_headers=['Content-Type'])
 
-# Lista statica di parole italiane (sostituisce il database)
-PAROLE_ITALIANE = [
-    "ciao", "grazie", "prego", "scusa", "pronuncia", "bellissimo", 
-    "spaghetti", "cappuccino", "famiglia", "ragazzo", "ragazza", 
-    "giorno", "notte", "mangiare", "bere", "parlare", "ascoltare", 
-    "guardare", "studiare", "lavorare", "gnocchi", "parmigiano", 
-    "prosciutto", "mozzarella", "bruschetta", "gelato", "pizza", 
-    "amore", "casa", "strada", "macchina", "telefono", "computer",
-    "musica", "libro", "scuola", "università", "lavoro", "tempo",
-    "sole", "luna", "mare", "montagna", "città", "paese"
-]
+# Configurazione Database
+DB_CONFIG = {
+    'host': '172.29.9.225',
+    'user': 'alessandro',
+    'password': '123456',
+    'database': 'step_by_step',
+    'port': 3306
+}
+
+def get_db_connection():
+    """Crea una connessione al database"""
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        return connection
+    except Error as e:
+        print(f"Errore connessione database: {e}")
+        return None
+
+def get_parole_italiane_from_db():
+    """Recupera le parole italiane con le relative immagini dal database"""
+    connection = get_db_connection()
+    if not connection:
+        return []
+    
+    try:
+        cursor = connection.cursor()
+        query = """
+        SELECT DISTINCT ea.testo, ea.immagine 
+        FROM esercizio_assegnato ea
+        JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+        WHERE e.tipologia = 'pronuncia' 
+        AND ea.testo IS NOT NULL 
+        AND ea.testo != ''
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+        
+        parole_con_immagini = []
+        for row in results:
+            testo = row[0]
+            immagine = row[1]
+            
+            # Validazione e correzione del link dell'immagine
+            if immagine and isinstance(immagine, str) and immagine.strip():
+                # Rimuovi spazi bianchi
+                immagine = immagine.strip()
+                
+                # Aggiungi https:// se manca il protocollo
+                if not immagine.startswith(('http://', 'https://')):
+                    if immagine.startswith('//'):
+                        immagine = 'https:' + immagine
+                    else:
+                        immagine = 'https://' + immagine
+                
+                parole_con_immagini.append({
+                    'testo': testo,
+                    'immagine': immagine
+                })
+            else:
+                # Se l'immagine non è valida, aggiungi solo il testo
+                parole_con_immagini.append({
+                    'testo': testo,
+                    'immagine': None
+                })
+        
+        print(f"✅ Caricate {len(parole_con_immagini)} parole dal database")
+        return parole_con_immagini
+        
+    except Error as e:
+        print(f"Errore query database: {e}")
+        return []
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# Carica le parole dal database all'avvio
+PAROLE_ITALIANE = get_parole_italiane_from_db()
 
 # Carica il modello Whisper
 try:
@@ -40,41 +110,106 @@ except Exception as e:
 @app.route('/health', methods=['GET'])
 def health_check():
     """Endpoint per verificare lo stato del server"""
+    parole_aggiornate = get_parole_italiane_from_db()
+    
     return jsonify({
         'status': 'healthy',
         'message': 'Server Flask funzionante',
-        'available_words': len(PAROLE_ITALIANE),
-        'whisper_loaded': whisper_model is not None
+        'available_words': len(parole_aggiornate),
+        'whisper_loaded': whisper_model is not None,
+        'database_connected': get_db_connection() is not None
     })
 
 @app.route('/get_random_text', methods=['GET'])
 def get_random_text():
     try:
-        if not PAROLE_ITALIANE:
+        parole_correnti = get_parole_italiane_from_db()
+        
+        if not parole_correnti:
             return jsonify({
-                'error': 'Nessuna parola disponibile',
+                'error': 'Nessuna parola disponibile nel database',
                 'status': 'error'
             }), 500
-            
-        parola_casuale = random.choice(PAROLE_ITALIANE)
-        word_id = PAROLE_ITALIANE.index(parola_casuale) + 1
-        
+
+        parola_casuale = random.choice(parole_correnti)
+        word_id = parole_correnti.index(parola_casuale) + 1
+
         return jsonify({
-            'text': parola_casuale,
+            'text': parola_casuale['testo'],
+            'image': parola_casuale['immagine'],
             'id': word_id,
             'status': 'success'
         })
-        
+
     except Exception as e:
-        print(f"Errore dettagliato: {str(e)}")  # Log per debug
+        print(f"Errore dettagliato: {str(e)}")
         return jsonify({
             'error': f'Errore nel recupero della parola: {str(e)}',
             'status': 'error'
         }), 500
-    
+
+@app.route('/get_all_words', methods=['GET'])
+def get_all_words():
+    """Ottieni tutte le parole italiane disponibili dal database"""
+    try:
+        parole_correnti = get_parole_italiane_from_db()
+        
+        parole_con_id = [
+            {
+                'id': i + 1, 
+                'parola': parola['testo'],
+                'immagine': parola['immagine']
+            }
+            for i, parola in enumerate(parole_correnti)
+        ]
+
+        return jsonify({
+            'parole': parole_con_id,
+            'count': len(parole_correnti),
+            'status': 'success'
+        })
+
     except Exception as e:
         return jsonify({
-            'error': f'Errore nel recupero della parola: {str(e)}',
+            'error': f'Errore nel recupero delle parole: {str(e)}',
+            'status': 'error'
+        })
+
+@app.route('/test_images', methods=['GET'])
+def test_images():
+    """Testa la validità dei link delle immagini"""
+    try:
+        parole_correnti = get_parole_italiane_from_db()
+        
+        risultati_test = []
+        for parola in parole_correnti:
+            if parola['immagine']:
+                try:
+                    response = requests.head(parola['immagine'], timeout=5)
+                    status = "✅ OK" if response.status_code == 200 else f"❌ Error {response.status_code}"
+                except Exception as e:
+                    status = f"❌ Errore: {str(e)}"
+                
+                risultati_test.append({
+                    'parola': parola['testo'],
+                    'link': parola['immagine'],
+                    'status': status
+                })
+            else:
+                risultati_test.append({
+                    'parola': parola['testo'],
+                    'link': 'Nessuna immagine',
+                    'status': '⚠️ Mancante'
+                })
+        
+        return jsonify({
+            'test_results': risultati_test,
+            'status': 'success'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Errore nel test: {str(e)}',
             'status': 'error'
         })
 
@@ -101,7 +236,6 @@ def check_pronunciation():
             audio_data.save(temp_audio.name)
 
             try:
-                # Trascrivi in italiano
                 result = whisper_model.transcribe(temp_audio.name, language='it')
                 testo_trascritto = result["text"].strip()
 
@@ -123,40 +257,38 @@ def check_pronunciation():
                         'error': f'Errore Whisper: {str(whisper_error)}',
                         'status': 'error'
                     })
+
             finally:
                 try:
                     os.unlink(temp_audio.name)
                 except:
                     pass
 
-        # Estrai la prima parola pronunciata
         parola_pronunciata = testo_trascritto.split()[0].lower() if testo_trascritto.split() else ""
         parola_riferimento_pulita = parola_riferimento.lower()
 
-        # Calcola similarità
         similarity = difflib.SequenceMatcher(None, parola_riferimento_pulita, parola_pronunciata).ratio()
 
-        # Prompt per valutazione parole italiane
         evaluation_prompt = f"""
-Sei un esperto insegnante di pronuncia italiana. Valuta la pronuncia di una PAROLA ITALIANA.
+        Sei un esperto insegnante di pronuncia italiana. Valuta la pronuncia di una PAROLA ITALIANA.
 
-PAROLA DA PRONUNCIARE: "{parola_riferimento}"
-PAROLA PRONUNCIATA: "{parola_pronunciata}"
-SIMILARITÀ: {similarity:.2f}
+        PAROLA DA PRONUNCIARE: "{parola_riferimento}"
+        PAROLA PRONUNCIATA: "{parola_pronunciata}"
+        SIMILARITÀ: {similarity:.2f}
 
-CRITERI PER PAROLE ITALIANE:
-- Pronuncia corretta dei suoni italiani (r, gl, gn, sc, ch, gh)
-- Accento sulla sillaba giusta
-- Chiarezza della pronuncia
-- Riconoscibilità della parola italiana
+        CRITERI PER PAROLE ITALIANE:
+        - Pronuncia corretta dei suoni italiani (r, gl, gn, sc, ch, gh)
+        - Accento sulla sillaba giusta
+        - Chiarezza della pronuncia
+        - Riconoscibilità della parola italiana
 
-VALUTAZIONE:
-"BRAVO" = parola italiana pronunciata correttamente
-"PROVA A FARE DI MEGLIO" = parola riconoscibile ma con errori di pronuncia italiana
-"SBAGLIATO" = parola non riconoscibile o completamente sbagliata
+        VALUTAZIONE:
+        "BRAVO" = parola italiana pronunciata correttamente
+        "PROVA A FARE DI MEGLIO" = parola riconoscibile ma con errori di pronuncia italiana
+        "SBAGLIATO" = parola non riconoscibile o completamente sbagliata
 
-Rispondi SOLO con una delle tre opzioni sopra, nient'altro.
-"""
+        Rispondi SOLO con una delle tre opzioni sopra, nient'altro.
+        """
 
         try:
             response = chat(
@@ -172,6 +304,7 @@ Rispondi SOLO con una delle tre opzioni sopra, nient'altro.
                     }
                 ],
             )
+
             feedback = response.message.content.strip().upper()
 
         except Exception as ollama_error:
@@ -181,7 +314,6 @@ Rispondi SOLO con una delle tre opzioni sopra, nient'altro.
                 'status': 'error'
             })
 
-        # Pulizia della risposta
         if "BRAVO" in feedback:
             feedback = "BRAVO"
         elif "PROVA A FARE DI MEGLIO" in feedback:
@@ -189,7 +321,6 @@ Rispondi SOLO con una delle tre opzioni sopra, nient'altro.
         elif "SBAGLIATO" in feedback:
             feedback = "SBAGLIATO"
         else:
-            # Fallback per parole italiane
             if similarity >= 0.8:
                 feedback = "BRAVO"
             elif similarity >= 0.5:
@@ -197,7 +328,6 @@ Rispondi SOLO con una delle tre opzioni sopra, nient'altro.
             else:
                 feedback = "SBAGLIATO"
 
-        # Genera suggerimenti per pronuncia italiana
         corrections = []
         if feedback != "BRAVO":
             corrections = generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, similarity)
@@ -223,14 +353,12 @@ def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, 
     ref_lower = parola_riferimento.lower()
     spoken_lower = parola_pronunciata.lower()
 
-    # Suggerimenti basati sulla similarità
     if similarity < 0.3:
         tips.append(f"🎯 Concentrati sui suoni italiani della parola '{parola_riferimento}'")
         tips.append("🔊 Parla più chiaramente, pronuncia ogni sillaba")
     elif similarity < 0.6:
         tips.append(f"📢 Migliora la pronuncia italiana di '{parola_riferimento}'")
 
-    # Suggerimenti specifici per suoni italiani
     if 'gli' in ref_lower and 'gli' not in spoken_lower:
         tips.append("🗣️ Il suono 'GLI' si pronuncia come 'LI' con la lingua sul palato")
     elif 'gn' in ref_lower and 'gn' not in spoken_lower:
@@ -244,32 +372,81 @@ def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, 
     elif ref_lower.endswith('e') and not spoken_lower.endswith('e'):
         tips.append("⏰ Non dimenticare la 'E' finale italiana")
 
-    # Suggerimenti per accento italiano
     if len(parola_riferimento) > 3:
         tips.append(f"🎵 Controlla l'accento italiano della parola '{parola_riferimento}'")
 
     return tips[:3]
 
-@app.route('/get_all_words', methods=['GET'])
-def get_all_words():
-    """Ottieni tutte le parole italiane disponibili"""
+@app.route('/add_word', methods=['POST'])
+def add_word():
+    """Aggiungi una nuova parola al database"""
     try:
-        # Crea una lista di dizionari con ID e parola
-        parole_con_id = [
-            {'id': i + 1, 'parola': parola} 
-            for i, parola in enumerate(PAROLE_ITALIANE)
-        ]
+        data = request.get_json()
+        parola = data.get('parola', '').strip().lower()
+        immagine = data.get('immagine', '').strip()
+        
+        if not parola:
+            return jsonify({'error': 'Parola mancante', 'status': 'error'}), 400
+        
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': 'Errore connessione database', 'status': 'error'}), 500
+        
+        cursor = connection.cursor()
+        
+        query = """
+        INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine)
+        SELECT 1, 3, 1, CURDATE(), %s, %s
+        WHERE NOT EXISTS (
+            SELECT 1 FROM esercizio_assegnato 
+            WHERE testo = %s AND idEsercizio = 3
+        )
+        """
+        
+        cursor.execute(query, (parola, immagine, parola))
+        connection.commit()
+        
+        if cursor.rowcount > 0:
+            global PAROLE_ITALIANE
+            PAROLE_ITALIANE = get_parole_italiane_from_db()
+            
+            return jsonify({
+                'message': f'Parola "{parola}" aggiunta con successo',
+                'status': 'success'
+            })
+        else:
+            return jsonify({
+                'message': f'Parola "{parola}" già esistente',
+                'status': 'info'
+            })
+            
+    except Exception as e:
+        return jsonify({
+            'error': f'Errore nell\'aggiunta della parola: {str(e)}',
+            'status': 'error'
+        }), 500
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+@app.route('/refresh_words', methods=['POST'])
+def refresh_words():
+    """Ricarica le parole dal database"""
+    try:
+        global PAROLE_ITALIANE
+        PAROLE_ITALIANE = get_parole_italiane_from_db()
         
         return jsonify({
-            'parole': parole_con_id,
+            'message': 'Parole ricaricate dal database',
             'count': len(PAROLE_ITALIANE),
             'status': 'success'
         })
     except Exception as e:
         return jsonify({
-            'error': f'Errore nel recupero delle parole: {str(e)}',
+            'error': f'Errore nel ricaricamento: {str(e)}',
             'status': 'error'
-        })
+        }), 500
 
 if __name__ == '__main__':
     print("🚀 Avviando server Flask per pronuncia italiana...")
