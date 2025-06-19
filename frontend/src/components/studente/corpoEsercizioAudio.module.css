@@ -1,0 +1,445 @@
+/* corpoEsercizioAudio.module.css */
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.mainTitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.exerciseHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.backButton {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.backButton:hover {
+    background: #5a6268;
+}
+
+.statusConnected {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.statusDisconnected {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.statusError {
+    background: #fff3cd;
+    color: #856404;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.statusChecking {
+    background: #cce7ff;
+    color: #004085;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.permissionGranted {
+    background: #d4edda;
+    color: #155724;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.permissionDenied {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.permissionPrompt {
+    background: #fff3cd;
+    color: #856404;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.infoTentativo {
+    display: flex;
+    justify-content: space-between;
+    background: #f0f0f0;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.rimanenti {
+    color: #ff6b35;
+    font-weight: bold;
+}
+
+.progressBar {
+    width: 100%;
+    height: 12px;
+    background-color: #e0e0e0;
+    border-radius: 6px;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 6px;
+}
+
+.imageContainer {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.wordImage {
+    max-width: 300px;
+    max-height: 200px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.imageError {
+    text-align: center;
+    padding: 20px;
+    background: #fff3cd;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.wordContainer {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.referenceText {
+    font-size: 48px;
+    font-weight: bold;
+    color: #2c3e50;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 20px;
+    border: 3px solid #667eea;
+    border-radius: 15px;
+    display: inline-block;
+    min-width: 200px;
+}
+
+.textControls {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.textControls p {
+    margin: 10px 0;
+}
+
+.controls {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.recordBtn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 20px 40px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.recordBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.recordBtn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.recording {
+    background: linear-gradient(135deg, #ff4444, #cc0000) !important;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.feedbackSuccess {
+    background: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.feedbackWarning {
+    background: #fff3cd;
+    color: #856404;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.feedbackError {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.feedbackInfo {
+    background: #cce7ff;
+    color: #004085;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 16px;
+}
+
+.results {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #007bff;
+}
+
+.resultGrid {
+    display: grid;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.resultItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+}
+
+.corrections {
+    margin-top: 15px;
+    padding: 15px;
+    background: #e3f2fd;
+    border-radius: 8px;
+}
+
+.corrections ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.corrections li {
+    margin: 5px 0;
+}
+
+.encouragement {
+    text-align: center;
+    margin-top: 15px;
+    padding: 10px;
+    background: #e8f5e8;
+    border-radius: 8px;
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.statisticheFinali {
+    text-align: center;
+    padding: 30px;
+    border-radius: 15px;
+    margin: 20px 0;
+    color: white;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.successo {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.limite {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+}
+
+.messaggioFinale {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 15px 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.statisticheCard {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.statItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.statLabel {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.statValue {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.feedbackFinal {
+    color: #FFD700 !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.tornaHomeBtn {
+    background: #FF6B35;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.tornaHomeBtn:hover {
+    background: #E55A2B;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.noExercise {
+    text-align: center;
+    padding: 50px 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.permissionBtn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.permissionBtn:hover {
+    background: #0056b3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .referenceText {
+        font-size: 36px;
+        padding: 15px;
+    }
+    
+    .recordBtn {
+        padding: 15px 30px;
+        font-size: 16px;
+    }
+    
+    .infoTentativo {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .exerciseHeader {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}
