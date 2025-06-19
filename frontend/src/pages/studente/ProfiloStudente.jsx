@@ -117,7 +117,6 @@ const handleSave = async () => {
 
     setIsEditing(false);
     console.log('Profilo salvato con successo');
-    alert('Profilo aggiornato con successo!');
   } catch (error) {
     console.error('Errore salvataggio:', error);
     alert('Errore durante il salvataggio: ' + error.message);

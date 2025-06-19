@@ -13,7 +13,7 @@ const FamilyPage = () => {
   // State per la finestra di conferma eliminazione
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // State per memorizzare le informazioni della famiglia (AGGIORNATO per DB)
+  // State per memorizzare le informazioni della famiglia (CORRETTO per DB)
   const [userInfo, setUserInfo] = useState({
     cognome_famiglia: '',
     email: '',
@@ -52,16 +52,49 @@ const FamilyPage = () => {
     loadProfile();
   }, [navigate]);
 
-
   // Funzione per attivare/disattivare la modalità modifica
   const handleEdit = () => {
     setIsEditing(!isEditing);
   };
 
-  // Funzione per salvare le modifiche
-  const handleSave = () => {
-    setIsEditing(false);
-    console.log('Dati salvati:', userInfo);
+  // Funzione per salvare le modifiche (IMPLEMENTATA)
+  const handleSave = async () => {
+    try {
+      // Validazione locale
+      if (!userInfo.cognome_famiglia || !userInfo.numero_telefono || !userInfo.email_studente) {
+        alert('Tutti i campi sono obbligatori');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      
+      // Invia solo i campi modificabili (ESCLUDI L'EMAIL principale)
+      const updateData = {
+        cognome_famiglia: userInfo.cognome_famiglia,
+        numero_telefono: userInfo.numero_telefono,
+        email_studente: userInfo.email_studente
+      };
+
+      const response = await fetch('http://localhost:3000/api/family-profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Errore nel salvataggio');
+      }
+
+      setIsEditing(false);
+      console.log('Profilo salvato con successo');
+    } catch (error) {
+      console.error('Errore salvataggio:', error);
+      alert('Errore durante il salvataggio: ' + error.message);
+    }
   };
 
   // Funzione per gestire i cambiamenti negli input
@@ -72,33 +105,45 @@ const FamilyPage = () => {
     }));
   };
 
-  // Funzione per gestire il click sulla cronologia
-  const handleCronologia = () => {
-    console.log('Apertura cronologia famiglia');
-  };
+  // Funzione per confermare l'eliminazione (IMPLEMENTATA)
+  const confirmDelete = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('http://localhost:3000/api/family-profile', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-  // Funzione per mostrare la conferma di eliminazione
-  const handleDeleteProfile = () => {
-    setShowDeleteConfirm(true);
-  };
+      if (!response.ok) {
+        throw new Error('Errore nell\'eliminazione del profilo');
+      }
 
-  // Funzione per confermare l'eliminazione
-  const confirmDelete = () => {
-    console.log('Profilo eliminato');
+      // Effettua il logout
+      localStorage.removeItem('token');
+      localStorage.removeItem('userType');
+      localStorage.removeItem('userData');
+      
+      // Redirect alla home
+      navigate('/');
+    } catch (error) {
+      console.error('Errore eliminazione:', error);
+      alert('Errore durante l\'eliminazione: ' + error.message);
+    }
+    
     setShowDeleteConfirm(false);
-    
-    // Effettua il logout
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('userData');
-    
-    // Redirect alla home
-    navigate('/');
   };
 
   // Funzione per annullare l'eliminazione
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
+  };
+
+  // Funzione per mostrare la conferma di eliminazione
+  const handleDeleteProfile = () => {
+    setShowDeleteConfirm(true);
   };
 
   return (
@@ -113,93 +158,72 @@ const FamilyPage = () => {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
-              Informazioni Personali
+              Informazioni Famiglia
             </h2>
             <button onClick={handleEdit} className={styles.editBtn}>
-              {isEditing ? 'Modifica' : 'Modifica'}
+              {isEditing ? 'Annulla' : 'Modifica'}
             </button>
           </div>
 
           <div className={styles.infoGrid}>
-            {/* Riga Nome e Cognome */}
-            <div className={styles.nameRow}>
+            {/* Riga Cognome Famiglia */}
+            <div className={styles.singleRow}>
               <div className={styles.infoItem}>
-                <label>Nome</label>
+                <label>Cognome Famiglia</label>
                 {isEditing ? (
                   <input
                     type="text"
-                    value={userInfo.nome}
-                    onChange={(e) => handleInputChange('nome', e.target.value)}
+                    value={userInfo.cognome_famiglia}
+                    onChange={(e) => handleInputChange('cognome_famiglia', e.target.value)}
                     className={styles.inputField}
                   />
                 ) : (
-                  <div className={styles.infoValue}>{userInfo.nome}</div>
-                )}
-              </div>
-              
-              <div className={styles.fieldSpacer}></div>
-              
-              <div className={styles.infoItem}>
-                <label>Cognome</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={userInfo.cognome}
-                    onChange={(e) => handleInputChange('cognome', e.target.value)}
-                    className={styles.inputField}
-                  />
-                ) : (
-                  <div className={styles.infoValue}>{userInfo.cognome}</div>
+                  <div className={styles.infoValue}>{userInfo.cognome_famiglia}</div>
                 )}
               </div>
             </div>
 
-            {/* Riga Email */}
+            {/* Riga Email (NON MODIFICABILE) */}
             <div className={styles.singleRow}>
               <div className={styles.infoItem}>
                 <label>Email</label>
-                {isEditing ? (
-                  <input
-                    type="email"
-                    value={userInfo.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={styles.inputField}
-                  />
-                ) : (
-                  <div className={styles.infoValue}>{userInfo.email}</div>
+                <div className={styles.infoValue}>{userInfo.email}</div>
+                {isEditing && (
+                  <small className={styles.helpText}>L'email non può essere modificata</small>
                 )}
               </div>
             </div>
 
-            {/* Riga Telefono e Email Studente */}
-            <div className={styles.contactRow}>
+            {/* Riga Telefono */}
+            <div className={styles.singleRow}>
               <div className={styles.infoItem}>
-                <label>Telefono</label>
+                <label>Numero Telefono</label>
                 {isEditing ? (
                   <input
                     type="tel"
-                    value={userInfo.telefono}
-                    onChange={(e) => handleInputChange('telefono', e.target.value)}
+                    value={userInfo.numero_telefono}
+                    onChange={(e) => handleInputChange('numero_telefono', e.target.value)}
                     className={styles.inputField}
                   />
                 ) : (
-                  <div className={styles.infoValue}>{userInfo.telefono}</div>
+                  <div className={styles.infoValue}>{userInfo.numero_telefono}</div>
                 )}
               </div>
-              
-              <div className={styles.fieldSpacer}></div>
-              
+            </div>
+
+            {/* Riga Email Studente */}
+            <div className={styles.singleRow}>
               <div className={styles.infoItem}>
                 <label>Email Studente</label>
                 {isEditing ? (
                   <input
                     type="email"
-                    value={userInfo.emailStudente}
-                    onChange={(e) => handleInputChange('emailStudente', e.target.value)}
+                    value={userInfo.email_studente}
+                    onChange={(e) => handleInputChange('email_studente', e.target.value)}
                     className={styles.inputField}
                   />
                 ) : (
-                  <div className={styles.infoValue}>{userInfo.emailStudente}</div>
+                  <div className={styles.infoValue}>{userInfo.email_studente}</div>
                 )}
               </div>
             </div>

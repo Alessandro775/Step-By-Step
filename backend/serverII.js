@@ -20,7 +20,7 @@ app.use(express.json());
 
 // Configurazione Database
 const db = mysql.createConnection({
-  host: "172.29.3.5",
+  host: "172.29.9.225",
   user: "alessandro",
   password: "123456",
   database: "step_by_step",
@@ -291,6 +291,52 @@ app.get("/api/profile", autentica, (req, res) => {
     res.json(results[0]);
   });
 });
+
+// Route per aggiornare i dati del profilo educatore
+app.put("/api/profile", autentica, (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono modificare il profilo.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  const { nome, cognome, istituto } = req.body;
+
+  console.log("Aggiornamento profilo per educatore ID:", idEducatore);
+
+  // Validazione input (EMAIL ESCLUSA per sicurezza)
+  if (!nome || !cognome || !istituto) {
+    return res.status(400).json({ 
+      error: "Tutti i campi (nome, cognome, istituto) sono obbligatori" 
+    });
+  }
+
+  // Aggiorna il profilo SENZA L'EMAIL
+  const updateQuery = `
+    UPDATE educatore 
+    SET nome = ?, cognome = ?, istituto = ?
+    WHERE idEducatore = ?
+  `;
+
+  db.query(updateQuery, [nome, cognome, istituto, idEducatore], (err, result) => {
+    if (err) {
+      console.error("Errore aggiornamento profilo educatore:", err);
+      return res.status(500).json({ error: "Errore durante l'aggiornamento" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Profilo non trovato" });
+    }
+
+    console.log("Profilo educatore aggiornato con successo:", idEducatore);
+    res.json({ 
+      message: "Profilo aggiornato con successo",
+      note: "L'email non può essere modificata per motivi di sicurezza"
+    });
+  });
+});
+
 
 // Route per aggiornare i dati del profilo educatore
 // Route per aggiornare i dati del profilo studente (SENZA email)
@@ -750,6 +796,7 @@ app.get("/api/family-profile", autentica, (req, res) => {
 });
 
   // Route per aggiornare i dati del profilo famiglia (SENZA email)
+// Route per aggiornare i dati del profilo famiglia (SENZA email)
 app.put("/api/family-profile", autentica, (req, res) => {
   if (req.utente.ruolo !== "G") {
     return res.status(403).json({
@@ -761,25 +808,28 @@ app.put("/api/family-profile", autentica, (req, res) => {
   const { cognome_famiglia, numero_telefono, email_studente } = req.body;
 
   console.log("Aggiornamento profilo per famiglia ID:", idFamiglia);
+  console.log("Dati ricevuti:", { cognome_famiglia, numero_telefono, email_studente }); // DEBUG
 
-  // Validazione input (EMAIL RIMOSSA per sicurezza)
+  // Validazione input
   if (!cognome_famiglia || !numero_telefono || !email_studente) {
     return res.status(400).json({ 
       error: "Tutti i campi (cognome famiglia, telefono, email studente) sono obbligatori" 
     });
   }
 
-  // Validazione formato telefono (opzionale)
-  const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-  if (!phoneRegex.test(numero_telefono)) {
+  // VALIDAZIONE TELEFONO PIÙ FLESSIBILE
+  const cleanPhone = numero_telefono.replace(/\s+/g, ''); // Rimuovi spazi
+  if (cleanPhone.length < 8 || !/^[\+]?[0-9\s\-\(\)\.]{8,}$/.test(numero_telefono)) {
+    console.log("Telefono non valido:", numero_telefono); // DEBUG
     return res.status(400).json({ 
-      error: "Formato numero di telefono non valido" 
+      error: "Numero di telefono non valido (minimo 8 cifre)" 
     });
   }
 
   // Validazione formato email studente
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email_studente)) {
+    console.log("Email studente non valida:", email_studente); // DEBUG
     return res.status(400).json({ error: "Formato email studente non valido" });
   }
 
@@ -793,12 +843,15 @@ app.put("/api/family-profile", autentica, (req, res) => {
     }
 
     if (studentResults.length === 0) {
+      console.log("Studente non trovato:", email_studente); // DEBUG
       return res.status(400).json({ 
         error: "Studente non trovato con l'email specificata" 
       });
     }
 
-    // Aggiorna il profilo SENZA L'EMAIL
+    console.log("Studente verificato, procedo con l'aggiornamento"); // DEBUG
+
+    // Aggiorna il profilo
     const updateQuery = `
       UPDATE famiglia 
       SET cognome_famiglia = ?, numero_telefono = ?, email_studente = ?
@@ -812,10 +865,12 @@ app.put("/api/family-profile", autentica, (req, res) => {
       }
 
       if (result.affectedRows === 0) {
+        console.log("Nessuna riga aggiornata - profilo non trovato"); // DEBUG
         return res.status(404).json({ error: "Profilo non trovato" });
       }
 
       console.log("Profilo famiglia aggiornato con successo:", idFamiglia);
+      console.log("Righe modificate:", result.affectedRows); // DEBUG
       res.json({ 
         message: "Profilo aggiornato con successo",
         note: "L'email non può essere modificata per motivi di sicurezza"
@@ -823,6 +878,7 @@ app.put("/api/family-profile", autentica, (req, res) => {
     });
   });
 });
+
 
 // Route per eliminare il profilo famiglia
 app.delete("/api/family-profile", autentica, (req, res) => {
