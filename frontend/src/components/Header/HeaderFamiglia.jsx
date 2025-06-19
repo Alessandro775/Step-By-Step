@@ -9,7 +9,7 @@ const HeaderFamiglia = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Funzioni per la navigazione
-  const goToHome = () => navigate('/');
+  const goToHome = () => navigate('/Home-Famiglia');
   const goToProfilo = () => navigate('/profilo-famiglia');
 
   // Verifica se siamo nella pagina del profilo
