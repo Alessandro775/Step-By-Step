@@ -6,19 +6,18 @@ const CorpoEsercizioAudio = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [microphonePermission, setMicrophonePermission] = useState('prompt');
     const [parolaRiferimento, setParolaRiferimento] = useState('');
+    const [immagineParola, setImmagineParola] = useState('');
+    const [imageError, setImageError] = useState(false);
     const [feedback, setFeedback] = useState('');
     const [results, setResults] = useState(null);
     const [currentWordId, setCurrentWordId] = useState(null);
     const [serverStatus, setServerStatus] = useState('checking');
     const [availableWords, setAvailableWords] = useState(0);
-    
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
 
-    // URL del server aggiornato
-    const SERVER_URL = '/api';
+    const SERVER_URL = 'http://127.0.0.1:5001';
 
-    // Verifica stato server e richiedi permessi microfono al caricamento
     useEffect(() => {
         checkServerHealth();
         requestMicrophonePermissionOnLoad();
@@ -27,32 +26,32 @@ const CorpoEsercizioAudio = () => {
 
     const checkServerHealth = async () => {
         try {
-            console.log('Verificando stato del server...');
+            console.log('Verificando stato del server Flask...');
             const response = await fetch(`${SERVER_URL}/health`);
             if (response.ok) {
                 const data = await response.json();
                 setServerStatus('connected');
                 setAvailableWords(data.available_words || 0);
-                console.log('✅ Server connesso:', data);
+                console.log('✅ Server Flask connesso:', data);
             } else {
                 setServerStatus('error');
-                console.error('❌ Server risponde ma con errore');
+                console.error('❌ Server Flask risponde ma con errore');
             }
         } catch (error) {
             setServerStatus('disconnected');
-            console.error('❌ Server non raggiungibile:', error);
+            console.error('❌ Server Flask non raggiungibile:', error);
         }
     };
 
     const requestMicrophonePermissionOnLoad = async () => {
         try {
             console.log('Richiedendo permessi microfono automaticamente...');
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true
-                }
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { 
+                    echoCancellation: true, 
+                    noiseSuppression: true, 
+                    autoGainControl: true 
+                } 
             });
             setMicrophonePermission('granted');
             console.log('✅ Permessi microfono concessi automaticamente');
@@ -77,13 +76,12 @@ const CorpoEsercizioAudio = () => {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error('Il browser non supporta l\'accesso al microfono');
             }
-
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true
-                }
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { 
+                    echoCancellation: true, 
+                    noiseSuppression: true, 
+                    autoGainControl: true 
+                } 
             });
             setMicrophonePermission('granted');
             stream.getTracks().forEach(track => track.stop());
@@ -105,16 +103,24 @@ const CorpoEsercizioAudio = () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
+            
             const data = await response.json();
             console.log('Risposta ricevuta:', data);
-
+            
             if (data.status === 'success') {
                 setParolaRiferimento(data.text);
+                setImmagineParola(data.image || '');
+                setImageError(false);
                 setCurrentWordId(data.id);
                 setFeedback('');
                 setResults(null);
                 setServerStatus('connected');
+                
+                if (data.image) {
+                    console.log('Link immagine ricevuto:', data.image);
+                } else {
+                    console.log('Nessuna immagine per questa parola');
+                }
             } else {
                 console.error('Errore dal server:', data.error);
                 alert('Errore nel caricamento della parola: ' + data.error);
@@ -141,12 +147,12 @@ const CorpoEsercizioAudio = () => {
                 }
             }
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true
-                }
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { 
+                    echoCancellation: true, 
+                    noiseSuppression: true, 
+                    autoGainControl: true 
+                } 
             });
 
             mediaRecorderRef.current = new MediaRecorder(stream);
@@ -263,10 +269,10 @@ const CorpoEsercizioAudio = () => {
     return (
         <div className={styles.container}>
             <h1 className={styles.mainTitle}>
-                 Esercizio di Pronuncia Italiana
+                <img src={logoUniba} alt="Logo Uniba" style={{ height: '60px', marginRight: '15px' }} />
+                Esercizio di Pronuncia Italiana
             </h1>
 
-            {/* Status indicators */}
             <div className={getServerStatusClass()}>
                 {getServerStatusText()}
             </div>
@@ -275,13 +281,44 @@ const CorpoEsercizioAudio = () => {
                 {getPermissionStatusText()}
             </div>
 
-            {/* Logo */}
-            <div className={styles.imageContainer}>
-                <img src={logoUniba} alt="Logo Università" className={styles.wordImage} />
-            </div>
+            {microphonePermission === 'denied' && (
+                <div className={styles.textControls}>
+                    <button 
+                        className={styles.permissionBtn}
+                        onClick={requestMicrophonePermission}
+                    >
+                        🎤 Richiedi Permesso Microfono
+                    </button>
+                </div>
+            )}
 
-            {/* Area principale pronuncia */}
             <div className={styles.pronunciationArea}>
+                {immagineParola && !imageError && (
+                    <div className={styles.imageContainer}>
+                        <img 
+                            src={immagineParola} 
+                            alt={parolaRiferimento}
+                            className={styles.wordImage}
+                            onLoad={() => {
+                                console.log('✅ Immagine caricata con successo:', immagineParola);
+                            }}
+                            onError={(e) => {
+                                console.error('❌ Errore caricamento immagine:', immagineParola);
+                                setImageError(true);
+                                e.target.style.display = 'none';
+                            }}
+                            crossOrigin="anonymous"
+                        />
+                    </div>
+                )}
+
+                {immagineParola && imageError && (
+                    <div className={styles.imageError}>
+                        <p>⚠️ Immagine non disponibile</p>
+                        <small>{immagineParola}</small>
+                    </div>
+                )}
+
                 <div className={styles.wordContainer}>
                     <div className={styles.referenceText}>
                         {parolaRiferimento || 'Caricamento parola...'}
@@ -291,51 +328,37 @@ const CorpoEsercizioAudio = () => {
                 <div className={styles.textControls}>
                     <p><strong>Pronuncia la parola italiana mostrata sopra</strong></p>
                     <button 
+                        className={styles.permissionBtn}
                         onClick={getNuovaParola}
                         disabled={serverStatus !== 'connected'}
-                        className={styles.permissionBtn}
                     >
                         🔄 Nuova Parola
                     </button>
                 </div>
 
                 <div className={styles.controls}>
-                    {microphonePermission === 'denied' && (
-                        <button 
-                            onClick={requestMicrophonePermission}
-                            className={styles.permissionBtn}
-                        >
-                            🎤 Abilita Microfono
-                        </button>
-                    )}
-
                     <button
+                        className={`${styles.recordBtn} ${isRecording ? styles.recording : ''}`}
                         onClick={isRecording ? stopRecording : startRecording}
                         disabled={microphonePermission !== 'granted' || serverStatus !== 'connected'}
-                        className={`${styles.recordBtn} ${isRecording ? styles.recording : ''}`}
                     >
                         {isRecording ? '⏹️ Ferma Registrazione' : '🎤 Inizia Registrazione'}
                     </button>
                 </div>
 
-                {/* Feedback */}
                 {feedback && (
                     <div className={getFeedbackClass()}>
                         {feedback}
                     </div>
                 )}
 
-                {/* Risultati dettagliati */}
                 {results && (
                     <div className={styles.results}>
-                        <h4>📊 Risultati Analisi Pronuncia</h4>
-                        
-                        {results.similarity_score && (
-                            <p><strong>Parola da pronunciare:</strong> {results.reference_text}</p>
-                        )}
-                        
+                        <h4> Risultati della Pronuncia</h4>
+                        <p><strong>Parola da pronunciare:</strong> {results.reference_text}</p>
                         <p><strong>Parola pronunciata:</strong> {results.transcribed_text}</p>
-                        
+                        <p><strong>Accuratezza pronuncia:</strong> {results.similarity_score}%</p>
+
                         {results.corrections && results.corrections.length > 0 && (
                             <div className={styles.corrections}>
                                 <h5>💡 Suggerimenti per migliorare:</h5>
@@ -346,8 +369,6 @@ const CorpoEsercizioAudio = () => {
                                 </ul>
                             </div>
                         )}
-                        
-                        <p><strong>Accuratezza pronuncia:</strong> {results.similarity_score}%</p>
                     </div>
                 )}
             </div>
