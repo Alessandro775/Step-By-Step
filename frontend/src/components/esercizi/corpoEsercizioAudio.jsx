@@ -13,16 +13,38 @@ const CorpoEsercizioAudio = () => {
     const [currentWordId, setCurrentWordId] = useState(null);
     const [serverStatus, setServerStatus] = useState('checking');
     const [availableWords, setAvailableWords] = useState(0);
+    const [idStudente, setIdStudente] = useState(null);
+    const [idEsercizioAssegnato, setIdEsercizioAssegnato] = useState(null);
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
 
     const SERVER_URL = 'http://127.0.0.1:5001';
 
     useEffect(() => {
+        // Ottieni l'ID studente dal token
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.ruolo === 'S') {
+                    setIdStudente(payload.id);
+                    console.log('ID Studente estratto dal token:', payload.id);
+                }
+            } catch (error) {
+                console.error('Errore decodifica token:', error);
+            }
+        }
+        
         checkServerHealth();
         requestMicrophonePermissionOnLoad();
-        getNuovaParola();
     }, []);
+
+    useEffect(() => {
+        // Carica una nuova parola quando l'ID studente è disponibile
+        if (idStudente) {
+            getNuovaParola();
+        }
+    }, [idStudente]);
 
     const checkServerHealth = async () => {
         try {
@@ -96,9 +118,14 @@ const CorpoEsercizioAudio = () => {
     };
 
     const getNuovaParola = async () => {
+        if (!idStudente) {
+            alert('ID studente non disponibile');
+            return;
+        }
+
         try {
-            console.log('Tentativo di connessione a:', `${SERVER_URL}/get_random_text`);
-            const response = await fetch(`${SERVER_URL}/get_random_text`);
+            console.log('Recupero parola per studente:', idStudente);
+            const response = await fetch(`${SERVER_URL}/get_random_text?idStudente=${idStudente}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -112,6 +139,7 @@ const CorpoEsercizioAudio = () => {
                 setImmagineParola(data.image || '');
                 setImageError(false);
                 setCurrentWordId(data.id);
+                setIdEsercizioAssegnato(data.idEsercizioAssegnato);
                 setFeedback('');
                 setResults(null);
                 setServerStatus('connected');
@@ -123,7 +151,7 @@ const CorpoEsercizioAudio = () => {
                 }
             } else {
                 console.error('Errore dal server:', data.error);
-                alert('Errore nel caricamento della parola: ' + data.error);
+                alert('Errore: ' + data.error);
                 setServerStatus('error');
             }
         } catch (error) {
@@ -191,6 +219,8 @@ const CorpoEsercizioAudio = () => {
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.wav');
         formData.append('reference_text', parolaRiferimento);
+        formData.append('idStudente', idStudente);
+        formData.append('idEsercizioAssegnato', idEsercizioAssegnato);
 
         try {
             setFeedback('Analizzando la pronuncia...');
@@ -330,7 +360,7 @@ const CorpoEsercizioAudio = () => {
                     <button 
                         className={styles.permissionBtn}
                         onClick={getNuovaParola}
-                        disabled={serverStatus !== 'connected'}
+                        disabled={serverStatus !== 'connected' || !idStudente}
                     >
                         🔄 Nuova Parola
                     </button>
@@ -340,7 +370,7 @@ const CorpoEsercizioAudio = () => {
                     <button
                         className={`${styles.recordBtn} ${isRecording ? styles.recording : ''}`}
                         onClick={isRecording ? stopRecording : startRecording}
-                        disabled={microphonePermission !== 'granted' || serverStatus !== 'connected'}
+                        disabled={microphonePermission !== 'granted' || serverStatus !== 'connected' || !idStudente}
                     >
                         {isRecording ? '⏹️ Ferma Registrazione' : '🎤 Inizia Registrazione'}
                     </button>
@@ -354,7 +384,7 @@ const CorpoEsercizioAudio = () => {
 
                 {results && (
                     <div className={styles.results}>
-                        <h4> Risultati della Pronuncia</h4>
+                        <h4>📊 Risultati della Pronuncia</h4>
                         <p><strong>Parola da pronunciare:</strong> {results.reference_text}</p>
                         <p><strong>Parola pronunciata:</strong> {results.transcribed_text}</p>
                         <p><strong>Accuratezza pronuncia:</strong> {results.similarity_score}%</p>
