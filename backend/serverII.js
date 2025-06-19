@@ -21,7 +21,7 @@ app.use(express.json());
 // Configurazione Database
 const db = mysql.createConnection({
 
-  host: "1",
+  host: "172.29.9.225",
   user: "alessandro",
   password: "123456",
   database: "step_by_step",

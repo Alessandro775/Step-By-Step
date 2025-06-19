@@ -38,8 +38,66 @@ def get_db_connection():
         print(f"Errore connessione database: {e}")
         return None
 
+def get_parole_per_studente(id_studente):
+    """Recupera le parole assegnate a uno studente specifico"""
+    connection = get_db_connection()
+    if not connection:
+        return []
+    
+    try:
+        cursor = connection.cursor()
+        query = """
+        SELECT ea.idEsercizioAssegnato, ea.testo, ea.immagine 
+        FROM esercizio_assegnato ea
+        JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+        WHERE e.tipologia = 'pronuncia' 
+        AND ea.idStudente = %s
+        AND ea.testo IS NOT NULL 
+        AND ea.testo != ''
+        """
+        cursor.execute(query, (id_studente,))
+        results = cursor.fetchall()
+        
+        parole_studente = []
+        for row in results:
+            id_esercizio_assegnato = row[0]
+            testo = row[1]
+            immagine = row[2]
+            
+            # Validazione e correzione del link dell'immagine
+            if immagine and isinstance(immagine, str) and immagine.strip():
+                immagine = immagine.strip()
+                if not immagine.startswith(('http://', 'https://')):
+                    if immagine.startswith('//'):
+                        immagine = 'https:' + immagine
+                    else:
+                        immagine = 'https://' + immagine
+                
+                parole_studente.append({
+                    'idEsercizioAssegnato': id_esercizio_assegnato,
+                    'testo': testo,
+                    'immagine': immagine
+                })
+            else:
+                parole_studente.append({
+                    'idEsercizioAssegnato': id_esercizio_assegnato,
+                    'testo': testo,
+                    'immagine': None
+                })
+        
+        print(f"✅ Caricate {len(parole_studente)} parole per studente {id_studente}")
+        return parole_studente
+        
+    except Error as e:
+        print(f"Errore query parole studente: {e}")
+        return []
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
 def get_parole_italiane_from_db():
-    """Recupera le parole italiane con le relative immagini dal database"""
+    """Recupera tutte le parole italiane dal database (per compatibilità)"""
     connection = get_db_connection()
     if not connection:
         return []
@@ -64,10 +122,7 @@ def get_parole_italiane_from_db():
             
             # Validazione e correzione del link dell'immagine
             if immagine and isinstance(immagine, str) and immagine.strip():
-                # Rimuovi spazi bianchi
                 immagine = immagine.strip()
-                
-                # Aggiungi https:// se manca il protocollo
                 if not immagine.startswith(('http://', 'https://')):
                     if immagine.startswith('//'):
                         immagine = 'https:' + immagine
@@ -79,13 +134,12 @@ def get_parole_italiane_from_db():
                     'immagine': immagine
                 })
             else:
-                # Se l'immagine non è valida, aggiungi solo il testo
                 parole_con_immagini.append({
                     'testo': testo,
                     'immagine': None
                 })
         
-        print(f"✅ Caricate {len(parole_con_immagini)} parole dal database")
+        print(f"✅ Caricate {len(parole_con_immagini)} parole totali dal database")
         return parole_con_immagini
         
     except Error as e:
@@ -96,7 +150,54 @@ def get_parole_italiane_from_db():
             cursor.close()
             connection.close()
 
-# Carica le parole dal database all'avvio
+def salva_risultato_pronuncia(id_studente, id_esercizio_assegnato, feedback, similarity, parola_pronunciata):
+    """Salva il risultato dell'esercizio di pronuncia nel database"""
+    connection = get_db_connection()
+    if not connection:
+        return False
+    
+    try:
+        cursor = connection.cursor()
+        
+        # Calcola il punteggio basato sul feedback
+        if feedback == "BRAVO":
+            punteggio = 100
+        elif feedback == "PROVA A FARE DI MEGLIO":
+            punteggio = max(50, int(similarity * 100))
+        else:  # SBAGLIATO
+            punteggio = min(30, int(similarity * 100))
+        
+        query = """
+        INSERT INTO risultato 
+        (idStudente, idEsercizioAssegnato, punteggio, numero_errori, tempo, 
+         numero_tentativi, data_esecuzione) 
+        VALUES (%s, %s, %s, %s, %s, %s, NOW())
+        """
+        
+        numero_errori = 0 if feedback == "BRAVO" else 1
+        
+        cursor.execute(query, (
+            id_studente,
+            id_esercizio_assegnato,
+            punteggio,
+            numero_errori,
+            0,  # tempo (non misurato in questo esercizio)
+            1   # numero_tentativi
+        ))
+        
+        connection.commit()
+        print(f"✅ Risultato salvato per studente {id_studente}")
+        return True
+        
+    except Error as e:
+        print(f"Errore salvataggio risultato: {e}")
+        return False
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# Carica le parole dal database all'avvio (per compatibilità)
 PAROLE_ITALIANE = get_parole_italiane_from_db()
 
 # Carica il modello Whisper
@@ -123,21 +224,32 @@ def health_check():
 @app.route('/get_random_text', methods=['GET'])
 def get_random_text():
     try:
-        parole_correnti = get_parole_italiane_from_db()
+        # Ottieni l'ID studente dai parametri della query
+        id_studente = request.args.get('idStudente')
         
-        if not parole_correnti:
+        if not id_studente:
             return jsonify({
-                'error': 'Nessuna parola disponibile nel database',
+                'error': 'ID studente mancante. Aggiungi ?idStudente=X alla richiesta',
                 'status': 'error'
-            }), 500
+            }), 400
 
-        parola_casuale = random.choice(parole_correnti)
-        word_id = parole_correnti.index(parola_casuale) + 1
+        # Query per ottenere solo le parole assegnate a quello studente specifico
+        parole_studente = get_parole_per_studente(id_studente)
+        
+        if not parole_studente:
+            return jsonify({
+                'error': 'Nessuna parola assegnata a questo studente',
+                'status': 'error'
+            }), 404
+
+        parola_casuale = random.choice(parole_studente)
+        word_id = parola_casuale['idEsercizioAssegnato']
 
         return jsonify({
             'text': parola_casuale['testo'],
             'image': parola_casuale['immagine'],
             'id': word_id,
+            'idEsercizioAssegnato': word_id,
             'status': 'success'
         })
 
@@ -225,6 +337,8 @@ def check_pronunciation():
 
         audio_data = request.files['audio']
         parola_riferimento = request.form.get('reference_text', '').strip()
+        id_studente = request.form.get('idStudente')
+        id_esercizio_assegnato = request.form.get('idEsercizioAssegnato')
 
         if not parola_riferimento:
             return jsonify({
@@ -331,6 +445,16 @@ def check_pronunciation():
         corrections = []
         if feedback != "BRAVO":
             corrections = generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, similarity)
+
+        # Salva il risultato nel database se disponibili ID studente e esercizio assegnato
+        if id_studente and id_esercizio_assegnato:
+            salva_risultato_pronuncia(
+                id_studente=id_studente,
+                id_esercizio_assegnato=id_esercizio_assegnato,
+                feedback=feedback,
+                similarity=similarity,
+                parola_pronunciata=parola_pronunciata
+            )
 
         return jsonify({
             'transcribed_text': parola_pronunciata,
