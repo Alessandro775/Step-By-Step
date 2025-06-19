@@ -12,7 +12,6 @@ const HeaderEducatore = () => {
   const goToHome = () => navigate('/home-educatore');
   const goToStudenti = () => navigate('/studenti-educatore');
   const goToProfilo = () => navigate('/profilo-educatore');
-  const goToContenuti = () => navigate('/contenuto-educatore');
   
   // Verifica se siamo nella pagina del profilo
   const isProfilePage = location.pathname === '/profilo-educatore';
@@ -48,7 +47,7 @@ const HeaderEducatore = () => {
           <ul className={header['nav-list']}>
 
             <li><button onClick={goToStudenti}>Studenti</button></li>
-            <li><button onClick={goToContenuti}>Contenuti</button></li>
+
             
             {!isProfilePage && (
               <button className={header.navButton} onClick={goToProfilo}>Profilo </button>

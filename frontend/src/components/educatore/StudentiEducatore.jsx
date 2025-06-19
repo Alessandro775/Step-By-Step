@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import styles from "./StudentiEducatore.module.css";
+
 // IMPORT DEI COMPONENTI ESTERNI
 import ContenutoStudente from "./ContenutoStudente";
 import CronologiaStudente from "./CronologiaStudente";
+
 
 const StudentiEducatore = () => {
   // Stati per gestire le viste
@@ -283,13 +285,13 @@ const StudentiEducatore = () => {
         // Vista principale studenti
         <>
           <div className={styles.header}>
-            <h2>Gestione Studenti</h2>
+            <h1>Gestione Studenti</h1>
             <p>Qui puoi gestire gli studenti assegnati al tuo account educatore</p>
           </div>
 
           {/* Form aggiunta studente */}
           <div className={styles.formSection}>
-            <h3>Aggiungi Nuovo Studente</h3>
+            <h2>Aggiungi Nuovo Studente</h2>
             <form onSubmit={handleAggiungiStudente} className={styles.form}>
               <div className={styles.inputGroup}>
                 <input
@@ -341,12 +343,13 @@ const StudentiEducatore = () => {
               <span>Caricamento studenti...</span>
             </div>
           )}
-
+          {/* Spazio aggiuntivo sotto la scritta "I Tuoi Studenti" */}
+          
           {/* Lista studenti */}
           {!loading && (
             <div className={styles.studentsSection}>
-              <h3>I Tuoi Studenti ({studenti.length})</h3>
-
+              <h2>I Tuoi Studenti ({studenti.length})</h2>
+              <div style={{ height: "24px" }}></div>
               {studenti.length === 0 ? (
                 <div className={styles.emptyState}>
                   <p>Nessuno studente associato al momento</p>
@@ -422,27 +425,6 @@ const StudentiEducatore = () => {
             </div>
           )}
 
-          {/* Debug info (rimuovi in produzione) */}
-          {process.env.NODE_ENV === "development" && (
-            <div className={styles.debugInfo}>
-              <details>
-                <summary>Debug Info</summary>
-                <pre>
-                  {JSON.stringify(
-                    {
-                      studentiCount: studenti.length,
-                      loading,
-                      adding,
-                      hasError: !!error,
-                      hasSuccess: !!success,
-                    },
-                    null,
-                    2
-                  )}
-                </pre>
-              </details>
-            </div>
-          )}
         </>
       ) : currentView === "contenuti" ? (
         // Vista contenuti studente - USA IL COMPONENTE ESTERNO
