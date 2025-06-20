@@ -28,8 +28,6 @@ const LoginPage = () => {
     
     const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Email:", formData.email);
-    console.log("Password:", formData.password);
     
     try {
         const response = await fetch(`${BASE_URL}/api/login`, {
