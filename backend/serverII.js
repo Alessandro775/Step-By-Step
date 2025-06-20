@@ -12,6 +12,15 @@ const app = express();
 const port = 3000;
 const JWT_SECRET = "balla";
 
+// Configurazione Database
+const db = mysql.createConnection({
+  host: "localhost",
+ user: "root",
+ password: "",
+ database: "step_by_step",
+ port: 3306,
+});
+
 // Middleware esistenti
 app.use(
   cors({
@@ -170,14 +179,7 @@ app.use((error, req, res, next) => {
   next(error);
 });
 
-// Configurazione Database
-const db = mysql.createConnection({
-   host: "localhost",
-  user: "root",
-  password: "",
-  database: "step_by_step",
-  port: 3306,
-});
+
 
 function autentica(req, res, next) {
   const authHeader = req.headers["authorization"];
