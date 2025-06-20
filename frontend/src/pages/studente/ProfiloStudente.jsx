@@ -16,30 +16,71 @@ const ProfiloStudente = () => {
     classe: '',
     anno_scolastico: ''
   });
+  const [statistiche, setStatistiche] = useState({
+  esercizi_completati: 0,
+  esercizi_non_completati: 0,
+  loading: true
+});
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/api/student-profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Errore nel caricamento del profilo');
-        }
-
-        const profileData = await response.json();
-        setUserInfo(profileData);
-      } catch (error) {
-        console.error('Errore caricamento profilo:', error);
+ const loadStatistiche = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:3000/api/student-stats', {
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-    };
+    });
 
-    loadProfile();
-  }, []);
+    if (!response.ok) {
+      throw new Error('Errore nel caricamento delle statistiche');
+    }
+
+    const statsData = await response.json();
+    
+    setStatistiche({
+      esercizi_completati: statsData.esercizi_completati,
+      esercizi_non_completati: statsData.esercizi_non_completati,
+      loading: false
+    });
+
+  } catch (error) {
+    console.error('Errore caricamento statistiche:', error);
+    setStatistiche({
+      esercizi_completati: 0,
+      esercizi_non_completati: 0,
+      loading: false
+    });
+  }
+};
+  useEffect(() => {
+  const loadProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3000/api/student-profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore nel caricamento del profilo');
+      }
+
+      const profileData = await response.json();
+      setUserInfo(profileData);
+    } catch (error) {
+      console.error('Errore caricamento profilo:', error);
+    }
+  };
+
+  const loadData = async () => {
+    await loadProfile();
+    await loadStatistiche();
+  };
+
+  loadData();
+}, []);
+
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -122,6 +163,11 @@ const ProfiloStudente = () => {
       setShowDeleteConfirm(false);
     }
   };
+
+//collegamento bottone visualizza cronologia
+const handleViewCronologia = () => {
+  navigate('/cronologia-studente');
+};
 
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
@@ -342,27 +388,32 @@ const ProfiloStudente = () => {
             </p>
             
             <div className={styles.cronologiaStats}>
-              <div className={styles.statItem}>
-                <div className={styles.statNumber}>12</div>
-                <div className={styles.statLabel}>Quiz Completati</div>
-              </div>
-              <div className={styles.statItem}>
-                <div className={styles.statNumber}>85%</div>
-                <div className={styles.statLabel}>Media Voti</div>
-              </div>
-              <div className={styles.statItem}>
-                <div className={styles.statNumber}>24h</div>
-                <div className={styles.statLabel}>Tempo Totale</div>
-              </div>
-            </div>
+  <div className={styles.statItem}>
+    <div className={styles.statNumber}>
+      {statistiche.loading ? '...' : statistiche.esercizi_completati}
+    </div>
+    <div className={styles.statLabel}>Esercizi Completati</div>
+  </div>
+  <div className={styles.statItem}>
+    <div className={styles.statNumber}>
+      {statistiche.loading ? '...' : statistiche.esercizi_non_completati}
+    </div>
+    <div className={styles.statLabel}>Esercizi Non Completati</div>
+  </div>
+</div>
+
 
             <div className={styles.cronologiaButtonContainer}>
-              <button className={styles.cronologiaBtn}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
-                </svg>
-                Visualizza Cronologia
-              </button>
+              <button 
+  className={styles.cronologiaBtn}
+  onClick={handleViewCronologia}
+>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
+  </svg>
+  Visualizza Cronologia
+</button>
+
             </div>
           </div>
 

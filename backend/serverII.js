@@ -1227,6 +1227,59 @@ app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
     });
   });
 
+// Route per ottenere i dati del profilo famiglia// Route per statistiche studente
+app.get("/api/student-stats", autentica, (req, res) => {
+  if (req.utente.ruolo !== "S") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli studenti possono accedere alle statistiche.",
+    });
+  }
+
+  const idStudente = req.utente.id;
+  console.log("=== STATISTICHE STUDENTE ===");
+  console.log("ID Studente:", idStudente);
+
+  // Query per contare esercizi completati
+  const queryCompletati = `
+    SELECT COUNT(DISTINCT r.idEsercizioAssegnato) as completati
+    FROM risultato r
+    JOIN esercizio_assegnato ea ON r.idEsercizioAssegnato = ea.idEsercizioAssegnato
+    WHERE ea.idStudente = ?
+  `;
+
+  // Query per contare esercizi assegnati ma non completati
+  const queryNonCompletati = `
+    SELECT COUNT(*) as non_completati
+    FROM esercizio_assegnato ea
+    LEFT JOIN risultato r ON ea.idEsercizioAssegnato = r.idEsercizioAssegnato
+    WHERE ea.idStudente = ? AND r.idRisultato IS NULL
+  `;
+
+  // Esegui entrambe le query
+  db.query(queryCompletati, [idStudente], (err, risultatiCompletati) => {
+    if (err) {
+      console.error("Errore query esercizi completati:", err);
+      return res.status(500).json({ error: "Errore database" });
+    }
+
+    db.query(queryNonCompletati, [idStudente], (err, risultatiNonCompletati) => {
+      if (err) {
+        console.error("Errore query esercizi non completati:", err);
+        return res.status(500).json({ error: "Errore database" });
+      }
+
+      const stats = {
+        esercizi_completati: risultatiCompletati[0].completati || 0,
+        esercizi_non_completati: risultatiNonCompletati[0].non_completati || 0
+      };
+
+      console.log("Statistiche calcolate:", stats);
+      res.json(stats);
+    });
+  });
+});
+
+
 // Route per ottenere i dati del profilo famiglia
 app.get("/api/family-profile", autentica, (req, res) => {
   if (req.utente.ruolo !== "G") {

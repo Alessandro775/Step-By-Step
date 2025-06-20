@@ -450,10 +450,15 @@ select.inputField {
 /* Statistiche nella cronologia */
 .cronologiaStats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr); /* Cambiato da 3 a 2 colonne */
   gap: 1.5rem;
   margin: 2rem 0;
+  justify-content: center; /* Centra le colonne */
+  max-width: 600px; /* Limita la larghezza massima */
+  margin-left: auto; /* Centra il container */
+  margin-right: auto;
 }
+
 
 .statItem {
   background: linear-gradient(135deg, #ffffff, #f8fafc);
