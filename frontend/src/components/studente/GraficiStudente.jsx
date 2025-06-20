@@ -1,6 +1,6 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import styles from './Grafici.module.css';
+import styles from './GraficiStudente.module.css';
 
 const Grafici = ({ chartData, errorsAttemptsData }) => {
     return (

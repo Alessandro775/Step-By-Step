@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Grafici from "./Grafici";
+import Grafici from "./GraficiStudente";
 import styles from "./CronologiaStudente.module.css";
 
 const CronologiaStudentePersonale = () => {
