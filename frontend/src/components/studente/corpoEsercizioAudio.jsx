@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './corpoEsercizioAudio.module.css';
-import logoUniba from '../../assets/logouniba.jpeg';
 
 const CorpoEsercizioAudio = () => {
     // Stati per la navigazione
@@ -428,7 +427,6 @@ const CorpoEsercizioAudio = () => {
             return (
                 <div className={styles.container}>
                     <h1 className={styles.mainTitle}>
-                        <img src={logoUniba} alt="Logo Uniba" style={{ height: '60px', marginRight: '15px' }} />
                         I Tuoi Esercizi di Pronuncia
                     </h1>
                     <div className={styles.loading}>
@@ -443,7 +441,6 @@ const CorpoEsercizioAudio = () => {
             return (
                 <div className={styles.container}>
                     <h1 className={styles.mainTitle}>
-                        <img src={logoUniba} alt="Logo Uniba" style={{ height: '60px', marginRight: '15px' }} />
                         I Tuoi Esercizi di Pronuncia
                     </h1>
                     <div className={styles.error}>
@@ -463,7 +460,6 @@ const CorpoEsercizioAudio = () => {
         return (
             <div className={styles.container}>
                 <h1 className={styles.mainTitle}>
-                    <img src={logoUniba} alt="Logo Uniba" style={{ height: '60px', marginRight: '15px' }} />
                     I Tuoi Esercizi di Pronuncia
                 </h1>
                 
@@ -565,7 +561,6 @@ const CorpoEsercizioAudio = () => {
         return (
             <div className={styles.container}>
                 <h1 className={styles.mainTitle}>
-                    <img src={logoUniba} alt="Logo Uniba" style={{ height: '60px', marginRight: '15px' }} />
                     Esercizio di Pronuncia Italiana
                 </h1>
 
@@ -713,7 +708,7 @@ const CorpoEsercizioAudio = () => {
                             >
                                 {isRecording ? '⏹️ Ferma Registrazione' : 
                                  numeroTentativi >= MAX_TENTATIVI ? '🚫 Limite Raggiunto' :
-                                 `🎤 Registra (${numeroTentativi + 1}/${MAX_TENTATIVI})`}
+                                 `🎤 Registra (${numeroTentativi}/${MAX_TENTATIVI})`}
                             </button>
                         </div>
 

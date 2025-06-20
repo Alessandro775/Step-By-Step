@@ -22,7 +22,7 @@ CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://loc
 
 # Configurazione Database
 DB_CONFIG = {
-    'host': '192.168.1.174',
+    'host': '172.29.4.159',
     'user': 'alessandro',
     'password': '123456',
     'database': 'step_by_step',
