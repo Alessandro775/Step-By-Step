@@ -3,6 +3,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import styles from './GraficiStudente.module.css';
 
 const Grafici = ({ chartData, errorsAttemptsData }) => {
+     // Funzione per mostrare i grafici
+
     return (
         <div className={styles.chartsSection}>
             <h3>Andamento dello Studente</h3>

@@ -11,6 +11,8 @@ const CronologiaStudente = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
+  
   useEffect(() => {
     const studenteData = sessionStorage.getItem("studenteSelezionato");
     if (studenteData) {
@@ -68,6 +70,7 @@ const CronologiaStudente = () => {
       }));
   };
 
+  
   const fetchCronologia = async (idStudente) => {
     try {
       setLoading(true);
@@ -173,8 +176,7 @@ const CronologiaStudente = () => {
 
               <button
                 onClick={handleToggleCharts}
-                className={styles.chartsButton}
-              >
+                className={styles.chartsButton}>                
                 Visualizza Grafici
               </button>
             </div>
@@ -229,20 +231,29 @@ const CronologiaStudente = () => {
                         <td>{record.numero_errori || "N/D"}</td>
                       </tr>
                     ))}
+                    
                   </tbody>
                 </table>
+                
               </div>
             )}
           </div>
+          
         </div>
-      ) : (
-        (chartData.length > 0 || errorsAttemptsData.length > 0) && (
-            <Grafici
-                chartData={chartData}
-                errorsAttemptsData={errorsAttemptsData}
-            />
-        )
-      )}
+      ) : (showCharts && (
+        <div>
+          <button 
+            className={styles.tornaIndietroButton} 
+            onClick={handleToggleCharts}
+          >
+            ← Torna alla cronologia
+          </button>
+          <Grafici 
+            chartData={chartData} 
+            errorsAttemptsData={errorsAttemptsData} 
+          />
+        </div>
+      ))}
     </>
   );
 };
