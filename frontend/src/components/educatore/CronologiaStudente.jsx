@@ -156,106 +156,110 @@ const CronologiaStudente = () => {
   }
 
   return (
-    <>
-      {!showCharts ? (
-        <div className={styles.container}>
-          <div className={styles.header}>
-            <h1>Cronologia Studente</h1>
-            <div className={styles.studenteInfo}>
+  <>
+    {!showCharts ? (
+      <div className={styles.container}>
+        {/* Pulsante Torna indietro sopra l'header */}
+        <div className={styles.topButtonContainer}>
+          <button
+            onClick={handleTornaIndietro}
+            className={styles.backButton}
+          >
+            ← Torna Indietro
+          </button>
+        </div>
+
+        {/* Header principale */}
+        <div className={styles.header}>
+          <h1>Cronologia Studente</h1>
+          <div className={styles.studenteInfo}>
+            <p>
+              Studente: <strong>{studenteInfo?.nome}</strong>
+            </p>
+          </div>
+          <div className={styles.buttonGroup}>
+            <button
+              onClick={handleToggleCharts}
+              className={styles.chartsToggleButton}
+            >
+              📊 Mostra Grafici
+            </button>
+          </div>
+        </div>
+
+        {/* Resto del contenuto */}
+        <div className={styles.content}>
+          {cronologia.length === 0 ? (
+            <div className={styles.noDataContainer}>
+              <h3>Nessuna attività registrata per questo studente</h3>
               <p>
-                Studente: <strong>{studenteInfo?.nome}</strong>
+                Gli esercizi completati appariranno qui una volta che lo
+                studente avrà iniziato a lavorare.
               </p>
             </div>
-            <div className={styles.buttonGroup}>
-              <button
-                onClick={handleTornaIndietro}
-                className={styles.backButton}
-              >
-                Torna Indietro
-              </button>
-
-              <button
-                onClick={handleToggleCharts}
-                className={styles.chartsButton}>                
-                Visualizza Grafici
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.content}>
-            {cronologia.length === 0 ? (
-              <div className={styles.noDataContainer}>
-                <h3>Nessuna attività registrata per questo studente</h3>
-                <p>
-                  Gli esercizi completati appariranno qui una volta che lo
-                  studente avrà iniziato a lavorare.
-                </p>
-              </div>
-            ) : (
-              <div className={styles.tableContainer}>
-                <table className={styles.cronologiaTable}>
-                  <thead>
-                    <tr>
-                      <th>Esercizio</th>
-                      <th>Tipo</th>
-                      <th>Punteggio</th>
-                      <th>Tempo Impiegato</th>
-                      <th>Data Completamento</th>
-                      <th>Tentativi</th>
-                      <th>Errori</th>
+          ) : (
+            <div className={styles.tableContainer}>
+              {/* Tabella cronologia */}
+              <table className={styles.cronologiaTable}>
+                <thead>
+                  <tr>
+                    <th>Esercizio</th>
+                    <th>Tipo</th>
+                    <th>Punteggio</th>
+                    <th>Tempo Impiegato</th>
+                    <th>Data Completamento</th>
+                    <th>Tentativi</th>
+                    <th>Errori</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cronologia.map((record, index) => (
+                    <tr key={index}>
+                      <td>{record.titolo || "N/D"}</td>
+                      <td>
+                        {record.tipo_esercizio || record.descrizione || "N/D"}
+                      </td>
+                      <td>
+                        {record.punteggio !== null ? record.punteggio : "N/D"}
+                      </td>
+                      <td>
+                        {record.tempo_impiegato || record.tempo || "N/D"}
+                      </td>
+                      <td>
+  {record.data_completamento
+    ? new Date(
+        record.data_completamento
+      ).toLocaleDateString("it-IT")
+    : "N/D"}
+</td>
+                      <td>
+                        {record.tentativi || record.numero_tentativi || "N/D"}
+                      </td>
+                      <td>{record.numero_errori || "N/D"}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {cronologia.map((record, index) => (
-                      <tr key={index}>
-                        <td>{record.titolo || "N/D"}</td>
-                        <td>
-                          {record.tipo_esercizio || record.descrizione || "N/D"}
-                        </td>
-                        <td>
-                          {record.punteggio !== null ? record.punteggio : "N/D"}
-                        </td>
-                        <td>
-                          {record.tempo_impiegato || record.tempo || "N/D"}
-                        </td>
-                        <td>
-                          {record.data_completamento
-                            ? new Date(
-                                record.data_completamento
-                              ).toLocaleString("it-IT")
-                            : "N/D"}
-                        </td>
-                        <td>
-                          {record.tentativi || record.numero_tentativi || "N/D"}
-                        </td>
-                        <td>{record.numero_errori || "N/D"}</td>
-                      </tr>
-                    ))}
-                    
-                  </tbody>
-                </table>
-                
-              </div>
-            )}
-          </div>
-          
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
-      ) : (showCharts && (
-        <div>
-          <button 
-            className={styles.tornaIndietroButton} 
-            onClick={handleToggleCharts}
-          >
-            ← Torna alla cronologia
-          </button>
-          <Grafici 
-            chartData={chartData} 
-            errorsAttemptsData={errorsAttemptsData} 
-          />
-        </div>
-      ))}
-    </>
-  );
-};
+      </div>
+    ) : (
+      <div>
+        <button 
+          className={styles.tornaIndietroButton} 
+          onClick={handleToggleCharts}
+        >
+          ← Torna alla cronologia
+        </button>
+        <Grafici 
+          chartData={chartData} 
+          errorsAttemptsData={errorsAttemptsData} 
+        />
+      </div>
+    )}
+  </>
+);
+}
 
 export default CronologiaStudente;
