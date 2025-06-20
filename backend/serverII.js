@@ -209,7 +209,7 @@ function autentica(req, res, next) {
   }
 }
 
-// Route Autenticazione
+//Route Autenticazione
 app.post("/api/register", async (req, res) => {
   console.log("Dati ricevuti:", req.body);
   const {

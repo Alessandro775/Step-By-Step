@@ -356,10 +356,9 @@
 /* Versione minimale usando solo lo stile confirmButtons */
 .chartsToggleButton {
   display: flex;
-  gap: 1.5rem;
-  justify-content: center;
-  margin-top: 2rem;
-  background: #667eea;
+  align-items: center;
+  gap: 0.5rem;
+  background: #2e8b57;
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -367,7 +366,14 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  margin: 0; /* Rimuove il margin-top per centrare meglio */
 }
+
+.chartsToggleButton:hover {
+  background: #256b47; /* Versione più scura del verde per l'hover */
+  transform: translateY(-1px);
+}
+
 
 .chartsToggleButton:hover {
   background: #5a67d8;
