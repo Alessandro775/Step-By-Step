@@ -5,10 +5,7 @@ import io
 import tempfile
 import os
 from ollama import chat
-import base64
 import difflib
-import ffmpeg
-import random
 import mysql.connector
 from mysql.connector import Error
 import requests
@@ -207,10 +204,9 @@ def salva_risultato_pronuncia(id_studente, id_esercizio_assegnato, feedback, sim
         if connection.is_connected():
             cursor.close()
             connection.close()
-
-
 # Carica le parole dal database all'avvio (per compatibilità)
 PAROLE_ITALIANE = get_parole_italiane_from_db()
+
 
 # Carica il modello Whisper
 try:
@@ -403,109 +399,6 @@ def get_esercizio_specifico():
             cursor.close()
             connection.close()
 
-@app.route('/get_random_text', methods=['GET'])
-def get_random_text():
-    try:
-        # Ottieni l'ID studente dai parametri della query
-        id_studente = request.args.get('idStudente')
-        
-        if not id_studente:
-            return jsonify({
-                'error': 'ID studente mancante. Aggiungi ?idStudente=X alla richiesta',
-                'status': 'error'
-            }), 400
-
-        # Query per ottenere solo le parole assegnate a quello studente specifico
-        parole_studente = get_parole_per_studente(id_studente)
-        
-        if not parole_studente:
-            return jsonify({
-                'error': 'Nessuna parola assegnata a questo studente',
-                'status': 'error'
-            }), 404
-
-        parola_casuale = random.choice(parole_studente)
-        word_id = parola_casuale['idEsercizioAssegnato']
-
-        return jsonify({
-            'text': parola_casuale['testo'],
-            'image': parola_casuale['immagine'],
-            'id': word_id,
-            'idEsercizioAssegnato': word_id,
-            'status': 'success'
-        })
-
-    except Exception as e:
-        print(f"Errore dettagliato: {str(e)}")
-        return jsonify({
-            'error': f'Errore nel recupero della parola: {str(e)}',
-            'status': 'error'
-        }), 500
-
-@app.route('/get_all_words', methods=['GET'])
-def get_all_words():
-    """Ottieni tutte le parole italiane disponibili dal database"""
-    try:
-        parole_correnti = get_parole_italiane_from_db()
-        
-        parole_con_id = [
-            {
-                'id': i + 1, 
-                'parola': parola['testo'],
-                'immagine': parola['immagine']
-            }
-            for i, parola in enumerate(parole_correnti)
-        ]
-
-        return jsonify({
-            'parole': parole_con_id,
-            'count': len(parole_correnti),
-            'status': 'success'
-        })
-
-    except Exception as e:
-        return jsonify({
-            'error': f'Errore nel recupero delle parole: {str(e)}',
-            'status': 'error'
-        })
-
-@app.route('/test_images', methods=['GET'])
-def test_images():
-    """Testa la validità dei link delle immagini"""
-    try:
-        parole_correnti = get_parole_italiane_from_db()
-        
-        risultati_test = []
-        for parola in parole_correnti:
-            if parola['immagine']:
-                try:
-                    response = requests.head(parola['immagine'], timeout=5)
-                    status = "✅ OK" if response.status_code == 200 else f"❌ Error {response.status_code}"
-                except Exception as e:
-                    status = f"❌ Errore: {str(e)}"
-                
-                risultati_test.append({
-                    'parola': parola['testo'],
-                    'link': parola['immagine'],
-                    'status': status
-                })
-            else:
-                risultati_test.append({
-                    'parola': parola['testo'],
-                    'link': 'Nessuna immagine',
-                    'status': '⚠️ Mancante'
-                })
-        
-        return jsonify({
-            'test_results': risultati_test,
-            'status': 'success'
-        })
-        
-    except Exception as e:
-        return jsonify({
-            'error': f'Errore nel test: {str(e)}',
-            'status': 'error'
-        })
 
 @app.route('/check_pronunciation', methods=['POST'])
 def check_pronunciation():
@@ -659,77 +552,6 @@ def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, 
         tips.append(f"🎵 Controlla l'accento italiano della parola '{parola_riferimento}'")
 
     return tips[:3]
-
-@app.route('/add_word', methods=['POST'])
-def add_word():
-    """Aggiungi una nuova parola al database"""
-    try:
-        data = request.get_json()
-        parola = data.get('parola', '').strip().lower()
-        immagine = data.get('immagine', '').strip()
-        
-        if not parola:
-            return jsonify({'error': 'Parola mancante', 'status': 'error'}), 400
-        
-        connection = get_db_connection()
-        if not connection:
-            return jsonify({'error': 'Errore connessione database', 'status': 'error'}), 500
-        
-        cursor = connection.cursor()
-        
-        query = """
-        INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine)
-        SELECT 1, 3, 1, CURDATE(), %s, %s
-        WHERE NOT EXISTS (
-            SELECT 1 FROM esercizio_assegnato 
-            WHERE testo = %s AND idEsercizio = 3
-        )
-        """
-        
-        cursor.execute(query, (parola, immagine, parola))
-        connection.commit()
-        
-        if cursor.rowcount > 0:
-            global PAROLE_ITALIANE
-            PAROLE_ITALIANE = get_parole_italiane_from_db()
-            
-            return jsonify({
-                'message': f'Parola "{parola}" aggiunta con successo',
-                'status': 'success'
-            })
-        else:
-            return jsonify({
-                'message': f'Parola "{parola}" già esistente',
-                'status': 'info'
-            })
-            
-    except Exception as e:
-        return jsonify({
-            'error': f'Errore nell\'aggiunta della parola: {str(e)}',
-            'status': 'error'
-        }), 500
-    finally:
-        if connection and connection.is_connected():
-            cursor.close()
-            connection.close()
-
-@app.route('/refresh_words', methods=['POST'])
-def refresh_words():
-    """Ricarica le parole dal database"""
-    try:
-        global PAROLE_ITALIANE
-        PAROLE_ITALIANE = get_parole_italiane_from_db()
-        
-        return jsonify({
-            'message': 'Parole ricaricate dal database',
-            'count': len(PAROLE_ITALIANE),
-            'status': 'success'
-        })
-    except Exception as e:
-        return jsonify({
-            'error': f'Errore nel ricaricamento: {str(e)}',
-            'status': 'error'
-        }), 500
 
 if __name__ == '__main__':
     print("🚀 Avviando server Flask per pronuncia italiana...")
