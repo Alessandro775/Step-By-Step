@@ -175,7 +175,7 @@ const db = mysql.createConnection({
    host: "localhost",
   user: "root",
   password: "",
-=  database: "step_by_step",
+  database: "step_by_step",
   port: 3306,
 });
 
