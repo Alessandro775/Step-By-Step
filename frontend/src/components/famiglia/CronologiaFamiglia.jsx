@@ -136,15 +136,15 @@ const CronologiaFamiglia = () => {
         </div>
 
         <div className={styles.headerRight}>
-          {(chartData.length > 0 || errorsAttemptsData.length > 0) && (
-            <button
-              onClick={handleToggleCharts}
-              className={styles.chartsToggleButton}
-            >
-              📊 {showCharts ? "Mostra Cronologia" : "Mostra Grafici"}
-            </button>
-          )}
-        </div>
+                {(chartData.length > 0 || errorsAttemptsData.length > 0) && (
+                    <button 
+                        onClick={handleToggleCharts}
+                        className={styles.chartsToggleButton}
+                    >
+                        📊 {showCharts ? 'Mostra Cronologia' : 'Mostra Grafici'}
+                    </button>
+                )}
+            </div>
       </div>
 
       {error && (

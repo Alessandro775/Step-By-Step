@@ -370,11 +370,5 @@
 }
 
 .chartsToggleButton:hover {
-  background: #256b47; /* Versione più scura del verde per l'hover */
-  transform: translateY(-1px);
-}
-
-
-.chartsToggleButton:hover {
   background: #5a67d8;
 }
