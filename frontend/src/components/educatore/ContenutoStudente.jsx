@@ -113,9 +113,6 @@ const ContenutoStudente = () => {
             const token = localStorage.getItem('token');
             const uploadFormData = new FormData();
             uploadFormData.append('image', selectedFile);
-
-            console.log('Caricando immagine:', selectedFile.name);
-
             const response = await fetch('http://localhost:3000/api/upload-image', {
                 method: 'POST',
                 headers: {
@@ -339,19 +336,6 @@ const ContenutoStudente = () => {
                                         {uploadingImage ? 'Caricando...' : 'Carica Immagine'}
                                     </button>
                                 )}
-                            </div>
-
-                            {/* URL manuale */}
-                            <div className={styles.urlSection}>
-                                <h4>Oppure inserisci URL:</h4>
-                                <input
-                                    type="url"
-                                    name="immagine"
-                                    value={formData.immagine}
-                                    onChange={handleFormChange}
-                                    placeholder="https://esempio.com/immagine.jpg"
-                                    className={styles.urlInput}
-                                />
                             </div>
 
                             {/* Immagine corrente */}
