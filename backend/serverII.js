@@ -14,11 +14,11 @@ const JWT_SECRET = "balla";
 
 // Configurazione Database
 const db = mysql.createConnection({
-host: "172.20.10.3",
- user: "alessandro",
- password: "123456",
- database: "step_by_step",
- port: 3306,
+  host: "172.20.10.3",
+  user: "alessandro",
+  password: "123456",
+  database: "step_by_step",
+  port: 3306,
 });
 
 // Middleware esistenti
@@ -31,49 +31,58 @@ app.use(
 app.use(express.json());
 
 // NUOVO: Servire file statici dalla cartella uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // NUOVO: Configurazione Multer per upload immagini
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, 'uploads', 'images');
-    
+    const uploadPath = path.join(__dirname, "uploads", "images");
+
     // Crea la cartella se non esiste
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
-    
+
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     // Genera nome file unico: timestamp + nome originale
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const extension = path.extname(file.originalname);
-    cb(null, 'img-' + uniqueSuffix + extension);
-  }
+    cb(null, "img-" + uniqueSuffix + extension);
+  },
 });
 
 // Filtro per accettare solo immagini
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-  
+  const allowedTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
+
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Tipo di file non supportato. Usa JPG, PNG, GIF o WebP'), false);
+    cb(
+      new Error("Tipo di file non supportato. Usa JPG, PNG, GIF o WebP"),
+      false
+    );
   }
 };
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // Limite 5MB
-  }
+    fileSize: 5 * 1024 * 1024, // Limite 5MB
+  },
 });
 
 // NUOVA ROUTE: Upload immagine
-app.post("/api/upload-image", autentica, upload.single('image'), (req, res) => {
+app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
   if (req.utente.ruolo !== "E") {
     return res.status(403).json({
       error: "Accesso negato. Solo gli educatori possono caricare immagini.",
@@ -82,23 +91,24 @@ app.post("/api/upload-image", autentica, upload.single('image'), (req, res) => {
 
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'Nessun file caricato' });
+      return res.status(400).json({ error: "Nessun file caricato" });
     }
 
     // Costruisci l'URL dell'immagine
     const imageUrl = `http://localhost:${port}/uploads/images/${req.file.filename}`;
-    
-    console.log('Immagine caricata:', req.file.filename);
-    
+
+    console.log("Immagine caricata:", req.file.filename);
+
     res.json({
-      message: 'Immagine caricata con successo',
+      message: "Immagine caricata con successo",
       imageUrl: imageUrl,
-      filename: req.file.filename
+      filename: req.file.filename,
     });
-    
   } catch (error) {
-    console.error('Errore upload immagine:', error);
-    res.status(500).json({ error: 'Errore durante il caricamento dell\'immagine' });
+    console.error("Errore upload immagine:", error);
+    res
+      .status(500)
+      .json({ error: "Errore durante il caricamento dell'immagine" });
   }
 });
 
@@ -132,54 +142,64 @@ app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
     WHERE idEducatore = ? AND idStudente = ?
   `;
 
-  db.query(verificaAssegnazione, [idEducatore, idStudente], (err, assegnazione) => {
-    if (err) {
-      console.error("Errore verifica assegnazione:", err);
-      return res.status(500).json({ error: "Errore database" });
-    }
+  db.query(
+    verificaAssegnazione,
+    [idEducatore, idStudente],
+    (err, assegnazione) => {
+      if (err) {
+        console.error("Errore verifica assegnazione:", err);
+        return res.status(500).json({ error: "Errore database" });
+      }
 
-    if (assegnazione.length === 0) {
-      return res.status(403).json({
-        error: "Studente non assegnato a questo educatore",
-      });
-    }
+      if (assegnazione.length === 0) {
+        return res.status(403).json({
+          error: "Studente non assegnato a questo educatore",
+        });
+      }
 
-    // Inserisci in esercizio_assegnato con l'URL dell'immagine
-    const insertQuery = `
+      // Inserisci in esercizio_assegnato con l'URL dell'immagine
+      const insertQuery = `
       INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine) 
       VALUES (?, ?, ?, CURDATE(), ?, ?)
     `;
 
-    db.query(insertQuery, [idStudente, idEsercizio, idEducatore, testo, immagine || null], (err, result) => {
-      if (err) {
-        console.error("Errore inserimento contenuto:", err);
-        return res.status(500).json({ error: "Errore inserimento contenuto" });
-      }
+      db.query(
+        insertQuery,
+        [idStudente, idEsercizio, idEducatore, testo, immagine || null],
+        (err, result) => {
+          if (err) {
+            console.error("Errore inserimento contenuto:", err);
+            return res
+              .status(500)
+              .json({ error: "Errore inserimento contenuto" });
+          }
 
-      res.status(201).json({
-        message: "Contenuto creato e assegnato con successo",
-        idEsercizioAssegnato: result.insertId,
-      });
-    });
-  });
+          res.status(201).json({
+            message: "Contenuto creato e assegnato con successo",
+            idEsercizioAssegnato: result.insertId,
+          });
+        }
+      );
+    }
+  );
 });
 
 // Gestione errori Multer
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
-    if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'File troppo grande. Massimo 5MB' });
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ error: "File troppo grande. Massimo 5MB" });
     }
   }
-  
-  if (error.message === 'Tipo di file non supportato. Usa JPG, PNG, GIF o WebP') {
+
+  if (
+    error.message === "Tipo di file non supportato. Usa JPG, PNG, GIF o WebP"
+  ) {
     return res.status(400).json({ error: error.message });
   }
-  
+
   next(error);
 });
-
-
 
 function autentica(req, res, next) {
   const authHeader = req.headers["authorization"];
@@ -272,9 +292,9 @@ app.post("/api/register", async (req, res) => {
                 .status(500)
                 .json({ error: "Errore durante la registrazione" });
             }
-            
+
             console.log("Registrazione famiglia completata per:", email);
-            
+
             // ✅ GENERA TOKEN DOPO REGISTRAZIONE FAMIGLIA
             const newUserId = result.insertId;
             const token = jwt.sign(
@@ -334,9 +354,9 @@ app.post("/api/register", async (req, res) => {
             .status(500)
             .json({ error: "Errore durante la registrazione" });
         }
-        
+
         console.log("Registrazione completata per:", email);
-        
+
         // ✅ GENERA TOKEN DOPO REGISTRAZIONE STUDENTE/EDUCATORE
         const newUserId = result.insertId;
         const token = jwt.sign(
@@ -369,8 +389,6 @@ app.post("/api/register", async (req, res) => {
     return res.status(500).json({ error: "Errore interno del server" });
   }
 });
-
-
 
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
@@ -511,9 +529,8 @@ app.put("/api/profile", autentica, (req, res) => {
 
   // Validazione input (EMAIL ESCLUSA per sicurezza)
   if (!nome || !cognome || !istituto) {
-    return res.status(400).json({ 
-      error: "Tutti i campi (nome, cognome, istituto) sono obbligatori" 
-
+    return res.status(400).json({
+      error: "Tutti i campi (nome, cognome, istituto) sono obbligatori",
     });
   }
 
@@ -524,24 +541,29 @@ app.put("/api/profile", autentica, (req, res) => {
     WHERE idEducatore = ?
   `;
 
-  db.query(updateQuery, [nome, cognome, istituto, idEducatore], (err, result) => {
-    if (err) {
-      console.error("Errore aggiornamento profilo educatore:", err);
-      return res.status(500).json({ error: "Errore durante l'aggiornamento" });
-    }
+  db.query(
+    updateQuery,
+    [nome, cognome, istituto, idEducatore],
+    (err, result) => {
+      if (err) {
+        console.error("Errore aggiornamento profilo educatore:", err);
+        return res
+          .status(500)
+          .json({ error: "Errore durante l'aggiornamento" });
+      }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Profilo non trovato" });
-    }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Profilo non trovato" });
+      }
 
-    console.log("Profilo educatore aggiornato con successo:", idEducatore);
-    res.json({ 
-      message: "Profilo aggiornato con successo",
-      note: "L'email non può essere modificata per motivi di sicurezza"
-    });
-  });
+      console.log("Profilo educatore aggiornato con successo:", idEducatore);
+      res.json({
+        message: "Profilo aggiornato con successo",
+        note: "L'email non può essere modificata per motivi di sicurezza",
+      });
+    }
+  );
 });
-
 
 // Route per aggiornare i dati del profilo educatore
 // Route per aggiornare i dati del profilo studente (SENZA email)
@@ -559,16 +581,17 @@ app.put("/api/student-profile", autentica, (req, res) => {
 
   // Validazione input (EMAIL RIMOSSA)
   if (!nome || !cognome || !istituto || !classe || !anno_scolastico) {
-    return res.status(400).json({ 
-      error: "Tutti i campi (nome, cognome, istituto, classe, anno scolastico) sono obbligatori" 
+    return res.status(400).json({
+      error:
+        "Tutti i campi (nome, cognome, istituto, classe, anno scolastico) sono obbligatori",
     });
   }
 
   // Validazione specifica per la classe
-  const classiValide = ['1', '2', '3', '4', '5'];
+  const classiValide = ["1", "2", "3", "4", "5"];
   if (!classiValide.includes(classe)) {
-    return res.status(400).json({ 
-      error: "La classe deve essere un valore tra 1 e 5" 
+    return res.status(400).json({
+      error: "La classe deve essere un valore tra 1 e 5",
     });
   }
 
@@ -579,24 +602,29 @@ app.put("/api/student-profile", autentica, (req, res) => {
     WHERE idStudente = ?
   `;
 
-  db.query(updateQuery, [nome, cognome, istituto, classe, anno_scolastico, idStudente], (err, result) => {
-    if (err) {
-      console.error("Errore aggiornamento profilo studente:", err);
-      return res.status(500).json({ error: "Errore durante l'aggiornamento" });
-    }
+  db.query(
+    updateQuery,
+    [nome, cognome, istituto, classe, anno_scolastico, idStudente],
+    (err, result) => {
+      if (err) {
+        console.error("Errore aggiornamento profilo studente:", err);
+        return res
+          .status(500)
+          .json({ error: "Errore durante l'aggiornamento" });
+      }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Profilo non trovato" });
-    }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Profilo non trovato" });
+      }
 
-    console.log("Profilo studente aggiornato con successo:", idStudente);
-    res.json({ 
-      message: "Profilo aggiornato con successo",
-      note: "L'email non può essere modificata per motivi di sicurezza"
-    });
-  });
+      console.log("Profilo studente aggiornato con successo:", idStudente);
+      res.json({
+        message: "Profilo aggiornato con successo",
+        note: "L'email non può essere modificata per motivi di sicurezza",
+      });
+    }
+  );
 });
-
 
 // Route per eliminare il profilo educatore
 app.delete("/api/profile", autentica, (req, res) => {
@@ -674,7 +702,7 @@ app.get("/api/student-profile", autentica, (req, res) => {
 });
 
 // Route per ottenere studenti dell'educatore
-app.get('/api/studenti', autentica, (req, res) => {
+app.get("/api/studenti", autentica, (req, res) => {
   if (req.utente.ruolo !== "E") {
     return res.status(403).json({
       error: "Accesso negato. Solo gli educatori possono vedere gli studenti.",
@@ -682,10 +710,10 @@ app.get('/api/studenti', autentica, (req, res) => {
   }
 
   const idEducatore = req.utente.id;
-  
+
   console.log("=== FETCH STUDENTI BACKEND ===");
   console.log("ID Educatore:", idEducatore);
-  
+
   const query = `
     SELECT 
       s.idStudente, 
@@ -701,13 +729,13 @@ app.get('/api/studenti', autentica, (req, res) => {
     WHERE a.idEducatore = ?
     ORDER BY s.cognome, s.nome
   `;
-  
+
   db.query(query, [idEducatore], (err, results) => {
     if (err) {
-      console.error('Errore query studenti:', err);
-      return res.status(500).json({ error: 'Errore nel caricamento studenti' });
+      console.error("Errore query studenti:", err);
+      return res.status(500).json({ error: "Errore nel caricamento studenti" });
     }
-    
+
     console.log("Studenti trovati:", results.length);
     res.json(results);
   });
@@ -833,38 +861,42 @@ app.delete("/api/studenti/:idStudente", autentica, (req, res) => {
 
 // Route per visualizzare i contenuti assegnati a uno studente
 app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
-    if (req.utente.ruolo !== "E") {
-      return res.status(403).json({
-        error: "Accesso negato. Solo gli educatori possono visualizzare i contenuti.",
-      });
-    }
-  
-    const idEducatore = req.utente.id;
-    const idStudente = req.params.idStudente;
-  
-    console.log("=== DEBUG CONTENUTI (NUOVA STRUTTURA) ===");
-    console.log("ID Educatore:", idEducatore);
-    console.log("ID Studente:", idStudente);
-  
-    // Verifica che lo studente sia assegnato all'educatore
-    const verificaAssegnazione = `
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error:
+        "Accesso negato. Solo gli educatori possono visualizzare i contenuti.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  const idStudente = req.params.idStudente;
+
+  console.log("=== DEBUG CONTENUTI (NUOVA STRUTTURA) ===");
+  console.log("ID Educatore:", idEducatore);
+  console.log("ID Studente:", idStudente);
+
+  // Verifica che lo studente sia assegnato all'educatore
+  const verificaAssegnazione = `
       SELECT * FROM assegnazione 
       WHERE idEducatore = ? AND idStudente = ?
     `;
-  
-    db.query(verificaAssegnazione, [idEducatore, idStudente], (err, assegnazione) => {
+
+  db.query(
+    verificaAssegnazione,
+    [idEducatore, idStudente],
+    (err, assegnazione) => {
       if (err) {
         console.error("Errore verifica assegnazione:", err);
         return res.status(500).json({ error: "Errore database" });
       }
-  
+
       if (assegnazione.length === 0) {
         return res.status(403).json({
           error: "Studente non assegnato a questo educatore",
         });
       }
-  
-      // Query corretta per la nuova struttura
+
+      // Query  per la nuova struttura
       const query = `
         SELECT 
           ea.idEsercizioAssegnato,
@@ -883,52 +915,57 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
         WHERE ea.idStudente = ? AND ea.idEducatore = ?
         ORDER BY ea.data_assegnazione DESC
       `;
-  
+
       db.query(query, [idStudente, idEducatore], (err, results) => {
         if (err) {
           console.error("Errore query contenuti:", err);
           return res.status(500).json({ error: "Errore database" });
         }
-  
+
         console.log("Contenuti trovati:", results.length);
         res.json(results);
       });
-    });
-  });
+    }
+  );
+});
 
 // Route per visualizzare la cronologia di uno studente
 app.get("/api/studenti/:idStudente/cronologia", autentica, (req, res) => {
-    if (req.utente.ruolo !== "E") {
-      return res.status(403).json({
-        error: "Accesso negato. Solo gli educatori possono visualizzare la cronologia.",
-      });
-    }
-  
-    const idEducatore = req.utente.id;
-    const idStudente = req.params.idStudente;
-  
-    console.log("=== DEBUG CRONOLOGIA ===");
-    console.log("ID Educatore:", idEducatore);
-    console.log("ID Studente:", idStudente);
-  
-    // Verifica che lo studente sia assegnato all'educatore
-    const verificaAssegnazione = `
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error:
+        "Accesso negato. Solo gli educatori possono visualizzare la cronologia.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  const idStudente = req.params.idStudente;
+
+  console.log("=== DEBUG CRONOLOGIA ===");
+  console.log("ID Educatore:", idEducatore);
+  console.log("ID Studente:", idStudente);
+
+  // Verifica che lo studente sia assegnato all'educatore
+  const verificaAssegnazione = `
       SELECT * FROM assegnazione 
       WHERE idEducatore = ? AND idStudente = ?
     `;
-  
-    db.query(verificaAssegnazione, [idEducatore, idStudente], (err, assegnazione) => {
+
+  db.query(
+    verificaAssegnazione,
+    [idEducatore, idStudente],
+    (err, assegnazione) => {
       if (err) {
         console.error("Errore verifica assegnazione:", err);
         return res.status(500).json({ error: "Errore database" });
       }
-  
+
       if (assegnazione.length === 0) {
         return res.status(403).json({
           error: "Studente non assegnato a questo educatore",
         });
       }
-  
+
       // Query semplificata che funziona con la struttura attuale
       const query = `
        SELECT 
@@ -949,24 +986,26 @@ app.get("/api/studenti/:idStudente/cronologia", autentica, (req, res) => {
     WHERE r.idStudente = ? AND ea.idEducatore = ?
     ORDER BY r.data_esecuzione DESC  
   `;
-  
+
       db.query(query, [idStudente, idEducatore], (err, results) => {
         if (err) {
           console.error("Errore query cronologia:", err);
           return res.status(500).json({ error: "Errore database" });
         }
-  
+
         console.log("Record cronologia trovati:", results.length);
         res.json(results);
       });
-    });
-  });
+    }
+  );
+});
 
 // Route per cronologia studente (per lo studente stesso)
 app.get("/api/student-cronologia", autentica, (req, res) => {
   if (req.utente.ruolo !== "S") {
     return res.status(403).json({
-      error: "Accesso negato. Solo gli studenti possono accedere alla propria cronologia.",
+      error:
+        "Accesso negato. Solo gli studenti possono accedere alla propria cronologia.",
     });
   }
 
@@ -1009,7 +1048,8 @@ app.get("/api/student-cronologia", autentica, (req, res) => {
 app.get("/api/family-cronologia", autentica, (req, res) => {
   if (req.utente.ruolo !== "G") {
     return res.status(403).json({
-      error: "Accesso negato. Solo le famiglie possono accedere alla cronologia.",
+      error:
+        "Accesso negato. Solo le famiglie possono accedere alla cronologia.",
     });
   }
 
@@ -1032,7 +1072,9 @@ app.get("/api/family-cronologia", autentica, (req, res) => {
     }
 
     if (studentResults.length === 0) {
-      return res.status(404).json({ error: "Studente non trovato per questa famiglia" });
+      return res
+        .status(404)
+        .json({ error: "Studente non trovato per questa famiglia" });
     }
 
     const studente = studentResults[0];
@@ -1068,82 +1110,100 @@ app.get("/api/family-cronologia", autentica, (req, res) => {
       console.log("Record cronologia famiglia trovati:", results.length);
       res.json({
         studente: studente,
-        cronologia: results
+        cronologia: results,
       });
     });
   });
 });
 
 // Route per eliminare un contenuto assegnato
-app.delete("/api/studenti/:idStudente/contenuti/:idEsercizioAssegnato", autentica, (req, res) => {
-
+app.delete(
+  "/api/studenti/:idStudente/contenuti/:idEsercizioAssegnato",
+  autentica,
+  (req, res) => {
     if (req.utente.ruolo !== "E") {
       return res.status(403).json({
-        error: "Accesso negato. Solo gli educatori possono eliminare contenuti.",
+        error:
+          "Accesso negato. Solo gli educatori possono eliminare contenuti.",
       });
     }
-  
+
     const idEducatore = req.utente.id;
     const idStudente = req.params.idStudente;
     const idEsercizioAssegnato = req.params.idEsercizioAssegnato;
-  
+
     console.log("=== ELIMINAZIONE CONTENUTO (NUOVA STRUTTURA) ===");
     console.log("Educatore:", idEducatore);
     console.log("Studente:", idStudente);
     console.log("EsercizioAssegnato:", idEsercizioAssegnato);
-  
+
     // Verifica che lo studente sia assegnato all'educatore
     const verificaAssegnazione = `
       SELECT * FROM assegnazione 
       WHERE idEducatore = ? AND idStudente = ?
     `;
-  
-    db.query(verificaAssegnazione, [idEducatore, idStudente], (err, assegnazione) => {
-      if (err) {
-        console.error("Errore verifica assegnazione:", err);
-        return res.status(500).json({ error: "Errore database" });
-      }
-  
-      if (assegnazione.length === 0) {
-        return res.status(403).json({
-          error: "Studente non assegnato a questo educatore",
-        });
-      }
-  
-      // Prima elimina eventuali risultati collegati
-      const eliminaRisultati = `
+
+    db.query(
+      verificaAssegnazione,
+      [idEducatore, idStudente],
+      (err, assegnazione) => {
+        if (err) {
+          console.error("Errore verifica assegnazione:", err);
+          return res.status(500).json({ error: "Errore database" });
+        }
+
+        if (assegnazione.length === 0) {
+          return res.status(403).json({
+            error: "Studente non assegnato a questo educatore",
+          });
+        }
+
+        // Prima elimina eventuali risultati collegati
+        const eliminaRisultati = `
         DELETE FROM risultato 
         WHERE idEsercizioAssegnato = ?
       `;
-  
-      db.query(eliminaRisultati, [idEsercizioAssegnato], (err, result) => {
-        if (err) {
-          console.error("Errore eliminazione risultati:", err);
-          return res.status(500).json({ error: "Errore eliminazione risultati" });
-        }
-  
-        // Poi elimina l'esercizio assegnato
-        const eliminaEsercizio = `
+
+        db.query(eliminaRisultati, [idEsercizioAssegnato], (err, result) => {
+          if (err) {
+            console.error("Errore eliminazione risultati:", err);
+            return res
+              .status(500)
+              .json({ error: "Errore eliminazione risultati" });
+          }
+
+          // Poi elimina l'esercizio assegnato
+          const eliminaEsercizio = `
           DELETE FROM esercizio_assegnato 
           WHERE idEsercizioAssegnato = ? AND idStudente = ? AND idEducatore = ?
         `;
-  
-        db.query(eliminaEsercizio, [idEsercizioAssegnato, idStudente, idEducatore], (err, result) => {
-          if (err) {
-            console.error("Errore eliminazione esercizio:", err);
-            return res.status(500).json({ error: "Errore eliminazione esercizio" });
-          }
-  
-          if (result.affectedRows === 0) {
-            return res.status(404).json({ error: "Contenuto non trovato o non assegnato" });
-          }
-  
-          console.log("Contenuto eliminato con successo");
-          res.json({ message: "Contenuto eliminato con successo" });
+
+          db.query(
+            eliminaEsercizio,
+            [idEsercizioAssegnato, idStudente, idEducatore],
+            (err, result) => {
+              if (err) {
+                console.error("Errore eliminazione esercizio:", err);
+                return res
+                  .status(500)
+                  .json({ error: "Errore eliminazione esercizio" });
+              }
+
+              if (result.affectedRows === 0) {
+                return res
+                  .status(404)
+                  .json({ error: "Contenuto non trovato o non assegnato" });
+              }
+
+              console.log("Contenuto eliminato con successo");
+              res.json({ message: "Contenuto eliminato con successo" });
+            }
+          );
         });
-      });
-    });
-  });
+      }
+    );
+  }
+);
 
 // Route per ottenere tutti gli esercizi disponibili
 app.get("/api/esercizi", autentica, (req, res) => {
@@ -1164,74 +1224,186 @@ app.get("/api/esercizi", autentica, (req, res) => {
   });
 });
 
-// Route per creare un nuovo contenuto e assegnarlo a uno studente
-// Route per creare un nuovo contenuto e assegnarlo a uno studente
-app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
+// Route per riassegnare un esercizio
+app.post(
+  "/api/studenti/:idStudente/contenuti/:idEsercizioAssegnato/riassegna",
+  autentica,
+  (req, res) => {
     if (req.utente.ruolo !== "E") {
       return res.status(403).json({
-        error: "Accesso negato. Solo gli educatori possono aggiungere contenuti.",
+        error:
+          "Accesso negato. Solo gli educatori possono riassegnare esercizi.",
       });
     }
-  
+
     const idEducatore = req.utente.id;
     const idStudente = req.params.idStudente;
-    const { testo, immagine, idEsercizio } = req.body;
-  
-    console.log("=== AGGIUNTA CONTENUTO (NUOVA STRUTTURA) ===");
+    const idEsercizioAssegnato = req.params.idEsercizioAssegnato;
+
+    console.log("=== RIASSEGNAZIONE ESERCIZIO ===");
     console.log("Educatore:", idEducatore);
     console.log("Studente:", idStudente);
-    console.log("Dati:", { testo, immagine, idEsercizio });
-  
-    // Validazione dati
-    if (!testo || !idEsercizio) {
-      return res.status(400).json({
-        error: "Campi obbligatori mancanti: testo, idEsercizio",
-      });
-    }
-  
+    console.log("EsercizioAssegnato:", idEsercizioAssegnato);
+
     // Verifica che lo studente sia assegnato all'educatore
     const verificaAssegnazione = `
+    SELECT * FROM assegnazione 
+    WHERE idEducatore = ? AND idStudente = ?
+  `;
+
+    db.query(
+      verificaAssegnazione,
+      [idEducatore, idStudente],
+      (err, assegnazione) => {
+        if (err) {
+          console.error("Errore verifica assegnazione:", err);
+          return res.status(500).json({ error: "Errore database" });
+        }
+
+        if (assegnazione.length === 0) {
+          return res.status(403).json({
+            error: "Studente non assegnato a questo educatore",
+          });
+        }
+
+        // Ottieni i dati dell'esercizio originale
+        const getEsercizioQuery = `
+      SELECT ea.*, e.tipologia, e.descrizione
+      FROM esercizio_assegnato ea
+      JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+      WHERE ea.idEsercizioAssegnato = ? AND ea.idStudente = ? AND ea.idEducatore = ?
+    `;
+
+        db.query(
+          getEsercizioQuery,
+          [idEsercizioAssegnato, idStudente, idEducatore],
+          (err, esercizioData) => {
+            if (err) {
+              console.error("Errore recupero esercizio:", err);
+              return res.status(500).json({ error: "Errore database" });
+            }
+
+            if (esercizioData.length === 0) {
+              return res.status(404).json({ error: "Esercizio non trovato" });
+            }
+
+            const esercizio = esercizioData[0];
+
+            // Crea una nuova copia dell'esercizio
+            const riassegnaQuery = `
+        INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine)
+        VALUES (?, ?, ?, CURDATE(), ?, ?)
+      `;
+
+            db.query(
+              riassegnaQuery,
+              [
+                idStudente,
+                esercizio.idEsercizio,
+                idEducatore,
+                esercizio.testo,
+                esercizio.immagine,
+              ],
+              (err, result) => {
+                if (err) {
+                  console.error("Errore riassegnazione esercizio:", err);
+                  return res
+                    .status(500)
+                    .json({ error: "Errore nella riassegnazione" });
+                }
+
+                console.log("Esercizio riassegnato con successo");
+                res.json({
+                  message: "Esercizio riassegnato con successo",
+                  nuovoIdEsercizioAssegnato: result.insertId,
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  }
+);
+
+// Route per creare un nuovo contenuto e assegnarlo a uno studente
+app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
+  if (req.utente.ruolo !== "E") {
+    return res.status(403).json({
+      error: "Accesso negato. Solo gli educatori possono aggiungere contenuti.",
+    });
+  }
+
+  const idEducatore = req.utente.id;
+  const idStudente = req.params.idStudente;
+  const { testo, immagine, idEsercizio } = req.body;
+
+  console.log("=== AGGIUNTA CONTENUTO (NUOVA STRUTTURA) ===");
+  console.log("Educatore:", idEducatore);
+  console.log("Studente:", idStudente);
+  console.log("Dati:", { testo, immagine, idEsercizio });
+
+  // Validazione dati
+  if (!testo || !idEsercizio) {
+    return res.status(400).json({
+      error: "Campi obbligatori mancanti: testo, idEsercizio",
+    });
+  }
+
+  // Verifica che lo studente sia assegnato all'educatore
+  const verificaAssegnazione = `
       SELECT * FROM assegnazione 
       WHERE idEducatore = ? AND idStudente = ?
     `;
-  
-    db.query(verificaAssegnazione, [idEducatore, idStudente], (err, assegnazione) => {
+
+  db.query(
+    verificaAssegnazione,
+    [idEducatore, idStudente],
+    (err, assegnazione) => {
       if (err) {
         console.error("Errore verifica assegnazione:", err);
         return res.status(500).json({ error: "Errore database" });
       }
-  
+
       if (assegnazione.length === 0) {
         return res.status(403).json({
           error: "Studente non assegnato a questo educatore",
         });
       }
-  
+
       // Inserisci direttamente in esercizioassegnato
       const insertQuery = `
         INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine) 
         VALUES (?, ?, ?, CURDATE(), ?, ?)
       `;
-  
-      db.query(insertQuery, [idStudente, idEsercizio, idEducatore, testo, immagine || null], (err, result) => {
-        if (err) {
-          console.error("Errore inserimento contenuto:", err);
-          return res.status(500).json({ error: "Errore inserimento contenuto" });
+
+      db.query(
+        insertQuery,
+        [idStudente, idEsercizio, idEducatore, testo, immagine || null],
+        (err, result) => {
+          if (err) {
+            console.error("Errore inserimento contenuto:", err);
+            return res
+              .status(500)
+              .json({ error: "Errore inserimento contenuto" });
+          }
+
+          res.status(201).json({
+            message: "Contenuto creato e assegnato con successo",
+            idEsercizioAssegnato: result.insertId,
+          });
         }
-  
-        res.status(201).json({
-          message: "Contenuto creato e assegnato con successo",
-          idEsercizioAssegnato: result.insertId,
-        });
-      });
-    });
-  });
+      );
+    }
+  );
+});
 
 // Route per ottenere i dati del profilo famiglia// Route per statistiche studente
 app.get("/api/student-stats", autentica, (req, res) => {
   if (req.utente.ruolo !== "S") {
     return res.status(403).json({
-      error: "Accesso negato. Solo gli studenti possono accedere alle statistiche.",
+      error:
+        "Accesso negato. Solo gli studenti possono accedere alle statistiche.",
     });
   }
 
@@ -1262,23 +1434,27 @@ app.get("/api/student-stats", autentica, (req, res) => {
       return res.status(500).json({ error: "Errore database" });
     }
 
-    db.query(queryNonCompletati, [idStudente], (err, risultatiNonCompletati) => {
-      if (err) {
-        console.error("Errore query esercizi non completati:", err);
-        return res.status(500).json({ error: "Errore database" });
+    db.query(
+      queryNonCompletati,
+      [idStudente],
+      (err, risultatiNonCompletati) => {
+        if (err) {
+          console.error("Errore query esercizi non completati:", err);
+          return res.status(500).json({ error: "Errore database" });
+        }
+
+        const stats = {
+          esercizi_completati: risultatiCompletati[0].completati || 0,
+          esercizi_non_completati:
+            risultatiNonCompletati[0].non_completati || 0,
+        };
+
+        console.log("Statistiche calcolate:", stats);
+        res.json(stats);
       }
-
-      const stats = {
-        esercizi_completati: risultatiCompletati[0].completati || 0,
-        esercizi_non_completati: risultatiNonCompletati[0].non_completati || 0
-      };
-
-      console.log("Statistiche calcolate:", stats);
-      res.json(stats);
-    });
+    );
   });
 });
-
 
 // Route per ottenere i dati del profilo famiglia
 app.get("/api/family-profile", autentica, (req, res) => {
@@ -1311,7 +1487,7 @@ app.get("/api/family-profile", autentica, (req, res) => {
   });
 });
 
-  // Route per aggiornare i dati del profilo famiglia (SENZA email)
+// Route per aggiornare i dati del profilo famiglia (SENZA email)
 // Route per aggiornare i dati del profilo famiglia (SENZA email)
 app.put("/api/family-profile", autentica, (req, res) => {
   if (req.utente.ruolo !== "G") {
@@ -1324,21 +1500,29 @@ app.put("/api/family-profile", autentica, (req, res) => {
   const { cognome_famiglia, numero_telefono, email_studente } = req.body;
 
   console.log("Aggiornamento profilo per famiglia ID:", idFamiglia);
-  console.log("Dati ricevuti:", { cognome_famiglia, numero_telefono, email_studente }); // DEBUG
+  console.log("Dati ricevuti:", {
+    cognome_famiglia,
+    numero_telefono,
+    email_studente,
+  }); // DEBUG
 
   // Validazione input
   if (!cognome_famiglia || !numero_telefono || !email_studente) {
-    return res.status(400).json({ 
-      error: "Tutti i campi (cognome famiglia, telefono, email studente) sono obbligatori" 
+    return res.status(400).json({
+      error:
+        "Tutti i campi (cognome famiglia, telefono, email studente) sono obbligatori",
     });
   }
 
   // VALIDAZIONE TELEFONO PIÙ FLESSIBILE
-  const cleanPhone = numero_telefono.replace(/\s+/g, ''); // Rimuovi spazi
-  if (cleanPhone.length < 8 || !/^[\+]?[0-9\s\-\(\)\.]{8,}$/.test(numero_telefono)) {
+  const cleanPhone = numero_telefono.replace(/\s+/g, ""); // Rimuovi spazi
+  if (
+    cleanPhone.length < 8 ||
+    !/^[\+]?[0-9\s\-\(\)\.]{8,}$/.test(numero_telefono)
+  ) {
     console.log("Telefono non valido:", numero_telefono); // DEBUG
-    return res.status(400).json({ 
-      error: "Numero di telefono non valido (minimo 8 cifre)" 
+    return res.status(400).json({
+      error: "Numero di telefono non valido (minimo 8 cifre)",
     });
   }
 
@@ -1351,7 +1535,7 @@ app.put("/api/family-profile", autentica, (req, res) => {
 
   // Verifica che lo studente esista
   const checkStudenteQuery = "SELECT idStudente FROM studente WHERE email = ?";
-  
+
   db.query(checkStudenteQuery, [email_studente], (err, studentResults) => {
     if (err) {
       console.error("Errore verifica studente:", err);
@@ -1360,8 +1544,8 @@ app.put("/api/family-profile", autentica, (req, res) => {
 
     if (studentResults.length === 0) {
       console.log("Studente non trovato:", email_studente); // DEBUG
-      return res.status(400).json({ 
-        error: "Studente non trovato con l'email specificata" 
+      return res.status(400).json({
+        error: "Studente non trovato con l'email specificata",
       });
     }
 
@@ -1374,24 +1558,30 @@ app.put("/api/family-profile", autentica, (req, res) => {
       WHERE idFamiglia = ?
     `;
 
-    db.query(updateQuery, [cognome_famiglia, numero_telefono, email_studente, idFamiglia], (err, result) => {
-      if (err) {
-        console.error("Errore aggiornamento profilo famiglia:", err);
-        return res.status(500).json({ error: "Errore durante l'aggiornamento" });
-      }
+    db.query(
+      updateQuery,
+      [cognome_famiglia, numero_telefono, email_studente, idFamiglia],
+      (err, result) => {
+        if (err) {
+          console.error("Errore aggiornamento profilo famiglia:", err);
+          return res
+            .status(500)
+            .json({ error: "Errore durante l'aggiornamento" });
+        }
 
-      if (result.affectedRows === 0) {
-        console.log("Nessuna riga aggiornata - profilo non trovato"); // DEBUG
-        return res.status(404).json({ error: "Profilo non trovato" });
-      }
+        if (result.affectedRows === 0) {
+          console.log("Nessuna riga aggiornata - profilo non trovato"); // DEBUG
+          return res.status(404).json({ error: "Profilo non trovato" });
+        }
 
-      console.log("Profilo famiglia aggiornato con successo:", idFamiglia);
-      console.log("Righe modificate:", result.affectedRows); // DEBUG
-      res.json({ 
-        message: "Profilo aggiornato con successo",
-        note: "L'email non può essere modificata per motivi di sicurezza"
-      });
-    });
+        console.log("Profilo famiglia aggiornato con successo:", idFamiglia);
+        console.log("Righe modificate:", result.affectedRows); // DEBUG
+        res.json({
+          message: "Profilo aggiornato con successo",
+          note: "L'email non può essere modificata per motivi di sicurezza",
+        });
+      }
+    );
   });
 });
 
@@ -1422,23 +1612,32 @@ app.delete("/api/student-profile", autentica, (req, res) => {
     console.log("Risultati studente eliminati:", result1.affectedRows);
 
     // STEP 2: Elimina tutti gli esercizi assegnati allo studente
-    const deleteEserciziAssegnatiQuery = "DELETE FROM esercizio_assegnato WHERE idStudente = ?";
+    const deleteEserciziAssegnatiQuery =
+      "DELETE FROM esercizio_assegnato WHERE idStudente = ?";
 
     db.query(deleteEserciziAssegnatiQuery, [idStudente], (err, result2) => {
       if (err) {
         console.error("Errore eliminazione esercizi assegnati studente:", err);
-        return res.status(500).json({ error: "Errore eliminazione esercizi assegnati" });
+        return res
+          .status(500)
+          .json({ error: "Errore eliminazione esercizi assegnati" });
       }
 
-      console.log("Esercizi assegnati studente eliminati:", result2.affectedRows);
+      console.log(
+        "Esercizi assegnati studente eliminati:",
+        result2.affectedRows
+      );
 
       // STEP 3: Elimina le assegnazioni studente-educatori
-      const deleteAssegnazioniQuery = "DELETE FROM assegnazione WHERE idStudente = ?";
+      const deleteAssegnazioniQuery =
+        "DELETE FROM assegnazione WHERE idStudente = ?";
 
       db.query(deleteAssegnazioniQuery, [idStudente], (err, result3) => {
         if (err) {
           console.error("Errore eliminazione assegnazioni studente:", err);
-          return res.status(500).json({ error: "Errore eliminazione assegnazioni" });
+          return res
+            .status(500)
+            .json({ error: "Errore eliminazione assegnazioni" });
         }
 
         console.log("Assegnazioni studente eliminate:", result3.affectedRows);
@@ -1449,11 +1648,15 @@ app.delete("/api/student-profile", autentica, (req, res) => {
         db.query(deleteStudenteQuery, [idStudente], (err, result4) => {
           if (err) {
             console.error("Errore eliminazione studente:", err);
-            return res.status(500).json({ error: "Errore eliminazione studente" });
+            return res
+              .status(500)
+              .json({ error: "Errore eliminazione studente" });
           }
 
           if (result4.affectedRows === 0) {
-            return res.status(404).json({ error: "Profilo studente non trovato" });
+            return res
+              .status(404)
+              .json({ error: "Profilo studente non trovato" });
           }
 
           console.log("Profilo studente eliminato con successo");
@@ -1462,15 +1665,15 @@ app.delete("/api/student-profile", autentica, (req, res) => {
           console.log("- Esercizi assegnati eliminati:", result2.affectedRows);
           console.log("- Assegnazioni eliminate:", result3.affectedRows);
           console.log("- Studente eliminato:", result4.affectedRows);
-          
-          res.json({ 
+
+          res.json({
             message: "Profilo eliminato con successo",
             dettagli: {
               risultati: result1.affectedRows,
               esercizi_assegnati: result2.affectedRows,
               assegnazioni: result3.affectedRows,
-              studente: result4.affectedRows
-            }
+              studente: result4.affectedRows,
+            },
           });
         });
       });
@@ -1491,7 +1694,7 @@ app.delete("/api/family-profile", autentica, (req, res) => {
 
   // Elimina direttamente il profilo famiglia (non ha dipendenze)
   const deleteFamigliaQuery = "DELETE FROM famiglia WHERE idFamiglia = ?";
-  
+
   db.query(deleteFamigliaQuery, [idFamiglia], (err, result) => {
     if (err) {
       console.error("Errore eliminazione famiglia:", err);
@@ -1505,16 +1708,15 @@ app.delete("/api/family-profile", autentica, (req, res) => {
     console.log("Profilo famiglia eliminato con successo");
     console.log("Riepilogo eliminazione famiglia:");
     console.log("- Famiglia eliminata:", result.affectedRows);
-    
-    res.json({ 
+
+    res.json({
       message: "Profilo eliminato con successo",
       dettagli: {
-        famiglia: result.affectedRows
-      }
+        famiglia: result.affectedRows,
+      },
     });
   });
 });
-
 
 // ==================== ELIMINAZIONE PROFILO EDUCATORE ====================
 app.delete("/api/profile", autentica, (req, res) => {
@@ -1543,47 +1745,58 @@ app.delete("/api/profile", autentica, (req, res) => {
     console.log("Risultati eliminati:", result1.affectedRows);
 
     // STEP 2: Elimina tutti gli esercizi assegnati dall'educatore
-    const deleteEserciziAssegnatiQuery = "DELETE FROM esercizio_assegnato WHERE idEducatore = ?";
+    const deleteEserciziAssegnatiQuery =
+      "DELETE FROM esercizio_assegnato WHERE idEducatore = ?";
 
     db.query(deleteEserciziAssegnatiQuery, [idEducatore], (err, result2) => {
       if (err) {
         console.error("Errore eliminazione esercizi assegnati:", err);
-        return res.status(500).json({ error: "Errore eliminazione esercizi assegnati" });
+        return res
+          .status(500)
+          .json({ error: "Errore eliminazione esercizi assegnati" });
       }
       console.log("Esercizi assegnati eliminati:", result2.affectedRows);
 
       // STEP 3: Elimina le assegnazioni studenti-educatore
-      const deleteAssegnazioniQuery = "DELETE FROM assegnazione WHERE idEducatore = ?";
+      const deleteAssegnazioniQuery =
+        "DELETE FROM assegnazione WHERE idEducatore = ?";
 
       db.query(deleteAssegnazioniQuery, [idEducatore], (err, result3) => {
         if (err) {
           console.error("Errore eliminazione assegnazioni:", err);
-          return res.status(500).json({ error: "Errore eliminazione assegnazioni" });
+          return res
+            .status(500)
+            .json({ error: "Errore eliminazione assegnazioni" });
         }
         console.log("Assegnazioni eliminate:", result3.affectedRows);
 
         // STEP 4: Elimina il profilo educatore
-        const deleteEducatoreQuery = "DELETE FROM educatore WHERE idEducatore = ?";
+        const deleteEducatoreQuery =
+          "DELETE FROM educatore WHERE idEducatore = ?";
 
         db.query(deleteEducatoreQuery, [idEducatore], (err, result4) => {
           if (err) {
             console.error("Errore eliminazione educatore:", err);
-            return res.status(500).json({ error: "Errore eliminazione educatore" });
+            return res
+              .status(500)
+              .json({ error: "Errore eliminazione educatore" });
           }
 
           if (result4.affectedRows === 0) {
-            return res.status(404).json({ error: "Profilo educatore non trovato" });
+            return res
+              .status(404)
+              .json({ error: "Profilo educatore non trovato" });
           }
 
           console.log("=== EDUCATORE ELIMINATO CON SUCCESSO ===");
-          res.json({ 
+          res.json({
             message: "Profilo eliminato con successo",
             dettagli: {
               risultati: result1.affectedRows,
               esercizi_assegnati: result2.affectedRows,
               assegnazioni: result3.affectedRows,
-              educatore: result4.affectedRows
-            }
+              educatore: result4.affectedRows,
+            },
           });
         });
       });
@@ -1618,22 +1831,31 @@ app.delete("/api/student-profile", autentica, (req, res) => {
     console.log("Risultati studente eliminati:", result1.affectedRows);
 
     // STEP 2: Elimina tutti gli esercizi assegnati allo studente
-    const deleteEserciziAssegnatiQuery = "DELETE FROM esercizio_assegnato WHERE idStudente = ?";
+    const deleteEserciziAssegnatiQuery =
+      "DELETE FROM esercizio_assegnato WHERE idStudente = ?";
 
     db.query(deleteEserciziAssegnatiQuery, [idStudente], (err, result2) => {
       if (err) {
         console.error("Errore eliminazione esercizi assegnati studente:", err);
-        return res.status(500).json({ error: "Errore eliminazione esercizi assegnati" });
+        return res
+          .status(500)
+          .json({ error: "Errore eliminazione esercizi assegnati" });
       }
-      console.log("Esercizi assegnati studente eliminati:", result2.affectedRows);
+      console.log(
+        "Esercizi assegnati studente eliminati:",
+        result2.affectedRows
+      );
 
       // STEP 3: Elimina le assegnazioni studente-educatori
-      const deleteAssegnazioniQuery = "DELETE FROM assegnazione WHERE idStudente = ?";
+      const deleteAssegnazioniQuery =
+        "DELETE FROM assegnazione WHERE idStudente = ?";
 
       db.query(deleteAssegnazioniQuery, [idStudente], (err, result3) => {
         if (err) {
           console.error("Errore eliminazione assegnazioni studente:", err);
-          return res.status(500).json({ error: "Errore eliminazione assegnazioni" });
+          return res
+            .status(500)
+            .json({ error: "Errore eliminazione assegnazioni" });
         }
         console.log("Assegnazioni studente eliminate:", result3.affectedRows);
 
@@ -1643,22 +1865,26 @@ app.delete("/api/student-profile", autentica, (req, res) => {
         db.query(deleteStudenteQuery, [idStudente], (err, result4) => {
           if (err) {
             console.error("Errore eliminazione studente:", err);
-            return res.status(500).json({ error: "Errore eliminazione studente" });
+            return res
+              .status(500)
+              .json({ error: "Errore eliminazione studente" });
           }
 
           if (result4.affectedRows === 0) {
-            return res.status(404).json({ error: "Profilo studente non trovato" });
+            return res
+              .status(404)
+              .json({ error: "Profilo studente non trovato" });
           }
 
           console.log("=== STUDENTE ELIMINATO CON SUCCESSO ===");
-          res.json({ 
+          res.json({
             message: "Profilo eliminato con successo",
             dettagli: {
               risultati: result1.affectedRows,
               esercizi_assegnati: result2.affectedRows,
               assegnazioni: result3.affectedRows,
-              studente: result4.affectedRows
-            }
+              studente: result4.affectedRows,
+            },
           });
         });
       });
@@ -1680,7 +1906,7 @@ app.delete("/api/family-profile", autentica, (req, res) => {
 
   // La famiglia non ha dipendenze dirette nel database, elimina direttamente
   const deleteFamigliaQuery = "DELETE FROM famiglia WHERE idFamiglia = ?";
-  
+
   db.query(deleteFamigliaQuery, [idFamiglia], (err, result) => {
     if (err) {
       console.error("Errore eliminazione famiglia:", err);
@@ -1692,16 +1918,14 @@ app.delete("/api/family-profile", autentica, (req, res) => {
     }
 
     console.log("=== FAMIGLIA ELIMINATA CON SUCCESSO ===");
-    res.json({ 
+    res.json({
       message: "Profilo eliminato con successo",
       dettagli: {
-        famiglia: result.affectedRows
-      }
+        famiglia: result.affectedRows,
+      },
     });
   });
 });
-
-  
 
 // Connessione DB e Avvio Server
 db.connect((err) => {
@@ -1721,4 +1945,3 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Errore interno del server" });
 });
-
