@@ -14,9 +14,9 @@ const JWT_SECRET = "balla";
 
 // Configurazione Database
 const db = mysql.createConnection({
-host: "172.29.4.159",
- user: "alessandro",
- password: "123456",
+host: "localhost",
+ user: "root",
+ password: "",
  database: "step_by_step",
  port: 3306,
 });
@@ -937,7 +937,6 @@ app.get("/api/studenti/:idStudente/cronologia", autentica, (req, res) => {
       r.numero_errori as numero_errori,
       r.tempo as tempo_impiegato,
       r.numero_tentativi as tentativi,
-      r.traccia_audio as traccia_audio,
       ea.testo as titolo,
       e.descrizione as tipo_esercizio,
       e.tipologia as descrizione,
@@ -981,7 +980,6 @@ app.get("/api/student-cronologia", autentica, (req, res) => {
       r.numero_errori as numero_errori,
       r.tempo as tempo_impiegato,
       r.numero_tentativi as tentativi,
-      r.traccia_audio as traccia_audio,
       ea.testo as titolo,
       e.descrizione as tipo_esercizio,
       e.tipologia as descrizione,
@@ -1046,7 +1044,6 @@ app.get("/api/family-cronologia", autentica, (req, res) => {
         r.numero_errori as numero_errori,
         r.tempo as tempo_impiegato,
         r.numero_tentativi as tentativi,
-        r.traccia_audio as traccia_audio,
         ea.testo as titolo,
         e.descrizione as tipo_esercizio,
         e.tipologia as descrizione,
