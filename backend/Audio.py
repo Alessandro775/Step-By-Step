@@ -423,17 +423,16 @@ def check_pronunciation():
             })
 
         with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_audio:
+            
             audio_data.save(temp_audio.name)
-
+            
             try:
                 result = whisper_model.transcribe(temp_audio.name, language='it')
+                
                 testo_trascritto = result["text"].strip()
+                
 
-                if not testo_trascritto:
-                    return jsonify({
-                        'error': 'Nessun audio rilevato',
-                        'status': 'error'
-                    })
+             
 
             except Exception as whisper_error:
                 return jsonify({
@@ -470,9 +469,9 @@ def check_pronunciation():
             feedback = response.message.content.strip().upper()
         except:
             # Fallback
-            if similarity >= 0.8:
+            if similarity > 0.8:
                 feedback = "BRAVO"
-            elif similarity >= 0.5:
+            elif similarity >= 0.5 and similarity < 0.8:
                 feedback = "PROVA A FARE DI MEGLIO"
             else:
                 feedback = "SBAGLIATO"
