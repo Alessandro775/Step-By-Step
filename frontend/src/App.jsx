@@ -5,10 +5,12 @@ import RoutesPath from './utils/RoutePath';
 
 function App() {
   return (
+    
     <BrowserRouter>
       <RoutesPath/>
     </BrowserRouter>
   )
+  
 }
 
 export default App
