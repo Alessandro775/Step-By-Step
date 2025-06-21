@@ -133,7 +133,7 @@ const EducatorProfile = () => {
             <div className={styles.welcomeContent}>
               <div className={styles.welcomeIcon}>👨‍🏫</div>
               <h1 className={styles.welcomeTitle}>
-                Benvenuto nel tuo Profilo Educatore!
+                Benvenuto nel tuo Profilo!
               </h1>
               <p className={styles.welcomeText}>
                 Gestisci le tue informazioni personali e monitora l'attività didattica con i tuoi studenti.
@@ -162,7 +162,6 @@ const EducatorProfile = () => {
             </div>
 
            <div className={styles.avatarSection}>
-            <div className={styles.educatorBadge}>EDUCATORE</div>
           </div>
 
             <div className={styles.infoGrid}>
