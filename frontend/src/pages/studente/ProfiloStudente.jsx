@@ -205,13 +205,15 @@ const ProfiloStudente = () => {
               <h2 className={styles.blockTitle}>
                 Informazioni Personali
               </h2>
-              <button className={styles.editBtn} onClick={handleEdit}>
-                {isEditing ? "Annulla" : "Modifica"}
+
+              <button 
+                className={styles.editBtn}
+                onClick={handleEdit}
+              >
+                {isEditing ? 'Annulla' : 'Modifica'}
               </button>
             </div>
 
-            <div className={styles.avatarSection}>
-            </div>
 
             <div className={styles.infoGrid}>
               <div className={styles.nameRow}>
@@ -350,7 +352,12 @@ const ProfiloStudente = () => {
 
             {isEditing && (
               <div className={styles.saveSection}>
-                <button className={styles.saveBtn} onClick={handleSave}>
+
+                <button 
+                  className={styles.saveBtn}
+                  onClick={handleSave}
+                >
+
                   Salva Modifiche
                 </button>
               </div>
@@ -388,12 +395,15 @@ const ProfiloStudente = () => {
             </div>
 
             <div className={styles.cronologiaButtonContainer}>
-              <button
-                className={styles.cronologiaBtn}
-                onClick={handleViewCronologia}
-                >
-                Visualizza Cronologia
-              </button>
+
+              <button 
+  className={styles.cronologiaBtn}
+  onClick={handleViewCronologia}
+>
+  Visualizza Cronologia
+</button>
+
+
             </div>
           </div>
 
@@ -403,7 +413,12 @@ const ProfiloStudente = () => {
               <h3>Zona Pericolosa</h3>
               <p>Le azioni in questa sezione sono irreversibili</p>
             </div>
-            <button className={styles.deleteBtn} onClick={handleDeleteProfile}>
+
+            <button 
+              className={styles.deleteBtn}
+              onClick={handleDeleteProfile}
+            >
+
               Elimina Profilo
             </button>
           </div>
@@ -435,7 +450,12 @@ const ProfiloStudente = () => {
               <button className={styles.confirmBtn} onClick={confirmDelete}>
                 Sì, Elimina
               </button>
-              <button className={styles.cancelBtn} onClick={cancelDelete}>
+
+              <button 
+                className={styles.cancelBtn}
+                onClick={cancelDelete}
+              >
+
                 Annulla
               </button>
             </div>
