@@ -103,8 +103,8 @@ def get_parole_per_studente(id_studente):
             connection.close()
 
 
-def get_parole_italiane_from_db():
-    """Recupera tutte le parole italiane dal database (per compatibilità)"""
+def get_parole_from_db():
+    """Recupera tutte le parole dal database (per compatibilità)"""
     connection = get_db_connection()
     if not connection:
         return []
@@ -205,7 +205,7 @@ def salva_risultato_pronuncia(id_studente, id_esercizio_assegnato, feedback, sim
             cursor.close()
             connection.close()
 # Carica le parole dal database all'avvio (per compatibilità)
-PAROLE_ITALIANE = get_parole_italiane_from_db()
+PAROLE = get_parole_from_db()
 
 
 # Carica il modello Whisper
@@ -219,7 +219,7 @@ except Exception as e:
 @app.route('/health', methods=['GET'])
 def health_check():
     """Endpoint per verificare lo stato del server"""
-    parole_aggiornate = get_parole_italiane_from_db()
+    parole_aggiornate = get_parole_from_db()
     
     return jsonify({
         'status': 'healthy',
@@ -423,17 +423,16 @@ def check_pronunciation():
             })
 
         with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_audio:
+            
             audio_data.save(temp_audio.name)
-
+            
             try:
                 result = whisper_model.transcribe(temp_audio.name, language='it')
+                
                 testo_trascritto = result["text"].strip()
+                
 
-                if not testo_trascritto:
-                    return jsonify({
-                        'error': 'Nessun audio rilevato',
-                        'status': 'error'
-                    })
+             
 
             except Exception as whisper_error:
                 return jsonify({
@@ -470,9 +469,9 @@ def check_pronunciation():
             feedback = response.message.content.strip().upper()
         except:
             # Fallback
-            if similarity >= 0.8:
+            if similarity > 0.8:
                 feedback = "BRAVO"
-            elif similarity >= 0.5:
+            elif similarity >= 0.5 and similarity < 0.8:
                 feedback = "PROVA A FARE DI MEGLIO"
             else:
                 feedback = "SBAGLIATO"
@@ -555,5 +554,5 @@ def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, 
 
 if __name__ == '__main__':
     print("🚀 Avviando server Flask per pronuncia italiana...")
-    print(f"📚 Parole italiane disponibili: {len(PAROLE_ITALIANE)}")
+    print(f"📚 Parole disponibili: {len(PAROLE)}")
     app.run(debug=True, host='127.0.0.1', port=5001)

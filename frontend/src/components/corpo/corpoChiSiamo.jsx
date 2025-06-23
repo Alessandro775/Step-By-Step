@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './corpoChiSiamo.module.css';
+import styles from './CorpoChiSiamo.module.css';
 
 const CorpoChiSiamo = () => {
   return (
@@ -17,9 +17,6 @@ const CorpoChiSiamo = () => {
         {/* Card del team */}
         <div className={styles.teamCard}>
           <div className={styles.cardHeader}>
-            <svg className={styles.icon} width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v-3c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v3h3v4H4z"/>
-            </svg>
             <h2 className={styles.cardTitle}>Il Nostro Team</h2>
           </div>
           <p className={styles.teamDescription}>
@@ -33,9 +30,6 @@ const CorpoChiSiamo = () => {
         {/* Card della missione */}
         <div className={styles.missionCard}>
           <div className={styles.cardHeader}>
-            <svg className={styles.icon} width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
             <h2 className={styles.cardTitle}>La Nostra Missione</h2>
           </div>
           <p className={styles.missionDescription}>

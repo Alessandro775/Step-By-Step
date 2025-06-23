@@ -1,86 +1,87 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from '../ProfilePageStudente.module.css';
-import Header from '../../components/Header/HeaderStudente';
-import Footer from '../../components/footer/Footer';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "../ProfilePageStudente.module.css";
+import Header from "../../components/Header/HeaderStudente";
+import Footer from "../../components/footer/Footer";
 
 const ProfiloStudente = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userInfo, setUserInfo] = useState({
-    nome: '',
-    cognome: '',
-    email: '',
-    istituto: '',
-    classe: '',
-    anno_scolastico: ''
+    nome: "",
+    cognome: "",
+    email: "",
+    istituto: "",
+    classe: "",
+    anno_scolastico: "",
   });
   const [statistiche, setStatistiche] = useState({
-  esercizi_completati: 0,
-  esercizi_non_completati: 0,
-  loading: true
-});
+    esercizi_completati: 0,
+    esercizi_non_completati: 0,
+    loading: true,
+  });
 
- const loadStatistiche = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:3000/api/student-stats', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Errore nel caricamento delle statistiche');
-    }
-
-    const statsData = await response.json();
-    
-    setStatistiche({
-      esercizi_completati: statsData.esercizi_completati,
-      esercizi_non_completati: statsData.esercizi_non_completati,
-      loading: false
-    });
-
-  } catch (error) {
-    console.error('Errore caricamento statistiche:', error);
-    setStatistiche({
-      esercizi_completati: 0,
-      esercizi_non_completati: 0,
-      loading: false
-    });
-  }
-};
-  useEffect(() => {
-  const loadProfile = async () => {
+  const loadStatistiche = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/student-profile', {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/student-stats", {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
-        throw new Error('Errore nel caricamento del profilo');
+        throw new Error("Errore nel caricamento delle statistiche");
       }
 
-      const profileData = await response.json();
-      setUserInfo(profileData);
+      const statsData = await response.json();
+
+      setStatistiche({
+        esercizi_completati: statsData.esercizi_completati,
+        esercizi_non_completati: statsData.esercizi_non_completati,
+        loading: false,
+      });
     } catch (error) {
-      console.error('Errore caricamento profilo:', error);
+      console.error("Errore caricamento statistiche:", error);
+      setStatistiche({
+        esercizi_completati: 0,
+        esercizi_non_completati: 0,
+        loading: false,
+      });
     }
   };
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          "http://localhost:3000/api/student-profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-  const loadData = async () => {
-    await loadProfile();
-    await loadStatistiche();
-  };
+        if (!response.ok) {
+          throw new Error("Errore nel caricamento del profilo");
+        }
 
-  loadData();
-}, []);
+        const profileData = await response.json();
+        setUserInfo(profileData);
+      } catch (error) {
+        console.error("Errore caricamento profilo:", error);
+      }
+    };
 
+    const loadData = async () => {
+      await loadProfile();
+      await loadStatistiche();
+    };
+
+    loadData();
+  }, []);
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -88,41 +89,44 @@ const ProfiloStudente = () => {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const updateData = {
         nome: userInfo.nome,
         cognome: userInfo.cognome,
         istituto: userInfo.istituto,
         classe: userInfo.classe,
-        anno_scolastico: userInfo.anno_scolastico
+        anno_scolastico: userInfo.anno_scolastico,
       };
 
-      const response = await fetch('http://localhost:3000/api/student-profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updateData)
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/student-profile",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updateData),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Errore nel salvataggio');
+        throw new Error(errorData.error || "Errore nel salvataggio");
       }
 
       setIsEditing(false);
-      alert('Profilo salvato con successo!');
+      alert("Profilo salvato con successo!");
     } catch (error) {
-      console.error('Errore salvataggio:', error);
+      console.error("Errore salvataggio:", error);
       alert(`Errore nel salvataggio: ${error.message}`);
     }
   };
 
   const handleInputChange = (field, value) => {
-    setUserInfo(prev => ({
+    setUserInfo((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -132,42 +136,45 @@ const ProfiloStudente = () => {
 
   const confirmDelete = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/student-profile', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        "http://localhost:3000/api/student-profile",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Errore dal server:', errorData);
-        throw new Error(errorData.error || 'Errore nell\'eliminazione');
+        console.error("Errore dal server:", errorData);
+        throw new Error(errorData.error || "Errore nell'eliminazione");
       }
 
       const result = await response.json();
-      console.log('Eliminazione completata:', result);
+      console.log("Eliminazione completata:", result);
       setShowDeleteConfirm(false);
 
       // Logout completo
-      localStorage.removeItem('token');
-      localStorage.removeItem('ruolo');
-      localStorage.removeItem('studenteSelezionato');
+      localStorage.removeItem("token");
+      localStorage.removeItem("ruolo");
+      localStorage.removeItem("studenteSelezionato");
 
-      alert('Profilo studente eliminato con successo!');
-      navigate('/');
+      alert("Profilo studente eliminato con successo!");
+      navigate("/");
     } catch (error) {
-      console.error('Errore eliminazione profilo:', error);
+      console.error("Errore eliminazione profilo:", error);
       alert(`Errore nell'eliminazione del profilo: ${error.message}`);
       setShowDeleteConfirm(false);
     }
   };
 
-//collegamento bottone visualizza cronologia
-const handleViewCronologia = () => {
-  navigate('/cronologia-studente');
-};
+  //collegamento bottone visualizza cronologia
+  const handleViewCronologia = () => {
+    navigate("/cronologia-studente");
+  };
 
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
@@ -178,7 +185,6 @@ const handleViewCronologia = () => {
       <Header />
       <div className={styles.profileContainer}>
         <div className={styles.profileContent}>
-          
           {/* Blocco di Benvenuto */}
           <div className={styles.welcomeBlock}>
             <div className={styles.welcomeContent}>
@@ -187,7 +193,8 @@ const handleViewCronologia = () => {
                 Benvenuto nel tuo Profilo!
               </h1>
               <p className={styles.welcomeText}>
-                Gestisci le tue informazioni personali e monitora i tuoi progressi accademici.
+                Gestisci le tue informazioni personali e monitora i tuoi
+                progressi accademici.
               </p>
             </div>
           </div>
@@ -198,6 +205,7 @@ const handleViewCronologia = () => {
               <h2 className={styles.blockTitle}>
                 Informazioni Personali
               </h2>
+
               <button 
                 className={styles.editBtn}
                 onClick={handleEdit}
@@ -205,6 +213,7 @@ const handleViewCronologia = () => {
                 {isEditing ? 'Annulla' : 'Modifica'}
               </button>
             </div>
+
 
             <div className={styles.infoGrid}>
               <div className={styles.nameRow}>
@@ -217,12 +226,14 @@ const handleViewCronologia = () => {
                       type="text"
                       className={styles.inputField}
                       value={userInfo.nome}
-                      onChange={(e) => handleInputChange('nome', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("nome", e.target.value)
+                      }
                       placeholder="Inserisci il nome"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.nome || 'Non specificato'}
+                      {userInfo.nome || "Non specificato"}
                     </div>
                   )}
                 </div>
@@ -238,12 +249,14 @@ const handleViewCronologia = () => {
                       type="text"
                       className={styles.inputField}
                       value={userInfo.cognome}
-                      onChange={(e) => handleInputChange('cognome', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("cognome", e.target.value)
+                      }
                       placeholder="Inserisci il cognome"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.cognome || 'Non specificato'}
+                      {userInfo.cognome || "Non specificato"}
                     </div>
                   )}
                 </div>
@@ -256,7 +269,7 @@ const handleViewCronologia = () => {
                   </label>
                   <div className={styles.infoValue}>
                     <span className={styles.readonlyBadge}>SOLA LETTURA</span>
-                    {userInfo.email || 'Non specificata'}
+                    {userInfo.email || "Non specificata"}
                   </div>
                   <div className={styles.emailNote}>
                     L'email non può essere modificata per motivi di sicurezza
@@ -274,12 +287,14 @@ const handleViewCronologia = () => {
                       type="text"
                       className={styles.inputField}
                       value={userInfo.istituto}
-                      onChange={(e) => handleInputChange('istituto', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("istituto", e.target.value)
+                      }
                       placeholder="Inserisci l'istituto"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.istituto || 'Non specificato'}
+                      {userInfo.istituto || "Non specificato"}
                     </div>
                   )}
                 </div>
@@ -295,12 +310,14 @@ const handleViewCronologia = () => {
                       type="text"
                       className={styles.inputField}
                       value={userInfo.classe}
-                      onChange={(e) => handleInputChange('classe', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("classe", e.target.value)
+                      }
                       placeholder="es. 3A, 5B"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.classe || 'Non specificata'}
+                      {userInfo.classe || "Non specificata"}
                     </div>
                   )}
                 </div>
@@ -315,7 +332,9 @@ const handleViewCronologia = () => {
                     <select
                       className={styles.inputField}
                       value={userInfo.anno_scolastico}
-                      onChange={(e) => handleInputChange('anno_scolastico', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("anno_scolastico", e.target.value)
+                      }
                     >
                       <option value="">Seleziona anno</option>
                       <option value="2024-2025">2024-2025</option>
@@ -324,7 +343,7 @@ const handleViewCronologia = () => {
                     </select>
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.anno_scolastico || 'Non specificato'}
+                      {userInfo.anno_scolastico || "Non specificato"}
                     </div>
                   )}
                 </div>
@@ -333,10 +352,12 @@ const handleViewCronologia = () => {
 
             {isEditing && (
               <div className={styles.saveSection}>
+
                 <button 
                   className={styles.saveBtn}
                   onClick={handleSave}
                 >
+
                   Salva Modifiche
                 </button>
               </div>
@@ -350,32 +371,38 @@ const handleViewCronologia = () => {
               Cronologia Prestazioni
             </h2>
             <p className={styles.cronologiaDescription}>
-              Visualizza i tuoi progressi, risultati dei quiz e statistiche dettagliate
+              Visualizza i tuoi progressi, risultati dei quiz e statistiche
+              dettagliate
             </p>
-            
-            <div className={styles.cronologiaStats}>
-  <div className={styles.statItem}>
-    <div className={styles.statNumber}>
-      {statistiche.loading ? '...' : statistiche.esercizi_completati}
-    </div>
-    <div className={styles.statLabel}>Esercizi Completati</div>
-  </div>
-  <div className={styles.statItem}>
-    <div className={styles.statNumber}>
-      {statistiche.loading ? '...' : statistiche.esercizi_non_completati}
-    </div>
-    <div className={styles.statLabel}>Esercizi Non Completati</div>
-  </div>
-</div>
 
+            <div className={styles.cronologiaStats}>
+              <div className={styles.statItem}>
+                <div className={styles.statNumber}>
+                  {statistiche.loading
+                    ? "..."
+                    : statistiche.esercizi_completati}
+                </div>
+                <div className={styles.statLabel}>Esercizi Completati</div>
+              </div>
+              <div className={styles.statItem}>
+                <div className={styles.statNumber}>
+                  {statistiche.loading
+                    ? "..."
+                    : statistiche.esercizi_non_completati}
+                </div>
+                <div className={styles.statLabel}>Esercizi Non Completati</div>
+              </div>
+            </div>
 
             <div className={styles.cronologiaButtonContainer}>
+
               <button 
   className={styles.cronologiaBtn}
   onClick={handleViewCronologia}
 >
   Visualizza Cronologia
 </button>
+
 
             </div>
           </div>
@@ -386,10 +413,12 @@ const handleViewCronologia = () => {
               <h3>Zona Pericolosa</h3>
               <p>Le azioni in questa sezione sono irreversibili</p>
             </div>
+
             <button 
               className={styles.deleteBtn}
               onClick={handleDeleteProfile}
             >
+
               Elimina Profilo
             </button>
           </div>
@@ -403,31 +432,30 @@ const handleViewCronologia = () => {
             <div className={styles.warningIcon}>⚠️</div>
             <h3>Conferma Eliminazione</h3>
             <p>Sei sicuro di voler eliminare il tuo profilo studente?</p>
-            
+
             <div className={styles.warningBox}>
               <div className={styles.warningTitle}>ATTENZIONE:</div>
               <ul className={styles.warningList}>
                 <li>• Tutti i tuoi dati verranno eliminati permanentemente</li>
                 <li>• La cronologia dei quiz sarà persa per sempre</li>
                 <li>• Non sarà possibile recuperare il profilo</li>
-                <li>• Dovrai riregistrarti per utilizzare nuovamente l'applicazione</li>
+                <li>
+                  • Dovrai riregistrarti per utilizzare nuovamente
+                  l'applicazione
+                </li>
               </ul>
             </div>
 
             <div className={styles.confirmButtons}>
-              <button 
-                className={styles.confirmBtn}
-                onClick={confirmDelete}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                </svg>
+              <button className={styles.confirmBtn} onClick={confirmDelete}>
                 Sì, Elimina
               </button>
+
               <button 
                 className={styles.cancelBtn}
                 onClick={cancelDelete}
               >
+
                 Annulla
               </button>
             </div>
