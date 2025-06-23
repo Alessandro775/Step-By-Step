@@ -2,16 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "./corpoEsercizioAudio.module.css";
 
 const CorpoEsercizioAudio = () => {
-  // Stati per la navigazione
-  const [currentView, setCurrentView] = useState("home"); // 'home' o 'esercizio'
+  const [currentView, setCurrentView] = useState("home");
   const [esercizioCorrente, setEsercizioCorrente] = useState(null);
-
-  // Stati per la home
   const [esercizi, setEsercizi] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Stati per l'esercizio
   const [isRecording, setIsRecording] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState("prompt");
   const [parolaRiferimento, setParolaRiferimento] = useState("");
@@ -22,8 +17,6 @@ const CorpoEsercizioAudio = () => {
   const [serverStatus, setServerStatus] = useState("checking");
   const [idStudente, setIdStudente] = useState(null);
   const [idEsercizioAssegnato, setIdEsercizioAssegnato] = useState(null);
-
-  // Stati per tracciare l'esercizio
   const [numeroTentativi, setNumeroTentativi] = useState(0);
   const [tempoInizio, setTempoInizio] = useState(null);
   const [tempoImpiegato, setTempoImpiegato] = useState(0);
@@ -38,46 +31,38 @@ const CorpoEsercizioAudio = () => {
   const SERVER_URL = "http://127.0.0.1:5001";
   const MAX_TENTATIVI = 10;
 
-  // Inizializzazione
   useEffect(() => {
-    // Ottieni l'ID studente dal token
     const token = localStorage.getItem("token");
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         if (payload.ruolo === "S") {
           setIdStudente(payload.id);
-          console.log("ID Studente estratto dal token:", payload.id);
         }
       } catch (error) {
         console.error("Errore decodifica token:", error);
       }
     }
-
     checkServerHealth();
     requestMicrophonePermissionOnLoad();
   }, []);
 
-  // Carica esercizi quando l'ID studente è disponibile
   useEffect(() => {
     if (idStudente && currentView === "home") {
       fetchEsercizi();
     }
   }, [idStudente, currentView]);
 
-  // Timer per aggiornare il tempo in tempo reale
   useEffect(() => {
     if (tempoInizio && !esercizioCompletato && currentView === "esercizio") {
       timerRef.current = setInterval(() => {
-        const tempoCorrente = Math.round((Date.now() - tempoInizio) / 1000);
-        setTempoImpiegato(tempoCorrente);
+        setTempoImpiegato(Math.round((Date.now() - tempoInizio) / 1000));
       }, 1000);
     } else {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     }
-
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -85,15 +70,11 @@ const CorpoEsercizioAudio = () => {
     };
   }, [tempoInizio, esercizioCompletato, currentView]);
 
-  // ===== FUNZIONI PER LA HOME =====
   const fetchEsercizi = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${SERVER_URL}/get_esercizi_studente?idStudente=${idStudente}`
-      );
+      const response = await fetch(`${SERVER_URL}/get_esercizi_studente?idStudente=${idStudente}`);
       const data = await response.json();
-
       if (data.status === "success") {
         setEsercizi(data.esercizi);
         setError(null);
@@ -112,69 +93,36 @@ const CorpoEsercizioAudio = () => {
       alert("Questo esercizio è già stato completato!");
       return;
     }
-
     setEsercizioCorrente(esercizio);
-
-    // Inizializza l'esercizio
     setParolaRiferimento(esercizio.testo);
     setImmagineParola(esercizio.immagine || "");
     setIdEsercizioAssegnato(esercizio.idEsercizioAssegnato);
     setImageError(false);
     setFeedback("");
     setResults(null);
-
-    // Reset statistiche esercizio
     setNumeroTentativi(0);
     setTentativiRimanenti(MAX_TENTATIVI);
     setTempoInizio(Date.now());
     setTempoImpiegato(0);
     setEsercizioCompletato(false);
     setStatisticheFinali(null);
-
-    // Cambia vista
     setCurrentView("esercizio");
   };
 
   const handleTornaHome = () => {
-    // Pulisci i timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-
-    // Ferma eventuale registrazione
+    if (timerRef.current) clearInterval(timerRef.current);
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
     }
-
-    // Reset stati esercizio
-    setEsercizioCorrente(null);
-    setParolaRiferimento("");
-    setImmagineParola("");
-    setIdEsercizioAssegnato(null);
-    setFeedback("");
-    setResults(null);
-    setNumeroTentativi(0);
-    setEsercizioCompletato(false);
-    setStatisticheFinali(null);
-
-    // Torna alla home
     setCurrentView("home");
   };
-
-  // ===== FUNZIONI PER L'ESERCIZIO =====
 
   const checkServerHealth = async () => {
     try {
       const response = await fetch(`${SERVER_URL}/health`);
-      if (response.ok) {
-        const data = await response.json();
-        setServerStatus("connected");
-      } else {
-        setServerStatus("error");
-      }
+      setServerStatus(response.ok ? "connected" : "error");
     } catch (error) {
-      console.error("❌ Server Flask non raggiungibile:", error);
       setServerStatus("disconnected");
     }
   };
@@ -183,13 +131,9 @@ const CorpoEsercizioAudio = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setMicrophonePermission("granted");
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach(track => track.stop());
     } catch (error) {
-      if (error.name === "NotAllowedError") {
-        setMicrophonePermission("denied");
-      } else {
-        setMicrophonePermission("prompt");
-      }
+      setMicrophonePermission(error.name === "NotAllowedError" ? "denied" : "prompt");
     }
   };
 
@@ -197,46 +141,30 @@ const CorpoEsercizioAudio = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setMicrophonePermission("granted");
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach(track => track.stop());
     } catch (error) {
       setMicrophonePermission("denied");
-      alert(
-        "⚠️ Devi concedere il permesso per il microfono per utilizzare questa funzionalità"
-      );
+      alert("⚠️ Devi concedere il permesso per il microfono");
     }
   };
 
   const startRecording = async () => {
     try {
       if (numeroTentativi >= MAX_TENTATIVI) {
-        alert(
-          `⚠️ Hai raggiunto il limite di ${MAX_TENTATIVI} tentativi per questa parola!`
-        );
+        alert(`⚠️ Hai raggiunto il limite di ${MAX_TENTATIVI} tentativi!`);
         return;
       }
 
       if (microphonePermission !== "granted") {
         await requestMicrophonePermission();
-        if (microphonePermission !== "granted") {
-          alert(
-            "⚠️ Devi concedere il permesso per il microfono per registrare"
-          );
-          return;
-        }
+        if (microphonePermission !== "granted") return;
       }
 
       const nuovoNumeroTentativi = numeroTentativi + 1;
       setNumeroTentativi(nuovoNumeroTentativi);
       setTentativiRimanenti(MAX_TENTATIVI - nuovoNumeroTentativi);
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
 
@@ -247,11 +175,9 @@ const CorpoEsercizioAudio = () => {
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/wav",
-        });
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
         sendAudioForEvaluation(audioBlob, nuovoNumeroTentativi);
-        stream.getTracks().forEach((track) => track.stop());
+        stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorderRef.current.start();
@@ -273,9 +199,7 @@ const CorpoEsercizioAudio = () => {
   };
 
   const sendAudioForEvaluation = async (audioBlob, tentativoCorrente) => {
-    const tempoCorrente = Date.now();
-    const tempoTotale = Math.round((tempoCorrente - tempoInizio) / 1000);
-
+    const tempoTotale = Math.round((Date.now() - tempoInizio) / 1000);
     const formData = new FormData();
     formData.append("audio", audioBlob, "recording.wav");
     formData.append("reference_text", parolaRiferimento);
@@ -291,12 +215,7 @@ const CorpoEsercizioAudio = () => {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const data = await response.json();
-
       if (data.status === "success") {
         setFeedback(data.feedback);
         setResults({
@@ -305,23 +224,14 @@ const CorpoEsercizioAudio = () => {
           similarity_score: data.similarity_score,
           corrections: data.corrections,
         });
-        setServerStatus("connected");
         setTentativiRimanenti(data.tentativi_rimanenti || 0);
 
         if (data.esercizio_completato) {
           setEsercizioCompletato(true);
-
-          let messaggioFinale = "";
-          let tipoCompletamento = "";
-
-          if (data.feedback === "BRAVO") {
-            messaggioFinale = `🎉 Perfetto! Hai pronunciato correttamente "${data.reference_text}"!`;
-            tipoCompletamento = "successo";
-          } else {
-            messaggioFinale = `⏰ Hai raggiunto il limite di ${MAX_TENTATIVI} tentativi per "${data.reference_text}".`;
-            tipoCompletamento = "limite";
-          }
-
+          const messaggioFinale = data.feedback === "BRAVO" 
+            ? `🎉 Perfetto! Hai pronunciato correttamente "${data.reference_text}"!`
+            : `⏰ Hai raggiunto il limite di ${MAX_TENTATIVI} tentativi per "${data.reference_text}".`;
+          
           setStatisticheFinali({
             parola: data.reference_text,
             tempo_impiegato: data.tempo_impiegato,
@@ -329,90 +239,26 @@ const CorpoEsercizioAudio = () => {
             punteggio: data.similarity_score,
             feedback: data.feedback,
             messaggio: messaggioFinale,
-            tipo: tipoCompletamento,
+            tipo: data.feedback === "BRAVO" ? "successo" : "limite",
             successo: data.feedback === "BRAVO",
           });
 
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-          }
+          if (timerRef.current) clearInterval(timerRef.current);
         }
       } else {
         setFeedback("❌ Errore nell'analisi: " + data.error);
-        setServerStatus("error");
       }
     } catch (error) {
-      console.error("Errore fetch:", error);
       setFeedback("❌ Errore di connessione nell'analisi");
-      setServerStatus("disconnected");
     }
   };
-
-  // Funzioni di utilità per gli stili
-  const getServerStatusClass = () => {
-    switch (serverStatus) {
-      case "connected":
-        return styles.statusConnected;
-      case "disconnected":
-        return styles.statusDisconnected;
-      case "error":
-        return styles.statusError;
-      default:
-        return styles.statusChecking;
-    }
-  };
-
-  const getServerStatusText = () => {
-    switch (serverStatus) {
-      case "connected":
-        return "✅ Server connesso";
-      case "disconnected":
-        return "❌ Server non raggiungibile";
-      case "error":
-        return "⚠️ Errore server";
-      default:
-        return "🔄 Verificando connessione...";
-    }
-  };
-
-  const getPermissionStatusClass = () => {
-    switch (microphonePermission) {
-      case "granted":
-        return styles.permissionGranted;
-      case "denied":
-        return styles.permissionDenied;
-      default:
-        return styles.permissionPrompt;
-    }
-  };
-
-  const getPermissionStatusText = () => {
-    switch (microphonePermission) {
-      case "granted":
-        return "🎤 Microfono autorizzato";
-      case "denied":
-        return "🚫 Microfono negato";
-      default:
-        return "⏳ Verifica permessi microfono...";
-    }
-  };
-
-  const getFeedbackClass = () => {
-    if (feedback.includes("BRAVO")) return styles.feedbackSuccess;
-    if (feedback.includes("PROVA A FARE DI MEGLIO"))
-      return styles.feedbackWarning;
-    if (feedback.includes("SBAGLIATO")) return styles.feedbackError;
-    return styles.feedbackInfo;
-  };
-
-  // ===== RENDER CONDIZIONALE =====
 
   // VISTA HOME
   if (currentView === "home") {
     if (loading) {
       return (
         <div className={styles.container}>
-          <h1 className={styles.mainTitle}>I Tuoi Esercizi di Pronuncia</h1>
+          <h1 className={styles.title}>I Tuoi Esercizi di Pronuncia</h1>
           <div className={styles.loading}>
             <div className={styles.spinner}></div>
             <span>Caricamento esercizi...</span>
@@ -424,25 +270,23 @@ const CorpoEsercizioAudio = () => {
     if (error) {
       return (
         <div className={styles.container}>
-          <h1 className={styles.mainTitle}>I Tuoi Esercizi di Pronuncia</h1>
+          <h1 className={styles.title}>I Tuoi Esercizi di Pronuncia</h1>
           <div className={styles.error}>
             <h2>❌ Errore</h2>
             <p>{error}</p>
-            <button onClick={fetchEsercizi} className={styles.retryButton}>
-              🔄 Riprova
-            </button>
+            <button onClick={fetchEsercizi} className={styles.button}>🔄 Riprova</button>
           </div>
         </div>
       );
     }
 
-    const eserciziRimanenti = esercizi.filter((e) => !e.completato);
-    const eserciziCompletati = esercizi.filter((e) => e.completato);
+    const eserciziRimanenti = esercizi.filter(e => !e.completato);
+    const eserciziCompletati = esercizi.filter(e => e.completato);
 
     return (
       <div className={styles.container}>
-        <h1 className={styles.mainTitle}>I Tuoi Esercizi di Pronuncia</h1>
-
+        <h1 className={styles.title}>I Tuoi Esercizi di Pronuncia</h1>
+      
         <div className={styles.stats}>
           <div className={styles.statCard}>
             <h3>📋 Totali</h3>
@@ -450,56 +294,30 @@ const CorpoEsercizioAudio = () => {
           </div>
           <div className={styles.statCard}>
             <h3>⏳ Da Fare</h3>
-            <span className={styles.statNumber}>
-              {eserciziRimanenti.length}
-            </span>
+            <span className={styles.statNumber}>{eserciziRimanenti.length}</span>
           </div>
           <div className={styles.statCard}>
             <h3>✅ Completati</h3>
-            <span className={styles.statNumber}>
-              {eserciziCompletati.length}
-            </span>
+            <span className={styles.statNumber}>{eserciziCompletati.length}</span>
           </div>
         </div>
 
-        {/* Esercizi da fare */}
         {eserciziRimanenti.length > 0 && (
           <div className={styles.section}>
-            <h2>🎯 Esercizi da Completare</h2>
-            <div className={styles.eserciziGrid}>
+            <h2>🎯 Esercizi da Completare - Leggi la parola mostrata ad alta voce, scandendo bene le lettere</h2>
+            <div className={styles.grid}>
               {eserciziRimanenti.map((esercizio, index) => (
-    <div key={`esercizio-${esercizio.idEsercizioAssegnato}-${index}`} className={styles.esercizioCard}>
+                <div key={`${esercizio.idEsercizioAssegnato}-${index}`} className={styles.card}>
                   <div className={styles.cardHeader}>
-                    <h3>📝 {esercizio.testo}</h3>
+                    <h3>{esercizio.testo}</h3>
                     <span className={styles.badge}>Da fare</span>
                   </div>
-
                   {esercizio.immagine && (
                     <div className={styles.cardImage}>
-                      <img
-                        src={esercizio.immagine}
-                        alt={esercizio.testo}
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
+                      <img src={esercizio.immagine} alt={esercizio.testo} />
                     </div>
                   )}
-
-                  <div className={styles.cardInfo}>
-                    <p>
-                      <strong>Tipo:</strong> {esercizio.tipologia}
-                    </p>
-                    <p>
-                      <strong>Descrizione:</strong> {esercizio.descrizione}
-                    </p>
-
-                  </div>
-
-                  <button
-                    className={styles.startButton}
-                    onClick={() => handleStartEsercizio(esercizio)}
-                  >
+                  <button className={styles.buttonPrimary} onClick={() => handleStartEsercizio(esercizio)}>
                     🎤 Inizia Esercizio
                   </button>
                 </div>
@@ -508,28 +326,18 @@ const CorpoEsercizioAudio = () => {
           </div>
         )}
 
-        {/* Esercizi completati */}
         {eserciziCompletati.length > 0 && (
           <div className={styles.section}>
             <h2>✅ Esercizi Completati</h2>
-            <div className={styles.eserciziGrid}>
+            <div className={styles.grid}>
               {eserciziCompletati.map((esercizio) => (
-                <div
-                  key={esercizio.idEsercizioAssegnato}
-                  className={`${styles.esercizioCard} ${styles.completato}`}
-                >
+                <div key={esercizio.idEsercizioAssegnato} className={`${styles.card} ${styles.completed}`}>
                   <div className={styles.cardHeader}>
-                    <h3>📝 {esercizio.testo}</h3>
-                    <span className={styles.badgeCompletato}>Completato</span>
+                    <h3>{esercizio.testo}</h3>
+                    <span className={styles.badgeSuccess}>Completato</span>
                   </div>
-
                   <div className={styles.cardInfo}>
-                    <p>
-                      <strong>Tipo:</strong> {esercizio.tipologia}
-                    </p>
-                    <p>
-                      <strong>Completato</strong>
-                    </p>
+                    <p><strong>Completato</strong></p>
                   </div>
                 </div>
               ))}
@@ -538,13 +346,10 @@ const CorpoEsercizioAudio = () => {
         )}
 
         {esercizi.length === 0 && (
-          <div className={styles.noEsercizi}>
+          <div className={styles.empty}>
             <h2>📚 Nessun Esercizio Assegnato</h2>
             <p>Non hai ancora esercizi di pronuncia assegnati.</p>
-            <p>Contatta il tuo educatore per ricevere nuovi esercizi.</p>
-            <button onClick={fetchEsercizi} className={styles.refreshButton}>
-              🔄 Aggiorna
-            </button>
+            <button onClick={fetchEsercizi} className={styles.button}>🔄 Aggiorna</button>
           </div>
         )}
       </div>
@@ -555,262 +360,133 @@ const CorpoEsercizioAudio = () => {
   if (currentView === "esercizio") {
     return (
       <div className={styles.container}>
-        <h1 className={styles.mainTitle}>Esercizio di Pronuncia Italiana</h1>
+        <h1 className={styles.title}>Esercizio di Pronuncia</h1>
 
-        <div className={getServerStatusClass()}>{getServerStatusText()}</div>
+        <div className={styles[`status-${serverStatus}`]}>
+          {serverStatus === "connected" ? "✅ Server connesso" : 
+           serverStatus === "disconnected" ? "❌ Server non raggiungibile" : 
+           "🔄 Verificando connessione..."}
+        </div>
 
-        <div className={getPermissionStatusClass()}>
-          {getPermissionStatusText()}
+        <div className={styles[`permission-${microphonePermission}`]}>
+          {microphonePermission === "granted" ? "🎤 Microfono autorizzato" :
+           microphonePermission === "denied" ? "🚫 Microfono negato" :
+           "⏳ Verifica permessi microfono..."}
         </div>
 
         {microphonePermission === "denied" && (
-          <div className={styles.textControls}>
-            <button
-              className={styles.permissionBtn}
-              onClick={requestMicrophonePermission}
-            >
-              🎤 Richiedi Permesso Microfono
-            </button>
-          </div>
+          <button className={styles.button} onClick={requestMicrophonePermission}>
+            🎤 Richiedi Permesso Microfono
+          </button>
         )}
 
-        {/* Statistiche finali quando l'esercizio è completato */}
         {esercizioCompletato && statisticheFinali && (
-          <div
-            className={`${styles.statisticheFinali} ${
-              statisticheFinali.tipo === "successo"
-                ? styles.successo
-                : styles.limite
-            }`}
-          >
-            <h2>
-              {statisticheFinali.tipo === "successo"
-                ? "🎉 Esercizio Completato!"
-                : "⏰ Limite Raggiunto"}
-            </h2>
-            <p className={styles.messaggioFinale}>
-              {statisticheFinali.messaggio}
-            </p>
-
-            <div className={styles.statisticheCard}>
-              <h3>📊 Risultati Finali</h3>
+          <div className={`${styles.finalStats} ${styles[statisticheFinali.tipo]}`}>
+            <h2>{statisticheFinali.tipo === "successo" ? "🎉 Esercizio Completato!" : "⏰ Limite Raggiunto"}</h2>
+            <p>{statisticheFinali.messaggio}</p>
+            <div className={styles.statsCard}>
               <div className={styles.statItem}>
-                <span className={styles.statLabel}>Parola:</span>
-                <span className={styles.statValue}>
-                  {statisticheFinali.parola}
-                </span>
+                <span>Parola:</span>
+                <span>{statisticheFinali.parola}</span>
               </div>
               <div className={styles.statItem}>
-                <span className={styles.statLabel}>Tempo impiegato:</span>
-                <span className={styles.statValue}>
-                  {statisticheFinali.tempo_impiegato} secondi
-                </span>
+                <span>Tempo:</span>
+                <span>{statisticheFinali.tempo_impiegato}s</span>
               </div>
               <div className={styles.statItem}>
-                <span className={styles.statLabel}>Numero di tentativi:</span>
-                <span className={styles.statValue}>
-                  {statisticheFinali.numero_tentativi}/{MAX_TENTATIVI}
-                </span>
+                <span>Tentativi:</span>
+                <span>{statisticheFinali.numero_tentativi}/{MAX_TENTATIVI}</span>
               </div>
               <div className={styles.statItem}>
-                <span className={styles.statLabel}>Accuratezza finale:</span>
-                <span className={styles.statValue}>
-                  {statisticheFinali.punteggio}%
-                </span>
-              </div>
-              <div className={styles.statItem}>
-                <span className={styles.statLabel}>Valutazione:</span>
-                <span className={`${styles.statValue} ${styles.feedbackFinal}`}>
-                  {statisticheFinali.feedback}
-                </span>
+                <span>Accuratezza:</span>
+                <span>{statisticheFinali.punteggio}%</span>
               </div>
             </div>
-
-            <button className={styles.tornaHomeBtn} onClick={handleTornaHome}>
-              🏠 Torna alla Home
-            </button>
+            <button className={styles.buttonPrimary} onClick={handleTornaHome}>🏠 Torna alla Home</button>
           </div>
         )}
 
-        {/* Area esercizio */}
         {!esercizioCompletato && (
-          <div className={styles.pronunciationArea}>
-            {/* Header esercizio */}
+          <>
             <div className={styles.exerciseHeader}>
-              <button className={styles.backButton} onClick={handleTornaHome}>
-                ← Torna alla Home
-              </button>
+              <button className={styles.button} onClick={handleTornaHome}>← Torna alla Home</button>
               <h2>Esercizio: {esercizioCorrente?.testo}</h2>
             </div>
 
-            {/* Informazioni tentativo corrente */}
-            <div className={styles.infoTentativo}>
-              <span>
-                Tentativo: {numeroTentativi}/{MAX_TENTATIVI}
-              </span>
-              <span className={styles.rimanenti}>
-                Rimanenti: {tentativiRimanenti}
-              </span>
+            <div className={styles.attemptInfo}>
+              <span>Tentativo: {numeroTentativi}/{MAX_TENTATIVI}</span>
+              <span>Rimanenti: {tentativiRimanenti}</span>
               <span>Tempo: {tempoImpiegato}s</span>
             </div>
 
-            {/* Barra di progresso tentativi */}
             <div className={styles.progressBar}>
-              <div
-                className={styles.progressFill}
-                style={{
-                  width: `${(numeroTentativi / MAX_TENTATIVI) * 100}%`,
-                  backgroundColor:
-                    numeroTentativi >= 8
-                      ? "#ff4444"
-                      : numeroTentativi >= 5
-                      ? "#ffaa00"
-                      : "#4CAF50",
-                }}
-              ></div>
+              <div className={styles.progressFill} style={{
+                width: `${(numeroTentativi / MAX_TENTATIVI) * 100}%`,
+                backgroundColor: numeroTentativi >= 8 ? "#ff4444" : numeroTentativi >= 5 ? "#ffa500" : "#2e8b57"
+              }}></div>
             </div>
 
-            {/* Immagine della parola */}
             {immagineParola && !imageError && (
               <div className={styles.imageContainer}>
-                <img
-                  src={immagineParola}
-                  alt={parolaRiferimento}
-                  className={styles.wordImage}
-                  onError={(e) => {
-                    setImageError(true);
-                    e.target.style.display = "none";
-                  }}
-                  crossOrigin="anonymous"
-                />
+                <img src={immagineParola} alt={parolaRiferimento} className={styles.wordImage}
+                     onError={() => setImageError(true)} />
               </div>
             )}
 
-            {immagineParola && imageError && (
-              <div className={styles.imageError}>
-                <p>⚠️ Immagine non disponibile</p>
-                <small>{immagineParola}</small>
-              </div>
-            )}
-
-            {/* Parola da pronunciare */}
             <div className={styles.wordContainer}>
-              <div className={styles.referenceText}>
-                {parolaRiferimento || "Caricamento parola..."}
-              </div>
+              <div className={styles.wordText}>{parolaRiferimento || "Caricamento..."}</div>
             </div>
 
-            {/* Istruzioni */}
-            <div className={styles.textControls}>
-              <p>
-                <strong>
-                  Pronuncia chiaramente la parola italiana mostrata sopra
-                </strong>
-              </p>
-              <p>
-                <small>
-                  Hai {tentativiRimanenti} tentativi rimanenti per completare
-                  questo esercizio
-                </small>
-              </p>
+            <div className={styles.instructions}>
+              <p><strong>Pronuncia chiaramente la parola italiana mostrata sopra</strong></p>
+              <p>Hai {tentativiRimanenti} tentativi rimanenti</p>
             </div>
 
-            {/* Controlli registrazione */}
             <div className={styles.controls}>
               <button
-                className={`${styles.recordBtn} ${
-                  isRecording ? styles.recording : ""
-                }`}
+                className={`${styles.recordButton} ${isRecording ? styles.recording : ""}`}
                 onClick={isRecording ? stopRecording : startRecording}
-                disabled={
-                  microphonePermission !== "granted" ||
-                  serverStatus !== "connected" ||
-                  !idStudente ||
-                  numeroTentativi >= MAX_TENTATIVI
-                }
+                disabled={microphonePermission !== "granted" || serverStatus !== "connected" || numeroTentativi >= MAX_TENTATIVI}
               >
-                {isRecording
-                  ? "⏹️ Ferma Registrazione"
-                  : numeroTentativi >= MAX_TENTATIVI
-                  ? "🚫 Limite Raggiunto"
-                  : `🎤 Registra (${numeroTentativi}/${MAX_TENTATIVI})`}
+                {isRecording ? "⏹️ Ferma" : numeroTentativi >= MAX_TENTATIVI ? "🚫 Limite Raggiunto" : `🎤 Registra (${numeroTentativi}/${MAX_TENTATIVI})`}
               </button>
             </div>
 
             {feedback && (
-              <div
-                className={`${styles.feedbackSection} ${getFeedbackClass()}`}
-              >
-                <div className={styles.feedbackIcon}>
-                  {feedback.includes("BRAVO")
-                    ? "🎉"
-                    : feedback.includes("PROVA A FARE DI MEGLIO")
-                    ? "💪"
-                    : feedback.includes("SBAGLIATO")
-                    ? "🔄"
-                    : "ℹ️"}
-                </div>
-                <div className={styles.feedbackContent}>
-                  <div className={styles.feedbackMain}>
-                    {results?.messaggio_personalizzato || feedback}
-                  </div>
-                  {results?.motivazione && (
-                    <div className={styles.feedbackMotivation}>
-                      {results.motivazione}
-                    </div>
-                  )}
-                  {results?.suggerimento_ollama && (
-                    <div className={styles.feedbackSuggestion}>
-                      💡 {results.suggerimento_ollama}
-                    </div>
-                  )}
-                </div>
+              <div className={`${styles.feedback} ${styles[
+                feedback.includes("BRAVO") ? "success" : 
+                feedback.includes("PROVA A FARE DI MEGLIO") ? "warning" : 
+                feedback.includes("SBAGLIATO") ? "error" : "info"
+              ]}`}>
+                {feedback}
               </div>
             )}
 
-            {/* Risultati del tentativo */}
             {results && !esercizioCompletato && (
               <div className={styles.results}>
-                <h4>
-                  📊 Risultati del Tentativo {numeroTentativi}/{MAX_TENTATIVI}
-                </h4>
-                <div className={styles.resultGrid}>
-                  <div className={styles.resultItem}>
-                    <strong>Parola da pronunciare:</strong>
-                    <span>{results.reference_text}</span>
-                  </div>
-                  <div className={styles.resultItem}>
-                    <strong>Parola pronunciata:</strong>
-                    <span>{results.transcribed_text}</span>
-                  </div>
-                  <div className={styles.resultItem}>
-                    <strong>Accuratezza pronuncia:</strong>
-                    <span>{results.similarity_score}%</span>
-                  </div>
+                <h4>📊 Risultati Tentativo {numeroTentativi}/{MAX_TENTATIVI}</h4>
+                <div className={styles.resultItem}>
+                  <strong>Parola da pronunciare:</strong> {results.reference_text}
                 </div>
-
+                <div className={styles.resultItem}>
+                  <strong>Parola pronunciata:</strong> {results.transcribed_text}
+                </div>
+                <div className={styles.resultItem}>
+                  <strong>Accuratezza:</strong> {results.similarity_score}%
+                </div>
                 {results.corrections && results.corrections.length > 0 && (
                   <div className={styles.corrections}>
-                    <h5>💡 Suggerimenti per migliorare:</h5>
+                    <h5>💡 Suggerimenti:</h5>
                     <ul>
-                     {results.corrections.map((correction, index) => (
-    <li key={`correction-${index}-${correction.substring(0, 10)}`}>{correction}</li>
-))}
+                      {results.corrections.map((correction, index) => (
+                        <li key={index}>{correction}</li>
+                      ))}
                     </ul>
                   </div>
                 )}
-
-                {tentativiRimanenti > 0 && (
-                  <div className={styles.encouragement}>
-                    <p>
-                      🔄 Puoi riprovare! Hai ancora {tentativiRimanenti}{" "}
-                      tentativi.
-                    </p>
-                  </div>
-                )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     );
