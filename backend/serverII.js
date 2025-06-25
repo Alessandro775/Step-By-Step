@@ -21,7 +21,7 @@ host: "172.29.15.124",
  port: 3306,
 });
 
-// Middleware esistenti
+// Abilita richieste cross-origin da qualsiasi dominio
 app.use(
   cors({
     origin: "*",
@@ -74,15 +74,16 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage: storage, // dove salvare i file
+  fileFilter: fileFilter, //quali file accettare
   limits: {
-    fileSize: 5 * 1024 * 1024, // Limite 5MB
+    fileSize: 5 * 1024 * 1024, //dimensione massima file
   },
 });
 
 // NUOVA ROUTE: Upload immagine
 app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
+  //verifica che solo gli educatori possonocaricare le immagini
   if (req.utente.ruolo !== "E") {
     return res.status(403).json({
       error: "Accesso negato. Solo gli educatori possono caricare immagini.",
