@@ -79,27 +79,38 @@ const RegisterPage = () => {
       console.log("Risposta registrazione:", data);
 
       if (!response.ok) {
-        // Gestisci diversi tipi di errore
-        if (
-          response.status === 409 ||
-          (data.error && data.error.toLowerCase().includes("email"))
-        ) {
-          // Errore specifico per email già esistente
-          setErrors((prev) => ({
-            ...prev,
-            email: "Questa email è già registrata",
-          }));
-        } else {
-          // Altri errori generici
-          setErrors((prev) => ({
-            ...prev,
-            submit: data.error || "Errore durante la registrazione",
-          }));
-        }
-        return;
-      }
+  // Gestisci diversi tipi di errore
+  if (
+    response.status === 409 ||
+    (data.error && data.error.toLowerCase().includes("email") && !data.error.toLowerCase().includes("studente"))
+  ) {
+    // Errore specifico per email genitore già esistente
+    setErrors((prev) => ({
+      ...prev,
+      email: "Questa email è già registrata",
+    }));
+  } else if (
+    response.status === 400 && 
+    data.error && 
+    data.error.toLowerCase().includes("studente non trovato")
+  ) {
+    // Errore specifico per email studente non trovata
+    setErrors((prev) => ({
+      ...prev,
+      email_studente: "Email studente non trovata.",
+    }));
+  } else {
+    // Altri errori generici
+    setErrors((prev) => ({
+      ...prev,
+      submit: data.error || "Errore durante la registrazione",
+    }));
+  }
+  return;
+}
 
-      // ✅ GESTIONE TOKEN E AUTO-LOGIN
+
+      // GESTIONE TOKEN E AUTO-LOGIN
       if (data.token) {
         console.log("Token ricevuto, salvando nel localStorage...");
 
@@ -307,16 +318,29 @@ const RegisterPage = () => {
               </div>
               <div style={{ width: "15px" }}></div>
               <div style={{ flex: 1 }}>
-                <input
-                  id="email_studente"
-                  type="email"
-                  value={email_studente}
-                  onChange={(e) => setemail_studente(e.target.value)}
-                  placeholder="Email Studente"
-                  className={`${styles["custom-input"]} ${styles["student-email-input"]}`}
-                  required
-                />
-              </div>
+  <input
+    id="email_studente"
+    type="email"
+    value={email_studente}
+    onChange={(e) => {
+      setemail_studente(e.target.value);
+      // Pulisci l'errore email_studente quando l'utente digita
+      if (errors.email_studente) {
+        setErrors((prev) => ({ ...prev, email_studente: "" }));
+      }
+    }}
+    placeholder="Email Studente"
+    className={`${styles["custom-input"]} ${styles["student-email-input"]} ${
+      errors.email_studente ? styles["input-error"] : ""
+    }`}
+    required
+  />
+  {/* Messaggio di errore specifico per email studente */}
+  {errors.email_studente && (
+    <div className={styles["error-message"]}>{errors.email_studente}</div>
+  )}
+</div>
+
             </div>
           )}
 

@@ -14,9 +14,9 @@ const JWT_SECRET = "balla";
 
 // Configurazione Database
 const db = mysql.createConnection({
-host: "172.29.9.47",
- user: "root",
- password: "",
+host: "172.29.15.124",
+ user: "alessandro",
+ password: "123456",
  database: "step_by_step",
  port: 3306,
 });
@@ -295,7 +295,7 @@ app.post("/api/register", async (req, res) => {
 
             console.log("Registrazione famiglia completata per:", email);
 
-            // ✅ GENERA TOKEN DOPO REGISTRAZIONE FAMIGLIA
+            // GENERA TOKEN DOPO REGISTRAZIONE FAMIGLIA
             const newUserId = result.insertId;
             const token = jwt.sign(
               {
@@ -308,7 +308,7 @@ app.post("/api/register", async (req, res) => {
               }
             );
 
-            // ✅ RESTITUISCI TOKEN E DATI UTENTE
+            // RESTITUISCI TOKEN E DATI UTENTE
             res.status(201).json({
               message: "Registrazione completata con successo",
               token,
@@ -357,7 +357,7 @@ app.post("/api/register", async (req, res) => {
 
         console.log("Registrazione completata per:", email);
 
-        // ✅ GENERA TOKEN DOPO REGISTRAZIONE STUDENTE/EDUCATORE
+        // GENERA TOKEN DOPO REGISTRAZIONE STUDENTE/EDUCATORE
         const newUserId = result.insertId;
         const token = jwt.sign(
           {
@@ -370,7 +370,7 @@ app.post("/api/register", async (req, res) => {
           }
         );
 
-        // ✅ RESTITUISCI TOKEN E DATI UTENTE
+        // RESTITUISCI TOKEN E DATI UTENTE
         res.status(201).json({
           message: "Registrazione completata con successo",
           token,
