@@ -1,6 +1,6 @@
 import React from "react";
-import { useExerciseLogic } from "../../hooks/useLogicaEsercizio";
-import { exerciseService } from "../../servizi/api/serviziEsercizi";
+import { useLogicaEsercizio } from "../../hooks/useLogicaEsercizio";
+import { serviziEsercizi } from "../../servizi/api/serviziEsercizi";
 import ExerciseHome from "./EsercizioAudio/HomeEsercizi";
 import ExerciseView from "./EsercizioAudio/VistaEsercizio";
 import styles from "./corpoEsercizioAudio.module.css";
@@ -33,7 +33,7 @@ const CorpoEsercizioAudio = () => {
     stopRecording,
     setImageError,
     setMicrophonePermission
-  } = useExerciseLogic();
+  } = useLogicaEsercizio();
 
   const handleRequestMicrophone = async () => {
     try {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { exerciseService } from '../servizi/api/serviziEsercizi';
+import { serviziEsercizi } from '../servizi/api/serviziEsercizi';
 
 export const useLogicaEsercizio = () => {
   const [currentView, setCurrentView] = useState("home");
@@ -42,8 +42,8 @@ export const useLogicaEsercizio = () => {
         console.error("Errore decodifica token:", error);
       }
     }
-    exerciseService.checkServerHealth(setServerStatus);
-    exerciseService.requestMicrophonePermission(setMicrophonePermission);
+    serviziEsercizi.checkServerHealth(setServerStatus);
+    serviziEsercizi.requestMicrophonePermission(setMicrophonePermission);
   }, []);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export const useLogicaEsercizio = () => {
   const loadEsercizi = async () => {
     try {
       setLoading(true);
-      const data = await exerciseService.fetchEsercizi(idStudente);
+      const data = await serviziEsercizi.fetchEsercizi(idStudente);
       setEsercizi(data.esercizi);
       setError(null);
     } catch (error) {
@@ -113,7 +113,7 @@ export const useLogicaEsercizio = () => {
   };
 
   const startRecording = () => {
-    exerciseService.startRecording({
+    serviziEsercizi.startRecording({
       numeroTentativi,
       MAX_TENTATIVI,
       microphonePermission,
@@ -139,7 +139,7 @@ export const useLogicaEsercizio = () => {
   const sendAudioForEvaluation = async (audioBlob, tentativoCorrente) => {
     try {
       setFeedback("🤖 Analizzando la pronuncia...");
-      const data = await exerciseService.evaluateAudio({
+      const data = await serviziEsercizi.evaluateAudio({
         audioBlob,
         parolaRiferimento,
         idStudente,
