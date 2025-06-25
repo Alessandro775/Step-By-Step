@@ -67,7 +67,7 @@ const profiloFamilgia = () => {
       }
 
       setIsEditing(false);
-      alert('Profilo salvato con successo!');
+      alert('Profilo famiglia salvato con successo!');
     } catch (error) {
       console.error('Errore salvataggio:', error);
       alert(`Errore nel salvataggio: ${error.message}`);
@@ -105,7 +105,6 @@ const profiloFamilgia = () => {
       console.log('Eliminazione completata:', result);
       setShowDeleteConfirm(false);
       
-      // Logout completo
       localStorage.removeItem('token');
       localStorage.removeItem('ruolo');
       alert('Profilo famiglia eliminato con successo!');
@@ -117,6 +116,10 @@ const profiloFamilgia = () => {
     }
   };
 
+  const handleViewCronologia = () => {
+    navigate('/cronologia-famiglia');
+  };
+
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
   };
@@ -126,87 +129,120 @@ const profiloFamilgia = () => {
       <Header />
       <div className={styles.profileContainer}>
         <div className={styles.profileContent}>
-          {/* Blocco Informazioni Personali */}
+          {/* Blocco di Benvenuto */}
+          <div className={styles.welcomeBlock}>
+            <div className={styles.welcomeContent}>
+              <div className={styles.welcomeIcon}>👨‍👩‍👧‍👦</div>
+              <h1 className={styles.welcomeTitle}>
+                Benvenuta Famiglia {userInfo.cognome_famiglia}!
+              </h1>
+              <p className={styles.welcomeText}>
+                Gestisci le informazioni della tua famiglia.
+              </p>
+            </div>
+          </div>
+
+          {/* Blocco Informazioni Famiglia */}
           <div className={styles.infoBlock}>
             <div className={styles.blockHeader}>
               <h2 className={styles.blockTitle}>
-                👨‍👩‍👧‍👦 Informazioni Famiglia
+                Informazioni Famiglia
               </h2>
+
               <button 
                 className={styles.editBtn}
                 onClick={handleEdit}
               >
-                {isEditing ? '✏️ Modifica' : '✏️ Modifica'}
+                {isEditing ? 'Annulla' : 'Modifica'}
               </button>
             </div>
 
             <div className={styles.infoGrid}>
-              {/* Riga Cognome Famiglia */}
-              <div className={styles.singleRow}>
+              <div className={styles.nameRow}>
                 <div className={styles.infoItem}>
-                  <label>Cognome Famiglia</label>
+                  <label>
+                    Cognome Famiglia
+                  </label>
                   {isEditing ? (
                     <input
                       type="text"
                       className={styles.inputField}
                       value={userInfo.cognome_famiglia}
-                      onChange={(e) => handleInputChange('cognome_famiglia', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("cognome_famiglia", e.target.value)
+                      }
+                      placeholder="Inserisci il cognome famiglia"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.cognome_famiglia || 'Non specificato'}
+                      {userInfo.cognome_famiglia || "Non specificato"}
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* Riga Contatti */}
-              <div className={styles.contactRow}>
-                <div className={styles.infoItem}>
-                  <label>Email</label>
-                  <div className={styles.infoValue}>
-                    {userInfo.email || 'Non specificata'}
-                  </div>
-                </div>
                 <div className={styles.fieldSpacer}></div>
+
                 <div className={styles.infoItem}>
-                  <label>Telefono</label>
+                  <label>
+                    Numero Telefono
+                  </label>
                   {isEditing ? (
                     <input
                       type="tel"
                       className={styles.inputField}
                       value={userInfo.numero_telefono}
-                      onChange={(e) => handleInputChange('numero_telefono', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("numero_telefono", e.target.value)
+                      }
+                      placeholder="Inserisci il numero telefono"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.numero_telefono || 'Non specificato'}
+                      {userInfo.numero_telefono || "Non specificato"}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Riga Email Studente */}
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>Email Studente</label>
+                  <label>
+                    Email Famiglia
+                  </label>
+                  <div className={styles.infoValue}>
+                    <span className={styles.readonlyBadge}>SOLA LETTURA</span>
+                    {userInfo.email || "Non specificata"}
+                  </div>
+                  <div className={styles.emailNote}>
+                    L'email famiglia non può essere modificata per motivi di sicurezza
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.singleRow}>
+                <div className={styles.infoItem}>
+                  <label>
+                    Email Studente
+                  </label>
                   {isEditing ? (
                     <input
                       type="email"
                       className={styles.inputField}
                       value={userInfo.email_studente}
-                      onChange={(e) => handleInputChange('email_studente', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("email_studente", e.target.value)
+                      }
+                      placeholder="Inserisci l'email studente"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.email_studente || 'Non specificata'}
+                      {userInfo.email_studente || "Non specificata"}
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Sezione Salva */}
             {isEditing && (
               <div className={styles.saveSection}>
                 <button 
@@ -217,41 +253,48 @@ const profiloFamilgia = () => {
                 </button>
               </div>
             )}
-
-            {/* Sezione Elimina */}
-            <div className={styles.deleteSection}>
-              <button 
-                className={styles.deleteBtn}
-                onClick={handleDeleteProfile}
-              >
-                Elimina Profilo
-              </button>
-            </div>
           </div>
 
-          {/* Blocco Cronologia */}
-          
+          {/* Zona Pericolosa */}
+          <div className={styles.dangerZone}>
+            <div className={styles.dangerHeader}>
+              <h3>Zona Pericolosa</h3>
+              <p>Le azioni in questa sezione sono irreversibili</p>
+            </div>
+
+            <button 
+              className={styles.deleteBtn}
+              onClick={handleDeleteProfile}
+            >
+              Elimina Profilo
+            </button>
           </div>
         </div>
-    
+      </div>
 
-      {/* Dialog di Conferma Eliminazione */}
+      {/* Finestra di Conferma Eliminazione */}
       {showDeleteConfirm && (
         <div className={styles.confirmOverlay}>
           <div className={styles.confirmDialog}>
-            <h3>⚠️ Conferma Eliminazione</h3>
-            <p>
-              Sei sicuro di voler eliminare il profilo famiglia?
-              <br />
-              <strong>ATTENZIONE:</strong> Questa operazione è <strong>irreversibile</strong>.
-            </p>
+            <div className={styles.warningIcon}>⚠️</div>
+            <h3>Conferma Eliminazione</h3>
+            <p>Sei sicuro di voler eliminare il profilo famiglia?</p>
+
+            <div className={styles.warningBox}>
+              <div className={styles.warningTitle}>ATTENZIONE:</div>
+              <ul className={styles.warningList}>
+                <li>• Tutti i dati della famiglia verranno eliminati permanentemente</li>
+                <li>• Il collegamento con lo studente sarà perso</li>
+                <li>• Non sarà possibile recuperare il profilo</li>
+                <li>• Dovrai riregistrarti per utilizzare nuovamente l'applicazione</li>
+              </ul>
+            </div>
+
             <div className={styles.confirmButtons}>
-              <button 
-                className={styles.confirmBtn}
-                onClick={confirmDelete}
-              >
-                Elimina
+              <button className={styles.confirmBtn} onClick={confirmDelete}>
+                Sì, Elimina
               </button>
+
               <button 
                 className={styles.cancelBtn}
                 onClick={cancelDelete}
