@@ -41,7 +41,7 @@ function RoutesPath() {
 
       {/* Routes educatore */}
       <Route path="/profilo-educatore" element={<ProfiloEducatore />} />
-      <Route path="/studenti-educatore" element={<StudentiEducatore />} />
+      <Route path="/home-educatore" element={<StudentiEducatore />} />
 
       {/* Routes famiglia */}
       <Route path="/profilo-famiglia" element={<ProfiloFamiglia />} />

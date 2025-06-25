@@ -14,14 +14,14 @@ const JWT_SECRET = "balla";
 
 // Configurazione Database
 const db = mysql.createConnection({
-host: "localhost",
- user: "root",
- password: "",
+host: "172.29.15.124",
+ user: "alessandro",
+ password: "123456",
  database: "step_by_step",
  port: 3306,
 });
 
-// Middleware esistenti
+// Abilita richieste cross-origin da qualsiasi dominio
 app.use(
   cors({
     origin: "*",
@@ -74,15 +74,16 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage: storage, // dove salvare i file
+  fileFilter: fileFilter, //quali file accettare
   limits: {
-    fileSize: 5 * 1024 * 1024, // Limite 5MB
+    fileSize: 5 * 1024 * 1024, //dimensione massima file
   },
 });
 
 // NUOVA ROUTE: Upload immagine
 app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
+  //verifica che solo gli educatori possonocaricare le immagini
   if (req.utente.ruolo !== "E") {
     return res.status(403).json({
       error: "Accesso negato. Solo gli educatori possono caricare immagini.",
@@ -295,7 +296,7 @@ app.post("/api/register", async (req, res) => {
 
             console.log("Registrazione famiglia completata per:", email);
 
-            // ✅ GENERA TOKEN DOPO REGISTRAZIONE FAMIGLIA
+            // GENERA TOKEN DOPO REGISTRAZIONE FAMIGLIA
             const newUserId = result.insertId;
             const token = jwt.sign(
               {
@@ -308,7 +309,7 @@ app.post("/api/register", async (req, res) => {
               }
             );
 
-            // ✅ RESTITUISCI TOKEN E DATI UTENTE
+            // RESTITUISCI TOKEN E DATI UTENTE
             res.status(201).json({
               message: "Registrazione completata con successo",
               token,
@@ -357,7 +358,7 @@ app.post("/api/register", async (req, res) => {
 
         console.log("Registrazione completata per:", email);
 
-        // ✅ GENERA TOKEN DOPO REGISTRAZIONE STUDENTE/EDUCATORE
+        // GENERA TOKEN DOPO REGISTRAZIONE STUDENTE/EDUCATORE
         const newUserId = result.insertId;
         const token = jwt.sign(
           {
@@ -370,7 +371,7 @@ app.post("/api/register", async (req, res) => {
           }
         );
 
-        // ✅ RESTITUISCI TOKEN E DATI UTENTE
+        // RESTITUISCI TOKEN E DATI UTENTE
         res.status(201).json({
           message: "Registrazione completata con successo",
           token,
@@ -1484,7 +1485,6 @@ app.get("/api/family-profile", autentica, (req, res) => {
   });
 });
 
-// Route per aggiornare i dati del profilo famiglia (SENZA email)
 // Route per aggiornare i dati del profilo famiglia (SENZA email)
 app.put("/api/family-profile", autentica, (req, res) => {
   if (req.utente.ruolo !== "G") {

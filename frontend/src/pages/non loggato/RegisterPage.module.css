@@ -7,13 +7,6 @@ align-items: center;
   height: 100vh;
 }
 
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: rgb(0, 0, 0);
-  border-radius: 8px;
-}
-
 .form-container {
   position: relative;
   display: flex;
@@ -49,12 +42,6 @@ align-items: center;
   gap: 1rem;
   margin-top: 1rem;
 }
-
-.button-wrapper {
-  width: 70%;
-  margin: 0 auto;
-}
-
 .student-email-input {
   position: relative;
   margin-top: 8px; /* Regola questo valore per spostare più o meno in basso */
