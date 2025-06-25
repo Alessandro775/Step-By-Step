@@ -1485,7 +1485,6 @@ app.get("/api/family-profile", autentica, (req, res) => {
 });
 
 // Route per aggiornare i dati del profilo famiglia (SENZA email)
-// Route per aggiornare i dati del profilo famiglia (SENZA email)
 app.put("/api/family-profile", autentica, (req, res) => {
   if (req.utente.ruolo !== "G") {
     return res.status(403).json({
