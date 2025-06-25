@@ -1,16 +1,15 @@
 import React from 'react';
-import Footer from '../../components/footer/Footer'; // Importa il componente Footer
-import Header from '../../components/Header/Header'; // Importa il componente Header
-import CorpoEserciziSvolti from '../../components/corpo/corpoEserciziSvolti';
+import Footer from '../../components/footer/Footer'; 
+import Header from '../../components/header/Header'; 
+import Corpo from '../../components/corpo/corpoEserciziSvolti';
 
 
 const EsempioEsercizio = () => {
     return (
         <>
-            {/* Qui puoi inserire il contenuto della tua homepage, ad esempio: */}
-            <Header /> {/* Aggiungi il componente Header qui */}
-            <CorpoEserciziSvolti/>
-            <Footer /> {/* Aggiungi il componente Footer qui */}
+            <Header /> 
+            <Corpo />
+            <Footer /> 
         </>
     );
 };
