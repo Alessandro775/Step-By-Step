@@ -3,7 +3,7 @@ import styles from "./StudentiEducatore.module.css";
 
 // IMPORT DEI COMPONENTI ESTERNI
 import ContenutoStudente from "./ContenutoStudente";
-import CronologiaStudente from "./CronologiaStudente";
+import CronologiaEducatore from "./CronologiaEducatore";
 
 
 const StudentiEducatore = () => {
@@ -35,18 +35,26 @@ const StudentiEducatore = () => {
   };
 
   const handleVisualizzaCronologia = (idStudente, nomeStudente) => {
-    // Salva le info dello studente nel sessionStorage per il componente CronologiaStudente
-    sessionStorage.setItem('studenteSelezionato', JSON.stringify({
-      id: idStudente,
-      nome: nomeStudente
-    }));
+    // ✅ CERCA I DATI COMPLETI DELLO STUDENTE DALLA LISTA
+    const studenteCompleto = studenti.find(s => s.idStudente === idStudente);
     
-    setSelectedStudente({
+    const studenteSelezionatoCompleto = {
       id: idStudente,
-      nome: nomeStudente
-    });
+      idStudente: idStudente, // Aggiungi anche questo per compatibilità
+      nome: studenteCompleto?.nome || 'Studente',
+      cognome: studenteCompleto?.cognome || '', // ✅ AGGIUNGI IL COGNOME
+      email: studenteCompleto?.email || ''
+    };
+  
+    console.log("🔧 Studente selezionato per cronologia:", studenteSelezionatoCompleto);
+  
+    // Salva nel sessionStorage
+    sessionStorage.setItem('studenteSelezionato', JSON.stringify(studenteSelezionatoCompleto));
+    
+    setSelectedStudente(studenteSelezionatoCompleto);
     setCurrentView("cronologia");
   };
+  
 
   const handleBackToStudenti = () => {
     setCurrentView("studenti");
@@ -432,9 +440,11 @@ const StudentiEducatore = () => {
           <ContenutoStudente />
         </div>
       ) : currentView === "cronologia" ? (
-        // Vista cronologia studente - USA IL COMPONENTE ESTERNO
         <div className={styles.subComponentContainer}>
-          <CronologiaStudente />
+          <CronologiaEducatore
+            studenteSelezionato={selectedStudente}
+            onTornaIndietro={handleBackToStudenti}
+          />
         </div>
       ) : null}
     </div>

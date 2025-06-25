@@ -1,0 +1,295 @@
+/* Stati connessione e permessi */
+.status-connected {
+    background: var(--success);
+    color: var(--white);
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .status-disconnected {
+    background: var(--error);
+    color: var(--white);
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .status-checking {
+    background: var(--info);
+    color: var(--white);
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .permission-granted {
+    background: var(--success);
+    color: var(--white);
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .permission-denied {
+    background: var(--error);
+    color: var(--white);
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .permission-prompt {
+    background: var(--warning);
+    color: var(--white);
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  /* Header esercizio */
+  .exerciseHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--white);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  
+  /* Info tentativi */
+  .attemptInfo {
+    display: flex;
+    justify-content: space-between;
+    background: var(--white);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  
+  /* Progress bar */
+  .progressBar {
+    width: 100%;
+    height: 20px;
+    background: var(--border);
+    border-radius: 4px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  
+  .progressFill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  
+  /* Immagine e parola */
+  .imageContainer {
+    text-align: center;
+    margin: 1rem 0;
+  }
+  
+  .wordImage {
+    max-width: 300px;
+    max-height: 200px;
+    border-radius: 4px;
+  }
+  
+  .wordContainer {
+    text-align: center;
+    margin: 2rem 0;
+  }
+  
+  .wordText {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary);
+    padding: 1rem;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    display: inline-block;
+    min-width: 200px;
+  }
+  
+  .instructions {
+    text-align: center;
+    margin: 1rem 0;
+    color: var(--text-light);
+  }
+  
+  /* Controlli registrazione */
+  .controls {
+    text-align: center;
+    margin: 2rem 0;
+  }
+  
+  .recordButton {
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .recordButton:hover:not(:disabled) {
+    background: var(--primary-dark);
+  }
+  
+  .recordButton:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+  }
+  
+  .recording {
+    background: var(--error) !important;
+  }
+  
+  /* Feedback */
+  .feedback {
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    text-align: center;
+    font-weight: 600;
+  }
+  
+  .feedback.success {
+    background: var(--success);
+    color: var(--white);
+  }
+  
+  .feedback.warning {
+    background: var(--warning);
+    color: var(--white);
+  }
+  
+  .feedback.error {
+    background: var(--error);
+    color: var(--white);
+  }
+  
+  .feedback.info {
+    background: var(--info);
+    color: var(--white);
+  }
+  
+  /* Risultati */
+  .results {
+    background: var(--white);
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    border: 1px solid var(--border);
+  }
+  
+  .resultItem {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background: var(--bg);
+    border-radius: 4px;
+  }
+  
+  .corrections {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--primary-light);
+    border-radius: 4px;
+  }
+  
+  .corrections ul {
+    margin: 0.5rem 0;
+    padding-left: 1rem;
+  }
+  
+  /* Statistiche finali */
+  .finalStats {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    color: var(--white);
+  }
+  
+  .finalStats.successo {
+    background: var(--success);
+  }
+  
+  .finalStats.limite {
+    background: var(--warning);
+  }
+  
+  .statsCard {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+  }
+  
+  .statItem {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Bottoni comuni */
+  .button {
+    background: var(--text-light);
+    color: var(--white);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  
+  .button:hover {
+    background: var(--text);
+  }
+  
+  .buttonPrimary {
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    width: 100%;
+  }
+  
+  .buttonPrimary:hover {
+    background: var(--primary-dark);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .wordText {
+      font-size: 2rem;
+    }
+    
+    .exerciseHeader {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .attemptInfo {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+  }
+  

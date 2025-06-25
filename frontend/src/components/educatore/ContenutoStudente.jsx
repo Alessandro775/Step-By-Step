@@ -103,24 +103,6 @@ const ContenutoStudente = () => {
       const data = await response.json();
       console.log("Contenuti ricevuti:", data);
 
-      // DEBUG: Verifica duplicati
-      const ids = data.map((c) => c.idEsercizioAssegnato);
-      const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
-      if (duplicateIds.length > 0) {
-        console.warn("⚠️ ID duplicati trovati:", duplicateIds);
-        console.log("Dati completi:", data);
-      }
-
-      // DEBUG: Verifica struttura dati
-      data.forEach((contenuto, index) => {
-        console.log(`Contenuto ${index}:`, {
-          id: contenuto.idEsercizioAssegnato,
-          testo: contenuto.testo || contenuto.titolo,
-          tipologia: contenuto.tipologia,
-          data: contenuto.data_assegnazione || contenuto.data_inizio,
-        });
-      });
-
       setContenuti(data);
     } catch (err) {
       console.error("Errore fetch contenuti:", err);
