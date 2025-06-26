@@ -136,7 +136,7 @@ const EducatorProfile = () => {
                 Benvenuto nel tuo Profilo!
               </h1>
               <p className={styles.welcomeText}>
-                Gestisci le tue informazioni personali e monitora l'attività didattica con i tuoi studenti.
+                Gestisci le tue informazioni personali.
               </p>
             </div>
           </div>
@@ -145,18 +145,12 @@ const EducatorProfile = () => {
           <div className={styles.infoBlock}>
             <div className={styles.blockHeader}>
               <h2 className={styles.blockTitle}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
                 Informazioni Personali
               </h2>
               <button 
                 className={styles.editBtn}
                 onClick={handleEdit}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                </svg>
                 {isEditing ? 'Annulla' : 'Modifica'}
               </button>
             </div>
@@ -168,9 +162,6 @@ const EducatorProfile = () => {
               <div className={styles.nameRow}>
                 <div className={styles.infoItem}>
                   <label>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-                    </svg>
                     Nome
                   </label>
                   {isEditing ? (
@@ -192,9 +183,6 @@ const EducatorProfile = () => {
 
                 <div className={styles.infoItem}>
                   <label>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-                    </svg>
                     Cognome
                   </label>
                   {isEditing ? (
@@ -216,9 +204,6 @@ const EducatorProfile = () => {
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
                   <label>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                    </svg>
                     Email
                   </label>
                   <div className={styles.infoValue}>
@@ -234,9 +219,6 @@ const EducatorProfile = () => {
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
                   <label>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
                     Istituto
                   </label>
                   {isEditing ? (
@@ -262,9 +244,6 @@ const EducatorProfile = () => {
                   className={styles.saveBtn}
                   onClick={handleSave}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                  </svg>
                   Salva Modifiche
                 </button>
               </div>
@@ -281,9 +260,6 @@ const EducatorProfile = () => {
               className={styles.deleteBtn}
               onClick={handleDeleteProfile}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-              </svg>
               Elimina Profilo
             </button>
           </div>
@@ -315,18 +291,12 @@ const EducatorProfile = () => {
                 className={styles.confirmBtn}
                 onClick={confirmDelete}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                </svg>
                 Sì, Elimina
               </button>
               <button 
                 className={styles.cancelBtn}
                 onClick={cancelDelete}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
                 Annulla
               </button>
             </div>

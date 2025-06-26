@@ -138,7 +138,7 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -298,19 +298,24 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
-    transition: background-color 0.2s;
+     transition: all 0.3s ease;
 }
 
 .viewButton:hover {
     background-color: #0056b3;
+    transform: translateY(-2px); /* Movimento verso l'alto */
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); /* Effetto ombra */
 }
 
 .historyButton {
     background-color: #28a745;
+    transition: all 0.3s ease; /* Aggiunto per animazione fluida */
 }
 
 .historyButton:hover {
     background-color: #1e7e34;
+    transform: translateY(-2px); /* Movimento verso l'alto */
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3); /* Effetto ombra */
 }
 
 .modalOverlay {
