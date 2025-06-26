@@ -50,7 +50,7 @@ export const utilitaApiDati = {
     console.log("🔧 Input errori/tentativi:", cronologia);
     
     if (!Array.isArray(cronologia) || cronologia.length === 0) {
-      console.log("❌ Cronologia vuota per errori");
+      console.error("❌ Cronologia vuota per errori");
       return [];
     }
 
