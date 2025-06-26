@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../ProfilePageFamiglia.module.css';
+import styles from './ProfilePageFamiglia.module.css';
 import Header from '../../components/Header/HeaderFamiglia';
 import Footer from '../../components/footer/Footer';
 
