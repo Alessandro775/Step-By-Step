@@ -1,87 +1,385 @@
-/* Qui andranno gli stili specifici per la tabella */
-.contenitoreTabella {
+/* ==========================================
+   TABELLA CRONOLOGIA STYLES - NO ANIMATIONS
+   ========================================== */
+
+   .contenitoreTabella {
     overflow-x: auto;
-    margin-top: 1.5rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+    margin: 1rem 0;
+    /* Rimosse tutte le transition */
   }
   
   .tabella {
     width: 100%;
     border-collapse: collapse;
+    min-width: 800px;
+    font-size: 0.875rem;
+    /* Rimossa transition */
   }
+  
+  /* ==========================================
+     HEADER DELLA TABELLA
+     ========================================== */
   
   .tabella thead th {
-    background-color: #f0f0f0;
-    padding: 12px 15px;
-    text-align: left;
+    background: #e2e8f0;
+    color: #000000;
     font-weight: 600;
-    color: #333;
-    border-bottom: 1px solid #ddd;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid #ffffff;
+    font-size: 0.875rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    /* Rimossa transition */
   }
   
+  .tabella thead th:first-child {
+    border-top-left-radius: 12px;
+    padding-left: 1.5rem;
+  }
+  
+  .tabella thead th:last-child {
+    border-top-right-radius: 12px;
+    padding-right: 1.5rem;
+  }
+  
+  .tabella thead th:hover {
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+    /* Rimossa transition */
+  }
+  
+  /* ==========================================
+     CORPO DELLA TABELLA
+     ========================================== */
+  
   .tabella tbody td {
-    padding: 10px 15px;
-    border-bottom: 1px solid #eee;
-    color: #555;
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+    color: #374151;
+    vertical-align: middle;
+    /* Rimossa transition */
+  }
+  
+  .tabella tbody td:first-child {
+    padding-left: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .tabella tbody td:last-child {
+    padding-right: 1.5rem;
+  }
+  
+  .tabella tbody tr {
+    cursor: pointer;
+    /* Rimossa transition */
+  }
+  
+  .tabella tbody tr:hover {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    /* Rimossi transform: scale e box-shadow */
+  }
+  
+  .tabella tbody tr:nth-child(even) {
+    background: rgba(248, 250, 252, 0.5);
+  }
+  
+  .tabella tbody tr:nth-child(even):hover {
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    /* Rimossa transition */
   }
   
   .tabella tbody tr:last-child td {
     border-bottom: none;
   }
   
-  .tabella tbody tr:nth-child(even) {
-    background-color: #fdfdfd;
+  .tabella tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 12px;
   }
   
-  .tabella tbody tr:hover {
-    background-color: #f5f5f5;
+  .tabella tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 12px;
   }
+  
+  /* ==========================================
+     STATO VUOTO
+     ========================================== */
   
   .statoVuoto {
     text-align: center;
-    padding: 2rem;
-    color: #777;
+    padding: 3rem 1.5rem;
+    color: #6b7280;
     font-style: italic;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px dashed #d1d5db;
+    margin: 1.5rem 0;
+    position: relative;
+    /* Rimosso box-shadow animato */
   }
   
-  /* Responsive */
+  .statoVuoto::before {
+    content: '📋';
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+  
+  .statoVuoto p {
+    margin: 1rem 0;
+    line-height: 1.6;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .statoVuoto p:first-of-type {
+    font-weight: 600;
+    color: #374151;
+    font-size: 1.125rem;
+    font-style: normal;
+  }
+  
+  .statoVuoto p:last-of-type {
+    color: #9ca3af;
+    font-size: 0.875rem;
+  }
+  
+  /* ==========================================
+     INDICATORI DI STATO
+     ========================================== */
+  
+  .badgeCompleto {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    /* Rimosso box-shadow */
+  }
+  
+  .badgeIncompleto {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    /* Rimosso box-shadow */
+  }
+  
+  .badgeInCorso {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    /* Rimosso box-shadow */
+  }
+  
+  /* ==========================================
+     CELLE SPECIFICHE
+     ========================================== */
+  
+  .cellaPunteggio {
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+  }
+  
+  .cellaPunteggioAlto {
+    color: #059669;
+  }
+  
+  .cellaPunteggioBasso {
+    color: #dc2626;
+  }
+  
+  .cellaPunteggioMedio {
+    color: #d97706;
+  }
+  
+  .cellaData {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.8125rem;
+    color: #6b7280;
+  }
+  
+  .cellaTempo {
+    font-weight: 600;
+    color: #374151;
+    text-align: center;
+  }
+  
+  .cellaErrori {
+    color: #dc2626;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .cellaTentativi {
+    color: #059669;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  /* ==========================================
+     RESPONSIVE DESIGN
+     ========================================== */
+  
+  @media (max-width: 1024px) {
+    .tabella {
+      min-width: 700px;
+      font-size: 0.8125rem;
+    }
+    
+    .tabella th,
+    .tabella td {
+      padding: 0.75rem 0.5rem;
+    }
+  }
+  
   @media (max-width: 768px) {
+    .contenitoreTabella {
+      border-radius: 8px;
+    }
+    
+    .tabella {
+      min-width: 600px;
+      font-size: 0.75rem;
+    }
+    
+    .tabella th,
+    .tabella td {
+      padding: 0.5rem;
+    }
+    
+    .tabella thead th:first-child,
+    .tabella tbody td:first-child {
+      padding-left: 1rem;
+    }
+    
+    .tabella thead th:last-child,
+    .tabella tbody td:last-child {
+      padding-right: 1rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
     .tabella thead {
-      display: none; /* Hide table headers on small screens */
+      display: none;
     }
   
-    .tabella, .tabella tbody, .tabella tr, .tabella td {
-      display: block; /* Make table elements behave like block elements */
+    .tabella,
+    .tabella tbody,
+    .tabella tr,
+    .tabella td {
+      display: block;
       width: 100%;
+    }
+  
+    .tabella {
+      min-width: auto;
     }
   
     .tabella tr {
       margin-bottom: 1rem;
-      border: 1px solid #ddd;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      padding: 1rem;
+      background: #ffffff;
     }
   
     .tabella td {
       text-align: right;
-      padding-left: 50%; /* Add space for the pseudo-element label */
+      padding: 0.5rem 0;
+      border: none;
       position: relative;
+      padding-left: 50%;
     }
   
     .tabella td::before {
-      content: attr(data-label); /* Use data-label for the pseudo-element */
+      content: attr(data-label) ': ';
       position: absolute;
-      left: 15px;
-      width: calc(50% - 30px);
+      left: 0;
+      width: 45%;
       text-align: left;
-      font-weight: bold;
-      color: #333;
+      font-weight: 600;
+      color: #374151;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.025em;
     }
+  
+    .statoVuoto {
+      padding: 2rem 1rem;
+    }
+    
+    .statoVuoto::before {
+      font-size: 2.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .contenitoreTabella {
+      margin: 0.5rem 0;
+    }
+    
+    .tabella tr {
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .tabella td {
+      padding: 0.25rem 0;
+      font-size: 0.875rem;
+    }
+    
+    .statoVuoto {
+      padding: 1.5rem 0.75rem;
+    }
+  }
+  
+  /* ==========================================
+     UTILITY CLASSES
+     ========================================== */
+  
+  .highlight {
+    background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+    border-left: 4px solid #f59e0b;
+  }
+  
+  .textCenter {
+    text-align: center;
+  }
+  
+  .textRight {
+    text-align: right;
+  }
+  
+  .fontMono {
+    font-family: 'Monaco', 'Menlo', monospace;
+  }
+  
+  .fontBold {
+    font-weight: 600;
   }
   
