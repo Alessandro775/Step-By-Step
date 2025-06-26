@@ -14,9 +14,15 @@ const JWT_SECRET = "balla";
 
 // Configurazione Database
 const db = mysql.createConnection({
+<<<<<<< ultimeModifiche
+host: "localhost",
+ user: "root",
+ password: "",
+=======
 host: "172.29.5.228",
  user: "alessandro",
  password: "123456",
+>>>>>>> main
  database: "step_by_step",
  port: 3306,
 });

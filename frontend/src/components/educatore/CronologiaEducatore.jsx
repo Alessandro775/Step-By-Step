@@ -1,6 +1,6 @@
 import React from "react";
 import CronologiaBase from "../condivisi/Cronologia/CronologiaBase";
-import styles from "./CronologiaEducatore.module.css";
+import styles from '../condivisi/Cronologia/CronologiaBase.module.css';
 
 const CronologiaEducatore = ({ studenteSelezionato, onTornaIndietro }) => {
   console.log("🔧 CronologiaEducatore - Props ricevute:", {
@@ -9,58 +9,35 @@ const CronologiaEducatore = ({ studenteSelezionato, onTornaIndietro }) => {
     hasId: studenteSelezionato?.id || studenteSelezionato?.idStudente
   });
 
-  // ✅ VALIDAZIONE STUDENTE SELEZIONATO
   if (!studenteSelezionato) {
     return (
-      <div style={{ 
-        padding: '2rem', 
-        textAlign: 'center',
-        border: '2px solid #ff6b6b',
-        borderRadius: '8px',
-        backgroundColor: '#ffe6e6'
-      }}>
+      <div className={styles.errorContainer}>
         <h2>❌ Errore</h2>
         <p>Nessuno studente selezionato.</p>
-        <button 
-          onClick={onTornaIndietro}
-          style={{
-            backgroundColor: '#6c757d',
-            color: 'white',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
+        <button onClick={onTornaIndietro} className={styles.backButton}>
           ← Torna alla Lista Studenti
         </button>
       </div>
     );
   }
 
-  // ✅ GESTIONE ID STUDENTE (potrebbe essere .id o .idStudente)
   const idStudente = studenteSelezionato.idStudente || studenteSelezionato.id;
   
   if (!idStudente) {
     return (
-      <div style={{ 
-        padding: '2rem', 
-        textAlign: 'center',
-        border: '2px solid #ff6b6b',
-        borderRadius: '8px',
-        backgroundColor: '#ffe6e6'
-      }}>
+      <div className={styles.errorContainer}>
         <h2>❌ Errore</h2>
         <p>ID studente non trovato.</p>
-        <p style={{ fontSize: '0.8em', color: '#666' }}>
+        <p className={styles.debugInfo}>
           Debug: {JSON.stringify(studenteSelezionato)}
         </p>
-        <button onClick={onTornaIndietro}>← Torna Indietro</button>
+        <button onClick={onTornaIndietro} className={styles.backButton}>
+          ← Torna Indietro
+        </button>
       </div>
     );
   }
 
-  // ✅ COSTRUZIONE NOME COMPLETO
   const nomeCompleto = `${studenteSelezionato.nome || ''} ${studenteSelezionato.cognome || ''}`.trim() || 'Studente';
   
   console.log("✅ CronologiaEducatore - Dati costruiti:", {
@@ -73,14 +50,13 @@ const CronologiaEducatore = ({ studenteSelezionato, onTornaIndietro }) => {
     <CronologiaBase
       apiEndpoint={`studenti/${idStudente}/cronologia`}
       titolo="Cronologia Studente"
-      sottotitolo="Visualizza i progressi dello studente negli esercizi"
-      nomeUtente={nomeCompleto} // ✅ PASSA IL NOME COMPLETO
+      sottotitolo="Visualizza i progressi nell'esecuzione degli esercizi"
+      nomeUtente={nomeCompleto}
       mostraBottoneTorna={true}
-      onTornaIndietro={onTornaIndietro} // ✅ PASSA LA FUNZIONE DI CALLBACK
+      onTornaIndietro={onTornaIndietro}
       testoBottoneGrafici="📊 Mostra Grafici"
       testoBottoneTabella="📋 Mostra Cronologia"
       mostraFormatoCompleto={false}
-      // ✅ RIMUOVI styleClasses se causa problemi in CronologiaBase
     />
   );
 };
