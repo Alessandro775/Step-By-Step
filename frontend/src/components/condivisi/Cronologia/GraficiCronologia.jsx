@@ -48,7 +48,7 @@ const GraficiCronologia = ({ datiGraficoPunteggio = [], datiGraficoErroriTentati
       
       {datiGraficoPunteggio.length > 0 && punteggioValid && (
         <div className={styles.contenitoreGrafico}>
-          <h4>Andamento Punteggio (Media Cumulativa)</h4>
+          <h4>Punteggio (Media Cumulativa)</h4>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart 
               data={datiGraficoPunteggio}
@@ -91,7 +91,7 @@ const GraficiCronologia = ({ datiGraficoPunteggio = [], datiGraficoErroriTentati
 
       {datiGraficoErroriTentativi.length > 0 && erroriValid && (
         <div className={styles.contenitoreGrafico}>
-          <h4>Andamento Errori e Tentativi</h4>
+          <h4>Errori e Tentativi</h4>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart 
               data={datiGraficoErroriTentativi}
