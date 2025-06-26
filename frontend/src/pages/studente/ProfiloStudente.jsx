@@ -371,8 +371,7 @@ const ProfiloStudente = () => {
               Cronologia Prestazioni
             </h2>
             <p className={styles.cronologiaDescription}>
-              Visualizza i tuoi progressi, risultati dei quiz e statistiche
-              dettagliate
+              Visualizza i tuoi progressi, e gli esercizi.
             </p>
 
             <div className={styles.cronologiaStats}>
