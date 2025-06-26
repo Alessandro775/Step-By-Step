@@ -39,21 +39,24 @@ const HeaderFamiglia = () => {
         
         <h1 className={header.title}>Step By Step</h1>
         
-        <nav className={header.nav}>
-          <ul className={header['nav-list']}>
-            <li><button onClick={goToProfilo}>Profilo</button></li>
-            {isProfilePage && (
-              <li>
-                <button 
-                  className={header.logoutButton} 
-                  onClick={handleLogoutClick}
-                >
-                  Logout
-                </button>
-              </li>
-            )}
-          </ul>
-        </nav>
+       <nav className={header.nav}>
+  <ul className={header['nav-list']}>
+    {!isProfilePage && (
+      <li><button onClick={goToProfilo}>Profilo</button></li>
+    )}
+    {isProfilePage && (
+      <li>
+        <button 
+          className={header.logoutButton} 
+          onClick={handleLogoutClick}
+        >
+          Logout
+        </button>
+      </li>
+    )}
+  </ul>
+</nav>
+
       </div>
 
       {showConfirm && (
