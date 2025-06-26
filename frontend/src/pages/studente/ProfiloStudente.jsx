@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "../ProfilePageStudente.module.css";
+import styles from "./ProfilePageStudente.module.css";
 import Header from "../../components/Header/HeaderStudente";
 import Footer from "../../components/footer/Footer";
 
