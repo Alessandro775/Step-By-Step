@@ -33,11 +33,6 @@
   transition: none; /* RIMOSSA transizione */
 }
 
-.contenitoreGrafico:hover {
-  transform: none; /* RIMOSSA trasformazione hover */
-  box-shadow: none; /* RIMOSSA ombra hover */
-}
-
 .contenitoreGrafico h4 {
   color: #374151;
   margin-bottom: 1rem;
@@ -77,34 +72,6 @@
   font-weight: 600;
   color: #374151;
   font-size: 1rem;
-}
-
-/* ==========================================
-   ERROR STATES - SEMPLIFICATI
-   ========================================== */
-
-.errorMessage {
-  color: #ef4444;
-  padding: 0.75rem;
-  border: 1px solid #fecaca;
-  border-radius: 4px;
-  background: #fef2f2; /* Sfondo semplice */
-  margin: 1rem 0;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.validationError {
-  color: #dc2626;
-  padding: 0.75rem;
-  border: 1px solid #fca5a5;
-  border-radius: 4px;
-  background: #fef2f2;
-  margin: 1rem 0;
-  font-weight: 600;
-  text-align: center;
 }
 
 /* ==========================================

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './corpoHomePage.module.css';
 
 const CorpoHomePage = () => {
-
+const [isVisible] = useState(false);
     // Dati strutturati per il contenuto
     const dsaData = {
         intro: {
