@@ -72,7 +72,7 @@ const VistaEsercizio = ({
       {!esercizioCompletato && (
         <>
           <div className={styles.exerciseHeader}>
-            <button className={styles.button} onClick={onTornaHome}>← Torna alla Home</button>
+            <button className={styles.button} onClick={onTornaHome}>← Torna indietro </button>
             <h2>Esercizio: {esercizioCorrente?.testo}</h2>
           </div>
 

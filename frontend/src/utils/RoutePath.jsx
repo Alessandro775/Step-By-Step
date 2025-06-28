@@ -15,6 +15,8 @@ import CronologiaStudente from "../pages/studente/CronologiaStudente";
 // Import pagine educatore
 import ProfiloEducatore from "../pages/educatore/ProfiloEducatore";
 import StudentiEducatore from "../pages/educatore/StudentiEducatore";// Importa il componente CorpoHomePage
+import CronologiaEducatore from "../pages/educatore/CronologiaEducatore";
+import ContenutoEducatore from "../pages/educatore/ContenutoEducatore";
 
 // Import pagine famiglia
 import ProfiloFamiglia from "../pages/famiglia/ProfiloFamiglia";
@@ -42,6 +44,8 @@ function RoutesPath() {
       {/* Routes educatore */}
       <Route path="/profilo-educatore" element={<ProfiloEducatore />} />
       <Route path="/home-educatore" element={<StudentiEducatore />} />
+      <Route path="/cronologia-educatore" element={<CronologiaEducatore />} />
+      <Route path="/contenuto-educatore" element={<ContenutoEducatore />} />
 
       {/* Routes famiglia */}
       <Route path="/profilo-famiglia" element={<ProfiloFamiglia />} />

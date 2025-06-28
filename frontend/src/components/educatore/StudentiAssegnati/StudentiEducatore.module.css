@@ -1,0 +1,47 @@
+/* ==========================================
+   STUDENTI EDUCATORE - CONTAINER PRINCIPALE
+   ========================================== */
+
+   .container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #3db139;
+    color: rgb(247, 247, 247);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .studentsSection {
+    margin-top: 16px;
+  }
+  
+  /* ==========================================
+     RESPONSIVE DESIGN
+     ========================================== */
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem;
+    }
+    
+    .header h1 {
+      font-size: 2rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .header h1 {
+      font-size: 1.5rem;
+    }
+  }
+  

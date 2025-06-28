@@ -1,0 +1,309 @@
+/* ==========================================
+   FEEDBACK NOTIFICA - BASE STYLES
+   ========================================== */
+
+   .notifica {
+    position: fixed;
+    z-index: 9999;
+    min-width: 300px;
+    max-width: 500px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e1e5e9;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .contenuto {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  
+  .iconaMessaggio {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+  }
+  
+  .icona {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .testo {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  
+  .azioni {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+  
+  .bottoneAzione {
+    background: none;
+    border: 1px solid currentColor;
+    color: inherit;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .bottoneAzione:hover {
+    background: currentColor;
+    color: white;
+  }
+  
+  .bottoneChiudi {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  .bottoneChiudi:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #374151;
+  }
+  
+  .barraProgresso {
+    height: 3px;
+    background: currentColor;
+    opacity: 0.3;
+    animation: diminuisci linear forwards;
+    transform-origin: left;
+  }
+  
+  @keyframes diminuisci {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+  
+  /* ==========================================
+     TIPI DI NOTIFICA
+     ========================================== */
+  
+  .success {
+    border-left: 4px solid #10b981;
+    color: #065f46;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  }
+  
+  .error {
+    border-left: 4px solid #ef4444;
+    color: #7f1d1d;
+    background: linear-gradient(135deg, #fef2f2, #fecaca);
+  }
+  
+  .warning {
+    border-left: 4px solid #f59e0b;
+    color: #92400e;
+    background: linear-gradient(135deg, #fffbeb, #fde68a);
+  }
+  
+  .info {
+    border-left: 4px solid #3b82f6;
+    color: #1e40af;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  }
+  
+  /* ==========================================
+     POSIZIONI
+     ========================================== */
+  
+  .topRight {
+    top: 1rem;
+    right: 1rem;
+  }
+  
+  .topLeft {
+    top: 1rem;
+    left: 1rem;
+  }
+  
+  .bottomRight {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .bottomLeft {
+    bottom: 1rem;
+    left: 1rem;
+  }
+  
+  .center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  /* ==========================================
+     ANIMAZIONI DI ENTRATA
+     ========================================== */
+  
+  .slide.topRight,
+  .slide.topLeft {
+    animation: slideInFromTop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .slide.bottomRight,
+  .slide.bottomLeft {
+    animation: slideInFromBottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .fade {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+  
+  .bounce {
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  }
+  
+  /* ==========================================
+     ANIMAZIONI DI USCITA
+     ========================================== */
+  
+  .chiusura.slide.topRight,
+  .chiusura.slide.topLeft {
+    animation: slideOutToTop 0.3s ease-in forwards;
+  }
+  
+  .chiusura.slide.bottomRight,
+  .chiusura.slide.bottomLeft {
+    animation: slideOutToBottom 0.3s ease-in forwards;
+  }
+  
+  .chiusura.fade {
+    animation: fadeOut 0.3s ease-in forwards;
+  }
+  
+  .chiusura.bounce {
+    animation: bounceOut 0.3s ease-in forwards;
+  }
+  
+  /* ==========================================
+     KEYFRAMES
+     ========================================== */
+  
+  @keyframes slideInFromTop {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInFromBottom {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOutToTop {
+    to {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes slideOutToBottom {
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes fadeOut {
+    to { opacity: 0; }
+  }
+  
+  @keyframes bounceIn {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes bounceOut {
+    to {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+  }
+  
+  /* ==========================================
+     RESPONSIVE DESIGN
+     ========================================== */
+  
+  @media (max-width: 768px) {
+    .notifica {
+      min-width: 280px;
+      max-width: calc(100vw - 2rem);
+      margin: 0 1rem;
+    }
+    
+    .topRight,
+    .topLeft {
+      top: 0.5rem;
+      right: 0.5rem;
+      left: 0.5rem;
+    }
+    
+    .bottomRight,
+    .bottomLeft {
+      bottom: 0.5rem;
+      right: 0.5rem;
+      left: 0.5rem;
+    }
+    
+    .contenuto {
+      padding: 0.75rem;
+    }
+    
+    .testo {
+      font-size: 0.85rem;
+    }
+  }
+  
