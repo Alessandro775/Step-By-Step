@@ -50,11 +50,6 @@
     padding-right: 1.5rem;
   }
   
-  .tabella thead th:hover {
-    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
-    /* Rimossa transition */
-  }
-  
   /* ==========================================
      CORPO DELLA TABELLA
      ========================================== */
@@ -81,11 +76,6 @@
   .tabella tbody tr {
     cursor: pointer;
     /* Rimossa transition */
-  }
-  
-  .tabella tbody tr:hover {
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    /* Rimossi transform: scale e box-shadow */
   }
   
   .tabella tbody tr:nth-child(even) {
@@ -153,93 +143,6 @@
     color: #9ca3af;
     font-size: 0.875rem;
   }
-  
-  /* ==========================================
-     INDICATORI DI STATO
-     ========================================== */
-  
-  .badgeCompleto {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 9999px;
-    /* Rimosso box-shadow */
-  }
-  
-  .badgeIncompleto {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 9999px;
-    /* Rimosso box-shadow */
-  }
-  
-  .badgeInCorso {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 9999px;
-    /* Rimosso box-shadow */
-  }
-  
-  /* ==========================================
-     CELLE SPECIFICHE
-     ========================================== */
-  
-  .cellaPunteggio {
-    font-weight: 700;
-    color: #1f2937;
-    text-align: center;
-  }
-  
-  .cellaPunteggioAlto {
-    color: #059669;
-  }
-  
-  .cellaPunteggioBasso {
-    color: #dc2626;
-  }
-  
-  .cellaPunteggioMedio {
-    color: #d97706;
-  }
-  
-  .cellaData {
-    font-family: 'Monaco', 'Menlo', monospace;
-    font-size: 0.8125rem;
-    color: #6b7280;
-  }
-  
-  .cellaTempo {
-    font-weight: 600;
-    color: #374151;
-    text-align: center;
-  }
-  
-  .cellaErrori {
-    color: #dc2626;
-    font-weight: 600;
-    text-align: center;
-  }
-  
-  .cellaTentativi {
-    color: #059669;
-    font-weight: 600;
-    text-align: center;
-  }
-  
   /* ==========================================
      RESPONSIVE DESIGN
      ========================================== */
@@ -357,29 +260,3 @@
       padding: 1.5rem 0.75rem;
     }
   }
-  
-  /* ==========================================
-     UTILITY CLASSES
-     ========================================== */
-  
-  .highlight {
-    background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
-    border-left: 4px solid #f59e0b;
-  }
-  
-  .textCenter {
-    text-align: center;
-  }
-  
-  .textRight {
-    text-align: right;
-  }
-  
-  .fontMono {
-    font-family: 'Monaco', 'Menlo', monospace;
-  }
-  
-  .fontBold {
-    font-weight: 600;
-  }
-  

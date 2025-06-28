@@ -15,9 +15,9 @@ const JWT_SECRET = "balla";
 // Configurazione Database
 const db = mysql.createConnection({
 
-host: "localhost",
- user: "root",
- password: "",
+host: "172.29.7.116",
+ user: "alessandro",
+ password: "123456",
  database: "step_by_step",
  port: 3306,
 });
@@ -570,7 +570,7 @@ app.put("/api/profile", autentica, (req, res) => {
 // Route per aggiornare i dati del profilo educatore
 // Route per aggiornare i dati del profilo studente (SENZA email)
 app.put("/api/student-profile", autentica, (req, res) => {
-  if (req.utente.ruolo !== "S") {
+  if (req.utente.ruolo !== "S"){
     return res.status(403).json({
       error: "Accesso negato. Solo gli studenti possono modificare il profilo.",
     });
