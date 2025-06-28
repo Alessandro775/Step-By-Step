@@ -1,0 +1,178 @@
+/* ==========================================
+   TABELLA STUDENTI
+   ========================================== */
+
+   .tableContainer {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+  
+  .table th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.2rem;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .table td {
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid #f1f3f4;
+    color: #495057;
+    vertical-align: middle;
+  }
+  
+  .table tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+  }
+  
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* ==========================================
+     AZIONI TABELLA
+     ========================================== */
+  
+  .actionsCell {
+    min-width: 200px;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .viewButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  
+  .viewButton:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  }
+  
+  .historyButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  
+  .historyButton:hover {
+    background-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  }
+  
+  .deleteButton {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .deleteButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+  
+  /* ==========================================
+     STATO VUOTO
+     ========================================== */
+  
+  .emptyState {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+  }
+  
+  .emptyState h3 {
+    color: #495057;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  }
+  
+  .emptyState p {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* ==========================================
+     RESPONSIVE DESIGN
+     ========================================== */
+  
+  @media (max-width: 768px) {
+    .table {
+      font-size: 0.9rem;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.8rem;
+    }
+    
+    .tableContainer {
+      overflow-x: auto;
+    }
+    
+    .buttonGroup {
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .viewButton,
+    .historyButton,
+    .deleteButton {
+      width: 100%;
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .table th,
+    .table td {
+      padding: 0.6rem;
+      font-size: 0.8rem;
+    }
+    
+    .actionsCell {
+      min-width: 120px;
+    }
+  }
+  

@@ -1,16 +1,36 @@
-import React from 'react';
-
-import Footer from '../../components/footer/Footer'; // Importa il componente Footer
-import Header from '../../components/Header/HeaderEducatore'; // Importa il componente Header
-import Contenuto from '../../components/educatore/ContenutoStudente'; // Importa il componente ContenutoEducatore
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // ✅ AGGIUNGI QUESTO
+import Footer from '../../components/footer/Footer';
+import Header from '../../components/Header/HeaderEducatore';
+import Contenuto from '../../components/educatore/Contenuto/ContenutoStudente';
 
 const ContenutoEducatore = () => {
+    const navigate = useNavigate(); // ✅ AGGIUNGI QUESTO
+
+    // ✅ FUNZIONE PER TORNARE ALLA LISTA STUDENTI
+    const handleTornaIndietro = () => {
+        sessionStorage.removeItem('studenteSelezionato');
+        navigate('/home-educatore'); // Modifica con il tuo percorso corretto
+    };
+
+    // ✅ AGGIUNGI LISTENER PER IL PULSANTE TORNA INDIETRO DEL COMPONENTE
+    useEffect(() => {
+        const handleBackEvent = () => {
+            handleTornaIndietro();
+        };
+
+        window.addEventListener('backToStudenti', handleBackEvent);
+
+        return () => {
+            window.removeEventListener('backToStudenti', handleBackEvent);
+        };
+    }, []);
+
     return (
         <>
-            {/* Qui puoi inserire il contenuto della tua homepage, ad esempio: */}
-            <Header /> {/* Aggiungi il componente Header qui */}
-            <Contenuto /> {/* Aggiungi il componente ContenutoEducatore qui */}
-            <Footer /> {/* Aggiungi il componente Footer qui */}
+            <Header />
+            <Contenuto />
+            <Footer />
         </>
     );
 };

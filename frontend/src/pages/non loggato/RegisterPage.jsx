@@ -108,8 +108,6 @@ const RegisterPage = () => {
   }
   return;
 }
-
-
       // GESTIONE TOKEN E AUTO-LOGIN
       if (data.token) {
         console.log("Token ricevuto, salvando nel localStorage...");

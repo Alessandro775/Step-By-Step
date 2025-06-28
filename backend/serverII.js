@@ -900,35 +900,36 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
 
       // Query  per la nuova struttura
       const query = `
-        SELECT 
-          ea.idEsercizioAssegnato,
-          ea.testo as titolo,
-          ea.immagine,
-          ea.data_assegnazione as data_inizio,
-          e.tipologia as tipologia,
-          e.descrizione as descrizione,
-          CASE 
-            WHEN r.idRisultato IS NOT NULL THEN 1 
-            ELSE 0 
-          END as completato
-        FROM esercizio_assegnato ea
-        JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
-        LEFT JOIN risultato r ON ea.idEsercizioAssegnato = r.idEsercizioAssegnato
-        WHERE ea.idStudente = ? AND ea.idEducatore = ?
-        ORDER BY ea.data_assegnazione DESC
-      `;
-
-      db.query(query, [idStudente, idEducatore], (err, results) => {
-        if (err) {
-          console.error("Errore query contenuti:", err);
-          return res.status(500).json({ error: "Errore database" });
-        }
-
-        console.log("Contenuti trovati:", results.length);
-        res.json(results);
-      });
-    }
-  );
+      SELECT 
+        ea.idEsercizioAssegnato,
+        ea.testo as titolo,
+        ea.immagine,
+        ea.data_assegnazione as data_inizio,
+        e.tipologia as tipologia,
+        e.descrizione as descrizione,
+        CASE 
+          WHEN r.idRisultato IS NOT NULL THEN 1 
+          ELSE 0 
+        END as completato
+      FROM esercizio_assegnato ea
+      JOIN esercizio e ON ea.idEsercizio = e.idEsercizio
+      LEFT JOIN risultato r ON ea.idEsercizioAssegnato = r.idEsercizioAssegnato
+      WHERE ea.idStudente = ? 
+        AND ea.idEducatore = ? 
+        AND (ea.attivo IS NULL OR ea.attivo = TRUE)
+      ORDER BY ea.data_assegnazione DESC
+    `;
+  
+    db.query(query, [idStudente, idEducatore], (err, results) => {
+      if (err) {
+        console.error("Errore query contenuti:", err);
+        return res.status(500).json({ error: "Errore database" });
+      }
+  
+      console.log("Contenuti attivi trovati:", results.length);
+      res.json(results);
+    });
+  });
 });
 
 // Route per visualizzare la cronologia di uno studente
@@ -1115,15 +1116,14 @@ app.get("/api/family-cronologia", autentica, (req, res) => {
   });
 });
 
-// Route per eliminare un contenuto assegnato
+// Route per "eliminare" un contenuto (SOFT DELETE)
 app.delete(
   "/api/studenti/:idStudente/contenuti/:idEsercizioAssegnato",
   autentica,
   (req, res) => {
     if (req.utente.ruolo !== "E") {
       return res.status(403).json({
-        error:
-          "Accesso negato. Solo gli educatori possono eliminare contenuti.",
+        error: "Accesso negato. Solo gli educatori possono eliminare contenuti.",
       });
     }
 
@@ -1131,12 +1131,12 @@ app.delete(
     const idStudente = req.params.idStudente;
     const idEsercizioAssegnato = req.params.idEsercizioAssegnato;
 
-    console.log("=== ELIMINAZIONE CONTENUTO (NUOVA STRUTTURA) ===");
+    console.log("=== SOFT DELETE CONTENUTO ===");
     console.log("Educatore:", idEducatore);
     console.log("Studente:", idStudente);
     console.log("EsercizioAssegnato:", idEsercizioAssegnato);
 
-    // Verifica che lo studente sia assegnato all'educatore
+    // STEP 1: Verifica che lo studente sia assegnato all'educatore
     const verificaAssegnazione = `
       SELECT * FROM assegnazione 
       WHERE idEducatore = ? AND idStudente = ?
@@ -1157,52 +1157,146 @@ app.delete(
           });
         }
 
-        // Prima elimina eventuali risultati collegati
-        const eliminaRisultati = `
-        DELETE FROM risultato 
-        WHERE idEsercizioAssegnato = ?
-      `;
-
-        db.query(eliminaRisultati, [idEsercizioAssegnato], (err, result) => {
-          if (err) {
-            console.error("Errore eliminazione risultati:", err);
-            return res
-              .status(500)
-              .json({ error: "Errore eliminazione risultati" });
-          }
-
-          // Poi elimina l'esercizio assegnato
-          const eliminaEsercizio = `
-          DELETE FROM esercizio_assegnato 
-          WHERE idEsercizioAssegnato = ? AND idStudente = ? AND idEducatore = ?
+        // STEP 2: Verifica se il campo 'attivo' esiste, altrimenti lo aggiunge
+        const checkColumnQuery = `
+          SELECT COLUMN_NAME 
+          FROM INFORMATION_SCHEMA.COLUMNS 
+          WHERE TABLE_SCHEMA = 'step_by_step' 
+            AND TABLE_NAME = 'esercizio_assegnato' 
+            AND COLUMN_NAME = 'attivo'
         `;
 
-          db.query(
-            eliminaEsercizio,
-            [idEsercizioAssegnato, idStudente, idEducatore],
-            (err, result) => {
+        db.query(checkColumnQuery, (err, columnExists) => {
+          if (err) {
+            console.error("Errore verifica colonna:", err);
+            return res.status(500).json({ error: "Errore database" });
+          }
+
+          // Se la colonna non esiste, la aggiunge
+          if (columnExists.length === 0) {
+            console.log("⚠️ Campo 'attivo' non trovato, lo aggiungo...");
+            
+            const addColumnQuery = `
+              ALTER TABLE esercizio_assegnato 
+              ADD COLUMN attivo BOOLEAN DEFAULT TRUE
+            `;
+
+            db.query(addColumnQuery, (err) => {
               if (err) {
-                console.error("Errore eliminazione esercizio:", err);
-                return res
-                  .status(500)
-                  .json({ error: "Errore eliminazione esercizio" });
+                console.error("Errore aggiunta colonna attivo:", err);
+                return res.status(500).json({ 
+                  error: "Errore nell'aggiunta del campo attivo" 
+                });
               }
 
-              if (result.affectedRows === 0) {
-                return res
-                  .status(404)
-                  .json({ error: "Contenuto non trovato o non assegnato" });
-              }
+              console.log("✅ Campo 'attivo' aggiunto con successo");
 
-              console.log("Contenuto eliminato con successo");
-              res.json({ message: "Contenuto eliminato con successo" });
-            }
-          );
+              // Imposta tutti gli esercizi esistenti come attivi
+              const updateExistingQuery = `
+                UPDATE esercizio_assegnato 
+                SET attivo = TRUE 
+                WHERE attivo IS NULL
+              `;
+
+              db.query(updateExistingQuery, (err) => {
+                if (err) {
+                  console.error("Errore aggiornamento esercizi esistenti:", err);
+                }
+                console.log("✅ Esercizi esistenti impostati come attivi");
+                
+                // Procedi con il soft delete
+                performSoftDelete();
+              });
+            });
+          } else {
+            console.log("✅ Campo 'attivo' già presente");
+            // Procedi direttamente con il soft delete
+            performSoftDelete();
+          }
         });
+
+        // STEP 3: Funzione per eseguire il soft delete
+        function performSoftDelete() {
+          // Prima conta i risultati esistenti per debug
+          const contaRisultati = `
+            SELECT COUNT(*) as totale FROM risultato 
+            WHERE idEsercizioAssegnato = ?
+          `;
+
+          db.query(contaRisultati, [idEsercizioAssegnato], (err, conteggioRisultati) => {
+            if (err) {
+              console.error("Errore conteggio risultati:", err);
+              return res.status(500).json({ error: "Errore database" });
+            }
+
+            const numeroRisultati = conteggioRisultati[0].totale;
+            console.log(`📊 Esercizio ha ${numeroRisultati} risultati collegati`);
+
+            // ✅ SOFT DELETE: Marca come non attivo SENZA toccare i risultati
+            const disattivaEsercizio = `
+              UPDATE esercizio_assegnato 
+              SET attivo = FALSE 
+              WHERE idEsercizioAssegnato = ? AND idStudente = ? AND idEducatore = ?
+            `;
+
+            db.query(
+              disattivaEsercizio,
+              [idEsercizioAssegnato, idStudente, idEducatore],
+              (err, result) => {
+                if (err) {
+                  console.error("Errore disattivazione esercizio:", err);
+                  return res.status(500).json({ 
+                    error: "Errore disattivazione esercizio" 
+                  });
+                }
+
+                if (result.affectedRows === 0) {
+                  return res.status(404).json({
+                    error: "Contenuto non trovato o già eliminato"
+                  });
+                }
+
+                // ✅ VERIFICA POST-ELIMINAZIONE: I risultati sono ancora lì?
+                const verificaRisultatiPostEliminazione = `
+                  SELECT COUNT(*) as totale FROM risultato 
+                  WHERE idEsercizioAssegnato = ?
+                `;
+
+                db.query(verificaRisultatiPostEliminazione, [idEsercizioAssegnato], (err, verificaFinale) => {
+                  if (err) {
+                    console.error("Errore verifica finale:", err);
+                  } else {
+                    const risultatiFinali = verificaFinale[0].totale;
+                    console.log(`✅ Dopo soft delete: ${risultatiFinali} risultati ancora presenti`);
+                    
+                    if (risultatiFinali !== numeroRisultati) {
+                      console.error(`❌ PROBLEMA: Risultati persi! Prima: ${numeroRisultati}, Dopo: ${risultatiFinali}`);
+                    } else {
+                      console.log(`🎉 SUCCESSO: Tutti i ${numeroRisultati} risultati sono stati preservati!`);
+                    }
+                  }
+
+                  console.log("✅ Contenuto disattivato con successo - RISULTATI PRESERVATI");
+                  res.json({ 
+                    message: "Contenuto rimosso con successo",
+                    note: "I risultati dello studente sono stati preservati completamente",
+                    preservaRisultati: true,
+                    debug: {
+                      risultatiPreservati: numeroRisultati,
+                      risultatiFinali: verificaFinale?.[0]?.totale || numeroRisultati,
+                      esercizioDisattivato: true
+                    }
+                  });
+                });
+              }
+            );
+          });
+        }
       }
     );
   }
 );
+
 
 // Route per ottenere tutti gli esercizi disponibili
 app.get("/api/esercizi", autentica, (req, res) => {
