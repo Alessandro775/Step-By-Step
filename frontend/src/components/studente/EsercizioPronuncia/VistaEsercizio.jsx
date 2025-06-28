@@ -17,12 +17,26 @@ const VistaEsercizio = ({
   feedback,
   results,
   MAX_TENTATIVI,
-  onTornaHome,
-  onRequestMicrophone,
-  onStartRecording,
-  onStopRecording,
-  onImageError
+  // ✅ Correzione nomi delle funzioni
+  tornaHome,           // era onTornaHome
+  setMicrophonePermission,  // era onRequestMicrophone  
+  startRecording,      // era onStartRecording
+  stopRecording,       // era onStopRecording
+  setImageError        // era onImageError
 }) => {
+
+  // ✅ Funzione per richiedere permesso microfono
+  const handleRequestMicrophone = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setMicrophonePermission('granted');
+      stream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+      console.error('Errore permesso microfono:', error);
+      setMicrophonePermission('denied');
+    }
+  };
+
   return (
     <>
       <div className={styles[`status-${serverStatus}`]}>
@@ -38,7 +52,7 @@ const VistaEsercizio = ({
       </div>
 
       {microphonePermission === "denied" && (
-        <button className={styles.button} onClick={onRequestMicrophone}>
+        <button className={styles.button} onClick={handleRequestMicrophone}>
           🎤 Richiedi Permesso Microfono
         </button>
       )}
@@ -54,25 +68,30 @@ const VistaEsercizio = ({
             </div>
             <div className={styles.statItem}>
               <span>Tempo:</span>
-              <span>{statisticheFinali.tempo_impiegato}s</span>
+              <span>{statisticheFinali.tempoimpiegato}s</span>
             </div>
             <div className={styles.statItem}>
               <span>Tentativi:</span>
-              <span>{statisticheFinali.numero_tentativi}/{MAX_TENTATIVI}</span>
+              <span>{statisticheFinali.numerotentativi}/{MAX_TENTATIVI}</span>
             </div>
             <div className={styles.statItem}>
               <span>Accuratezza:</span>
               <span>{statisticheFinali.punteggio}%</span>
             </div>
           </div>
-          <button className={styles.buttonPrimary} onClick={onTornaHome}>🏠 Torna alla Home</button>
+          <button className={styles.buttonPrimary} onClick={tornaHome}>
+            🏠 Torna alla Home
+          </button>
         </div>
       )}
 
       {!esercizioCompletato && (
         <>
           <div className={styles.exerciseHeader}>
-            <button className={styles.button} onClick={onTornaHome}>← Torna indietro </button>
+            {/* ✅ Correzione chiamata funzione */}
+            <button className={styles.button} onClick={tornaHome}>
+              ← Torna indietro
+            </button>
             <h2>Esercizio: {esercizioCorrente?.testo}</h2>
           </div>
 
@@ -91,8 +110,12 @@ const VistaEsercizio = ({
 
           {immagineParola && !imageError && (
             <div className={styles.imageContainer}>
-              <img src={immagineParola} alt={parolaRiferimento} className={styles.wordImage}
-                   onError={onImageError} />
+              <img 
+                src={immagineParola} 
+                alt={parolaRiferimento} 
+                className={styles.wordImage}
+                onError={() => setImageError(true)}
+              />
             </div>
           )}
 
@@ -106,12 +129,19 @@ const VistaEsercizio = ({
           </div>
 
           <div className={styles.controls}>
+            {/* ✅ Correzione chiamate funzioni registrazione */}
             <button
               className={`${styles.recordButton} ${isRecording ? styles.recording : ""}`}
-              onClick={isRecording ? onStopRecording : onStartRecording}
-              disabled={microphonePermission !== "granted" || serverStatus !== "connected" || numeroTentativi >= MAX_TENTATIVI}
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={
+                microphonePermission !== "granted" || 
+                serverStatus !== "connected" || 
+                numeroTentativi >= MAX_TENTATIVI
+              }
             >
-              {isRecording ? "⏹️ Ferma" : numeroTentativi >= MAX_TENTATIVI ? "🚫 Limite Raggiunto" : `🎤 Registra (${numeroTentativi}/${MAX_TENTATIVI})`}
+              {isRecording ? "⏹️ Ferma" : 
+               numeroTentativi >= MAX_TENTATIVI ? "🚫 Limite Raggiunto" : 
+               `🎤 Registra (${numeroTentativi}/${MAX_TENTATIVI})`}
             </button>
           </div>
 
@@ -129,13 +159,13 @@ const VistaEsercizio = ({
             <div className={styles.results}>
               <h4>📊 Risultati Tentativo {numeroTentativi}/{MAX_TENTATIVI}</h4>
               <div className={styles.resultItem}>
-                <strong>Parola da pronunciare:</strong> {results.reference_text}
+                <strong>Parola da pronunciare:</strong> {results.referencetext}
               </div>
               <div className={styles.resultItem}>
-                <strong>Parola pronunciata:</strong> {results.transcribed_text}
+                <strong>Parola pronunciata:</strong> {results.transcribedtext}
               </div>
               <div className={styles.resultItem}>
-                <strong>Accuratezza:</strong> {results.similarity_score}%
+                <strong>Accuratezza:</strong> {results.similarityscore}%
               </div>
               {results.corrections && results.corrections.length > 0 && (
                 <div className={styles.corrections}>

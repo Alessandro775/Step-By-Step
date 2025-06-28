@@ -7,7 +7,7 @@ import EsempioEsercizio from "../pages/non loggato/EsempioEsercizio";
 
 // Import pagine studente
 import ProfuloStudente from "../pages/studente/ProfiloStudente";
-import EsercizioAudio from "../pages/studente/EsercizioAudio";
+import EsercizioPronuncia from "../pages/studente/EsercizioPronuncia";
 import HomePageStudente from "../pages/studente/HomePageStudente";  
 import CronologiaStudente from "../pages/studente/CronologiaStudente";
  // Importa il componente CorpoHomePage
@@ -37,7 +37,7 @@ function RoutesPath() {
 
       {/* Routes studente */}
       <Route path="/profilo-studente" element={<ProfuloStudente />} />
-      <Route path="/esercizio-audio" element={<EsercizioAudio />} />
+      <Route path="/esercizio-pronuncia" element={<EsercizioPronuncia />} />
       <Route path="/home-studente" element={<HomePageStudente />} />
       <Route path="/cronologia-studente" element={<CronologiaStudente />} />
 
