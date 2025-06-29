@@ -14,41 +14,41 @@ import styles from "./ContenutoStudente.module.css";
 
 const ContenutoStudente = () => {
   const {
-    contenuti,
-    studenteInfo,
-    loading,
-    error,
-    esercizi,
-    notifiche,
-    setError,
-    fetchContenuti,
-    riassegnaEsercizio,
-    eliminaContenuto
+    contenuti, //array dei contenuti assegnati allo studente
+    studenteInfo, //informazioni dello studente
+    loading, //stato di caricamento per operazioni asincrone
+    error, //messaggio di errore
+    esercizi, // Lista degli esercizi disponibili per l'assegnazione
+    notifiche, // Lista degli esercizi disponibili per l'assegnazione
+    setError, // Funzione per impostare messaggi di errore
+    fetchContenuti, // Funzione per ricaricare i contenuti
+    riassegnaEsercizio, // Funzione per riassegnare un esercizio
+    eliminaContenuto // Funzione per eliminare un contenuto
   } = useContenutoStudente();
 
   const {
-    showForm,
-    setShowForm,
-    submitting,
-    formData,
-    setFormData,
-    handleFormChange,
-    resetForm,
-    submitContenuto
+    showForm,           // Flag per mostrare/nascondere il form
+    setShowForm,        // Funzione per controllare la visibilità del form
+    submitting,         // Stato di invio del form
+    formData,           // Dati del form corrente
+    setFormData,        // Funzione per aggiornare i dati del form
+    handleFormChange,   // Handler per i cambiamenti nei campi del form
+    resetForm,          // Funzione per resettare il form
+    submitContenuto     // Funzione per inviare il form
   } = useGestioneContenutoForm(studenteInfo, fetchContenuti);
 
   const uploadProps = useUploadImmagine(setFormData);
   
   const { 
-    statoDialogo, 
-    mostraConferma, 
-    gestisciConferma, 
-    gestisciAnnulla 
+    statoDialogo, //stato del dialogo 
+    mostraConferma, // mostrare un dialogo di conferma
+    gestisciConferma, //conferma dell'azione
+    gestisciAnnulla //annullamento dell'azione
   } = usaDialogoConferma();
 
   const handleRiassegnaEsercizio = async (idEsercizioAssegnato, testo) => {
     console.log("🔄 Riassegnazione richiesta:", { idEsercizioAssegnato, testo });
-    
+    //mostra dialogo con dettagli precisi
     const conferma = await mostraConferma({
       titolo: "Conferma Riassegnazione",
       messaggio: `Sei sicuro di voler riassegnare l'esercizio "${testo}"?\n\nQuesto creerà una nuova copia dell'esercizio per lo studente.`,
@@ -56,7 +56,7 @@ const ContenutoStudente = () => {
       testoAnnulla: "Annulla",
       variante: "default"
     });
-
+//procedere solo se l'utente da conferma
     if (conferma) {
       await riassegnaEsercizio(idEsercizioAssegnato, testo);
     }
@@ -64,7 +64,7 @@ const ContenutoStudente = () => {
 
   const handleEliminaContenuto = async (idEsercizioAssegnato, titolo) => {
     console.log("🗑️ Eliminazione richiesta:", { idEsercizioAssegnato, titolo });
-    
+    //dialogo di conferma sulle azioni
     const conferma = await mostraConferma({
       titolo: "Conferma Eliminazione",
       messaggio: `Sei sicuro di voler eliminare il contenuto "${titolo}"?\n\nQuesta azione non può essere annullata.`,
@@ -72,7 +72,7 @@ const ContenutoStudente = () => {
       testoAnnulla: "Annulla",
       variante: "pericolo"
     });
-
+//procedere solo se l'utente conferma
     if (conferma) {
       await eliminaContenuto(idEsercizioAssegnato, titolo);
     }
@@ -85,17 +85,19 @@ const ContenutoStudente = () => {
   const handleCancelForm = () => {
     resetForm();
   };
-
+//mostrare spinner durante il caricamento iniziale
   if (loading) {
     return <CaricamentoSpinner messaggio="Caricamento contenuti..." />;
   }
 
   return (
     <div className={styles.container}>
+      {/*titolo dinamico con il nome dello  studente*/}
       <div className={styles.header}>
         <h1 className={styles.title}>
           Contenuti per {studenteInfo?.nome} {studenteInfo?.cognome}
         </h1>
+        {/*pulsante per aggiungere un nuovo contenuto*/}
         <button
           onClick={() => setShowForm(true)}
           className={styles.addButton}
@@ -104,7 +106,7 @@ const ContenutoStudente = () => {
           + Aggiungi Contenuto
         </button>
       </div>
-
+{/*mostra il messaggio di errore se presente*/}
       {error && (
         <MessaggioErrore
           titolo="Errore"
@@ -113,7 +115,7 @@ const ContenutoStudente = () => {
           onTornaIndietro={() => setError(null)}
         />
       )}
-
+{/*gestione di aggiunta contenuto con tutti i campi*/}
       {showForm && (
         <FormAggiungiContenuto
           formData={formData}
@@ -128,8 +130,8 @@ const ContenutoStudente = () => {
 
       <ListaContenuti
         contenuti={contenuti}
-        onRiassegna={handleRiassegnaEsercizio}
-        onElimina={handleEliminaContenuto}
+        onRiassegna={handleRiassegnaEsercizio} //riassegna
+        onElimina={handleEliminaContenuto} //elimina
       />
 
       {/* Dialogo di conferma */}

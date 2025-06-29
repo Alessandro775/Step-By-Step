@@ -53,7 +53,7 @@ const HeaderFamiglia = () => {
       sessionStorage.clear();
      
       navigate('/');
-      
+
     } catch (error) {
       console.error('Errore durante il logout:', error);
       errore('Errore durante il logout', { durata: 4000 });

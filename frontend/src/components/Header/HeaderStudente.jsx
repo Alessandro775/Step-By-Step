@@ -66,12 +66,13 @@ const HeaderStudente = () => {
   return (
     <>
       <div className={header.container}>
+        {/*bottone del logo*/}
         <button className={header.logoButton} onClick={goToHome}>
           <img src={logo} alt="Logo" className={header.logo} />
         </button>
         
         <h1 className={header.title}>Step By Step</h1>
-        
+        {/*vari bottoni*/}
         <nav className={header.nav}>
           <ul className={header['nav-list']}>
             {!isCronologyPage && (
@@ -88,6 +89,7 @@ const HeaderStudente = () => {
             )}
             {isProfilePage && (
               <li>
+                {/*bottone logout*/}
                 <button 
                   className={header.logoutButton} 
                   onClick={handleLogoutClick}
