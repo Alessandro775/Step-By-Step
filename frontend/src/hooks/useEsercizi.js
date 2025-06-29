@@ -1,11 +1,11 @@
-// hooks/useEsercizi.js
 import { useState, useEffect } from 'react';
-
+//Custom hook per la gestione del caricamento degli esercizi disponibili
 const useEsercizi = () => {
-  const [esercizi, setEsercizi] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [esercizi, setEsercizi] = useState([]);  // Array degli esercizi disponibili
+  const [loading, setLoading] = useState(false); // Flag per stato di caricamento
 
   useEffect(() => {
+    //Stati per gestire i dati degli esercizi e lo stato di caricamento
     const caricaEsercizi = async () => {
       setLoading(true);
       try {
@@ -27,10 +27,10 @@ const useEsercizi = () => {
             id: 3,
             nome: 'Pronuncia corretta',
             immagine: 'src/assets/pronuncia-removebg-preview.png',
-            tipo: 'pronuncia'  // ✅ Questo tipo deve corrispondere al mapping
+            tipo: 'pronuncia'  // Questo tipo deve corrispondere al mapping
           }
         ];
-        
+        //aggiorna lo stato con i dati caricati
         setEsercizi(datiEsercizi);
       } catch (error) {
         console.error('Errore nel caricamento esercizi:', error);
@@ -41,7 +41,7 @@ const useEsercizi = () => {
 
     caricaEsercizi();
   }, []);
-
+// Restituisce l'interfaccia pubblica del hook e fornisce dati e stati necessari ai componenti chiamanti
   return { esercizi, loading };
 };
 

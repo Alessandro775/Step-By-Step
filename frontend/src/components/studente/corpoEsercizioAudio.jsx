@@ -5,13 +5,13 @@ import VistaEsercizio from "./EsercizioPronuncia/VistaEsercizio";
 import styles from "./corpoEsercizioAudio.module.css";
 
 const CorpoEsercizioAudio = () => {
-  // ✅ Destrutturazione completa con nomi corretti
+  //  Destrutturazione completa con nomi corretti
 const {
   currentView,
   esercizi,
   loading,
   error,
-  hasError,
+  hasError, //flag boleano per presenza di errori
   esercizioCorrente,
   isRecording,
   microphonePermission,
@@ -20,7 +20,7 @@ const {
   immagineParola,
   imageError,
   feedback,
-  results, // ✅ Ora è unificato come results
+  results, //  Ora è unificato come results
   numeroTentativi,
   tentativiRimanenti,
   tempoImpiegato,
@@ -39,7 +39,7 @@ const {
   setMicrophonePermission
 } = useLogicaEsercizio();
 
-  // ✅ Funzione per richiedere permessi microfono
+  // Funzione per richiedere permessi microfono
   const handleRequestMicrophone = async () => {
     try {
       console.log("🎤 Richiedendo permesso microfono...");
@@ -70,7 +70,7 @@ const {
     }
   };
 
-  // ✅ Gestione errori con fallback UI
+  // Gestione errori con fallback UI
   if (hasError && error) {
     return (
       <div className={styles.container}>
@@ -98,14 +98,14 @@ const {
 
   return (
     <div className={styles.container}>
-      {/* ✅ Titolo dinamico basato sulla vista corrente */}
+      {/* Titolo dinamico basato sulla vista corrente */}
       <h1 className={styles.title}>
         {currentView === "home" && "I Tuoi Esercizi di Pronuncia"}
         {currentView === "esercizio" && "Esercizio di Pronuncia"}
         {currentView === "risultati" && "Risultati Esercizio"}
       </h1>
 
-      {/* ✅ Rendering condizionale della vista */}
+      {/* Rendering condizionale della vista */}
       {currentView === "home" && (
         <HomeEserciziPronuncia
           esercizi={esercizi}
@@ -124,41 +124,41 @@ const {
 
       {(currentView === "esercizio" || currentView === "risultati") && (
         <VistaEsercizio
-          // ✅ Stati esercizio
+          //  Stati esercizio
           esercizioCorrente={esercizioCorrente}
           esercizioCompletato={esercizioCompletato}
           statisticheFinali={statisticheFinali}
           
-          // ✅ Stati contatori
+          //  Stati contatori
           numeroTentativi={numeroTentativi}
           tentativiRimanenti={tentativiRimanenti}
           tempoImpiegato={tempoImpiegato}
           MAX_TENTATIVI={MAX_TENTATIVI}
           
-          // ✅ Stati audio e media
+          //  Stati audio e media
           isRecording={isRecording}
           microphonePermission={microphonePermission}
           serverStatus={serverStatus}
           
-          // ✅ Stati contenuto
+          //  Stati contenuto
           parolaRiferimento={parolaRiferimento}
           immagineParola={immagineParola}
           imageError={imageError}
           
-          // ✅ Stati risultati
+          //  Stati risultati
           feedback={feedback}
-          results={results} // ✅ Passa risultato come results per compatibilità
+          results={results} // Passa risultato come results per compatibilità
           
-          // ✅ Funzioni di navigazione (senza prefisso "on")
+          //  Funzioni di navigazione (senza prefisso "on")
           tornaHome={() => {
             console.log("🏠 Tornando alla home...");
             tornaAllaHome();
           }}
           
-          // ✅ Funzioni microfono
+          //  Funzioni microfono
           setMicrophonePermission={handleRequestMicrophone}
           
-          // ✅ Funzioni registrazione (senza prefisso "on")  
+          //  Funzioni registrazione (senza prefisso "on")  
           startRecording={() => {
             console.log("🎤 Avvio registrazione...");
             startRegistrazione();
@@ -168,13 +168,13 @@ const {
             stopRegistrazione();
           }}
           
-          // ✅ Funzioni utilità
+          //  Funzioni utilità
           setImageError={(hasError) => {
             console.log("🖼️ Errore immagine:", hasError);
             setImageError(hasError);
           }}
           
-          // ✅ Funzioni esercizio
+          //  Funzioni esercizio
           onRipeti={() => {
             console.log("🔄 Ripetizione esercizio...");
             ripetEsercizio();
@@ -182,7 +182,7 @@ const {
         />
       )}
 
-      {/* ✅ Stato loading globale */}
+      {/* Stato loading globale */}
       {loading && currentView === "home" && (
         <div className={styles.loadingOverlay}>
           <div className={styles.spinner}></div>

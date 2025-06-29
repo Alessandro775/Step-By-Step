@@ -8,7 +8,6 @@ const CorpoHomePageFamiglia = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.titolo}>Cronologia</h1>
-      {/* Altri contenuti della pagina */}
     </div>
   );
 };

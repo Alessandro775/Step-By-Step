@@ -4,8 +4,8 @@ import useEsercizi from '../../hooks/useEsercizi';
 import useNavigazioneEsercizi from '../../hooks/useNavigazioneEsercizi';
 
 const CorpoHomePage = () => {
-  const { esercizi, loading } = useEsercizi();
-  const { navigaAEsercizio } = useNavigazioneEsercizi();
+  const { esercizi, loading } = useEsercizi(); //array degli esercizio fleg per stato di caricamento
+  const { navigaAEsercizio } = useNavigazioneEsercizi(); //funzione per navigare il tipo specifico
 
   if (loading) {
     return <div>Caricamento...</div>;
@@ -17,7 +17,9 @@ const CorpoHomePage = () => {
       
       <div className={styles.exercisesGrid}>
         {esercizi.map((esercizio) => (
+          //card singolo esercizio
           <div key={esercizio.id} className={styles.exerciseCard}>
+            {/*container immagine*/}
             <div className={styles.imageContainer}>
               <img 
                 src={esercizio.immagine}

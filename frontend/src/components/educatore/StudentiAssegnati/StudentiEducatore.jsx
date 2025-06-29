@@ -9,26 +9,27 @@ import styles from "./StudentiEducatore.module.css";
 const StudentiEducatore = () => {
   const {
     // Stati
-    studenti,
-    emailNuovoStudente,
-    loading,
-    adding,
-    notifiche, // ✅ Ricevi le notifiche
+    studenti, // Array degli studenti assegnati all'educatore
+    emailNuovoStudente,  // Valore corrente del campo email per nuovo studente
+    loading, // Stato di caricamento iniziale
+    adding, // Stato di aggiunta nuovo studente in corso
+    notifiche, // Ricevi le notifiche
     
-    // Setters
-    setEmailNuovoStudente,
+    setEmailNuovoStudente, // Funzione per aggiornare l'email del nuovo studente
     
     // Azioni
-    handleAggiungiStudente,
-    handleEliminaStudente,
-    handleVisualizzaContenuti,
-    handleVisualizzaCronologia
+    handleAggiungiStudente, // Gestisce l'aggiunta di un nuovo studente
+    handleEliminaStudente, // Gestisce l'eliminazione di uno studente
+    handleVisualizzaContenuti, // Naviga alla pagina contenuti dello studente
+    handleVisualizzaCronologia // Naviga alla cronologia dello studente
   } = useStudentiEducatore();
 
   if (loading) {
     return (
       <>
+      {/* Spinner con messaggio descrittivo */}
         <CaricamentoSpinner messaggio="Caricamento studenti..." />
+        {/* Notifiche sempre visibili anche durante il caricamento */}
         <ContainerNotifiche notifiche={notifiche} />
       </>
     );
@@ -36,7 +37,7 @@ const StudentiEducatore = () => {
 
   return (
     <div className={styles.container}>
-      {/* ✅ Container delle notifiche */}
+      {/* Container delle notifiche */}
       <ContainerNotifiche notifiche={notifiche} />
       
       {/* Header */}
@@ -59,10 +60,10 @@ const StudentiEducatore = () => {
         <div style={{ height: "24px" }}></div>
         
         <TabellaStudenti
-          studenti={studenti}
-          onVisualizzaContenuti={handleVisualizzaContenuti}
-          onVisualizzaCronologia={handleVisualizzaCronologia}
-          onEliminaStudente={handleEliminaStudente}
+          studenti={studenti} //dati degli studenti
+          onVisualizzaContenuti={handleVisualizzaContenuti} //richiamo dei contenuti
+          onVisualizzaCronologia={handleVisualizzaCronologia} //richiamo della cronologia
+          onEliminaStudente={handleEliminaStudente} //richiamo per l'eliminazione
         />
       </div>
     </div>
