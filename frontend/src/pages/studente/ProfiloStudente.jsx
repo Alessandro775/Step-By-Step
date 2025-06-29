@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./ProfilePageStudente.module.css";
+import styles from "./ProfiloStudente.module.css";
 import Header from "../../components/Header/HeaderStudente";
 import Footer from "../../components/footer/Footer";
+import ContainerNotifiche from "../../components/condivisi/Layout/ContainerNotifiche";
+import DialogoConferma from "../../components/condivisi/Layout/DialogoConferma";
+import { useFeedback } from "../../hooks/useFeedback";
+import { usaDialogoConferma } from "../../hooks/usaDialogoConferma";
 
 const ProfiloStudente = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userInfo, setUserInfo] = useState({
     nome: "",
     cognome: "",
@@ -21,6 +24,17 @@ const ProfiloStudente = () => {
     esercizi_non_completati: 0,
     loading: true,
   });
+
+  // Integrazione sistema feedback
+  const { notifiche, successo, errore, avviso } = useFeedback();
+  
+  // Integrazione sistema conferma
+  const { 
+    statoDialogo, 
+    mostraConferma, 
+    gestisciConferma, 
+    gestisciAnnulla 
+  } = usaDialogoConferma();
 
   const loadStatistiche = async () => {
     try {
@@ -44,6 +58,7 @@ const ProfiloStudente = () => {
       });
     } catch (error) {
       console.error("Errore caricamento statistiche:", error);
+      errore("Errore nel caricamento delle statistiche", { durata: 6000 });
       setStatistiche({
         esercizi_completati: 0,
         esercizi_non_completati: 0,
@@ -51,6 +66,7 @@ const ProfiloStudente = () => {
       });
     }
   };
+
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -72,6 +88,7 @@ const ProfiloStudente = () => {
         setUserInfo(profileData);
       } catch (error) {
         console.error("Errore caricamento profilo:", error);
+        errore("Errore nel caricamento del profilo", { durata: 6000 });
       }
     };
 
@@ -81,7 +98,7 @@ const ProfiloStudente = () => {
     };
 
     loadData();
-  }, []);
+  }, [errore]);
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -116,10 +133,10 @@ const ProfiloStudente = () => {
       }
 
       setIsEditing(false);
-      alert("Profilo salvato con successo!");
+      successo("Profilo salvato con successo!", { durata: 4000 });
     } catch (error) {
       console.error("Errore salvataggio:", error);
-      alert(`Errore nel salvataggio: ${error.message}`);
+      errore(`Errore nel salvataggio: ${error.message}`, { durata: 6000 });
     }
   };
 
@@ -130,8 +147,18 @@ const ProfiloStudente = () => {
     }));
   };
 
-  const handleDeleteProfile = () => {
-    setShowDeleteConfirm(true);
+  const handleDeleteProfile = async () => {
+    const conferma = await mostraConferma({
+      titolo: "Conferma Eliminazione",
+      messaggio: "Sei sicuro di voler eliminare il tuo profilo studente? Tutti i dati verranno eliminati permanentemente e non sarà possibile recuperare il profilo.",
+      testoConferma: "Sì, Elimina",
+      testoAnnulla: "Annulla",
+      variante: "pericolo"
+    });
+
+    if (conferma) {
+      await confirmDelete();
+    }
   };
 
   const confirmDelete = async () => {
@@ -155,29 +182,26 @@ const ProfiloStudente = () => {
 
       const result = await response.json();
       console.log("Eliminazione completata:", result);
-      setShowDeleteConfirm(false);
 
       // Logout completo
       localStorage.removeItem("token");
       localStorage.removeItem("ruolo");
       localStorage.removeItem("studenteSelezionato");
 
-      alert("Profilo studente eliminato con successo!");
-      navigate("/");
+      successo("Profilo studente eliminato con successo!", { durata: 4000 });
+      
+      // Ritarda la navigazione per mostrare il messaggio
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (error) {
       console.error("Errore eliminazione profilo:", error);
-      alert(`Errore nell'eliminazione del profilo: ${error.message}`);
-      setShowDeleteConfirm(false);
+      errore(`Errore nell'eliminazione del profilo: ${error.message}`, { durata: 8000 });
     }
   };
 
-  //collegamento bottone visualizza cronologia
   const handleViewCronologia = () => {
     navigate("/cronologia-studente");
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteConfirm(false);
   };
 
   return (
@@ -205,7 +229,6 @@ const ProfiloStudente = () => {
               <h2 className={styles.blockTitle}>
                 Informazioni Personali
               </h2>
-
               <button 
                 className={styles.editBtn}
                 onClick={handleEdit}
@@ -214,13 +237,10 @@ const ProfiloStudente = () => {
               </button>
             </div>
 
-
             <div className={styles.infoGrid}>
               <div className={styles.nameRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Nome
-                  </label>
+                  <label>Nome</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -241,9 +261,7 @@ const ProfiloStudente = () => {
                 <div className={styles.fieldSpacer}></div>
 
                 <div className={styles.infoItem}>
-                  <label>
-                    Cognome
-                  </label>
+                  <label>Cognome</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -264,9 +282,7 @@ const ProfiloStudente = () => {
 
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Email
-                  </label>
+                  <label>Email</label>
                   <div className={styles.infoValue}>
                     <span className={styles.readonlyBadge}>SOLA LETTURA</span>
                     {userInfo.email || "Non specificata"}
@@ -279,9 +295,7 @@ const ProfiloStudente = () => {
 
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Istituto
-                  </label>
+                  <label>Istituto</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -302,9 +316,7 @@ const ProfiloStudente = () => {
 
               <div className={styles.nameRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Classe
-                  </label>
+                  <label>Classe</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -325,9 +337,7 @@ const ProfiloStudente = () => {
                 <div className={styles.fieldSpacer}></div>
 
                 <div className={styles.infoItem}>
-                  <label>
-                    Anno Scolastico
-                  </label>
+                  <label>Anno Scolastico</label>
                   {isEditing ? (
                     <select
                       className={styles.inputField}
@@ -352,12 +362,10 @@ const ProfiloStudente = () => {
 
             {isEditing && (
               <div className={styles.saveSection}>
-
                 <button 
                   className={styles.saveBtn}
                   onClick={handleSave}
                 >
-
                   Salva Modifiche
                 </button>
               </div>
@@ -394,15 +402,12 @@ const ProfiloStudente = () => {
             </div>
 
             <div className={styles.cronologiaButtonContainer}>
-
               <button 
-  className={styles.cronologiaBtn}
-  onClick={handleViewCronologia}
->
-  Visualizza Cronologia
-</button>
-
-
+                className={styles.cronologiaBtn}
+                onClick={handleViewCronologia}
+              >
+                Visualizza Cronologia
+              </button>
             </div>
           </div>
 
@@ -417,50 +422,27 @@ const ProfiloStudente = () => {
               className={styles.deleteBtn}
               onClick={handleDeleteProfile}
             >
-
               Elimina Profilo
             </button>
           </div>
         </div>
       </div>
 
-      {/* Finestra di Conferma Eliminazione */}
-      {showDeleteConfirm && (
-        <div className={styles.confirmOverlay}>
-          <div className={styles.confirmDialog}>
-            <div className={styles.warningIcon}>⚠️</div>
-            <h3>Conferma Eliminazione</h3>
-            <p>Sei sicuro di voler eliminare il tuo profilo studente?</p>
+      {/* Sistema di notifiche integrato */}
+      <ContainerNotifiche notifiche={notifiche} />
 
-            <div className={styles.warningBox}>
-              <div className={styles.warningTitle}>ATTENZIONE:</div>
-              <ul className={styles.warningList}>
-                <li>• Tutti i tuoi dati verranno eliminati permanentemente</li>
-                <li>• La cronologia dei quiz sarà persa per sempre</li>
-                <li>• Non sarà possibile recuperare il profilo</li>
-                <li>
-                  • Dovrai riregistrarti per utilizzare nuovamente
-                  l'applicazione
-                </li>
-              </ul>
-            </div>
-
-            <div className={styles.confirmButtons}>
-              <button className={styles.confirmBtn} onClick={confirmDelete}>
-                Sì, Elimina
-              </button>
-
-              <button 
-                className={styles.cancelBtn}
-                onClick={cancelDelete}
-              >
-
-                Annulla
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Dialogo di conferma integrato */}
+      <DialogoConferma
+        aperto={statoDialogo.aperto}
+        titolo={statoDialogo.titolo}
+        messaggio={statoDialogo.messaggio}
+        testoConferma={statoDialogo.testoConferma}
+        testoAnnulla={statoDialogo.testoAnnulla}
+        variante={statoDialogo.variante}
+        onConferma={gestisciConferma}
+        onAnnulla={gestisciAnnulla}
+        onChiudi={gestisciAnnulla}
+      />
 
       <Footer />
     </>

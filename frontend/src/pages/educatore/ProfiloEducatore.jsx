@@ -1,19 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import styles from "./ProfilePageEducatore.module.css";
-import Header from "../../components/Header/HeaderEducatore";
-import Footer from "../../components/footer/Footer";
 
-const EducatorProfile = () => {
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './ProfiloEducatore.module.css';
+import Header from '../../components/header/HeaderEducatore';
+import Footer from '../../components/footer/Footer';
+import ContainerNotifiche from '../../components/condivisi/Layout/ContainerNotifiche';
+import DialogoConferma from '../../components/condivisi/Layout/DialogoConferma';
+import { useFeedback } from '../../hooks/useFeedback';
+import { usaDialogoConferma } from '../../hooks/usaDialogoConferma';
+
+
+const ProfiloEducatore = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userInfo, setUserInfo] = useState({
     nome: "",
     cognome: "",
     email: "",
     istituto: "",
   });
+
+  // Integrazione sistema feedback
+  const { notifiche, successo, errore, avviso } = useFeedback();
+  
+  // Integrazione sistema conferma
+  const { 
+    statoDialogo, 
+    mostraConferma, 
+    gestisciConferma, 
+    gestisciAnnulla 
+  } = usaDialogoConferma();
+
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -31,12 +48,15 @@ const EducatorProfile = () => {
         const profileData = await response.json();
         setUserInfo(profileData);
       } catch (error) {
-        console.error("Errore caricamento profilo:", error);
+
+        console.error('Errore caricamento profilo:', error);
+        errore('Errore nel caricamento del profilo', { durata: 6000 });
+
       }
     };
 
     loadProfile();
-  }, []);
+  }, [errore]);
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -66,10 +86,11 @@ const EducatorProfile = () => {
       }
 
       setIsEditing(false);
-      alert("Profilo salvato con successo!");
+      successo('Profilo educatore salvato con successo!', { durata: 4000 });
     } catch (error) {
-      console.error("Errore salvataggio:", error);
-      alert(`Errore nel salvataggio: ${error.message}`);
+      console.error('Errore salvataggio:', error);
+      errore(`Errore nel salvataggio: ${error.message}`, { durata: 6000 });
+
     }
   };
 
@@ -80,8 +101,18 @@ const EducatorProfile = () => {
     }));
   };
 
-  const handleDeleteProfile = () => {
-    setShowDeleteConfirm(true);
+  const handleDeleteProfile = async () => {
+    const conferma = await mostraConferma({
+      titolo: "Conferma Eliminazione",
+      messaggio: "Sei sicuro di voler eliminare il tuo profilo educatore?",
+      testoConferma: "Sì, Elimina",
+      testoAnnulla: "Annulla",
+      variante: "pericolo"
+    });
+
+    if (conferma) {
+      await confirmDelete();
+    }
   };
 
   const confirmDelete = async () => {
@@ -101,24 +132,24 @@ const EducatorProfile = () => {
       }
 
       const result = await response.json();
-      console.log("Eliminazione completata:", result);
-      setShowDeleteConfirm(false);
+
+      console.log('Eliminazione completata:', result);
 
       // Logout completo
       localStorage.removeItem("token");
       localStorage.removeItem("ruolo");
 
-      alert("Profilo educatore eliminato con successo!");
-      navigate("/");
+      successo('Profilo educatore eliminato con successo!', { durata: 4000 });
+      
+      // Ritarda la navigazione per mostrare il messaggio
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
     } catch (error) {
-      console.error("Errore eliminazione profilo:", error);
-      alert(`Errore nell'eliminazione del profilo: ${error.message}`);
-      setShowDeleteConfirm(false);
-    }
-  };
+      console.error('Errore eliminazione profilo:', error);
+      errore(`Errore nell'eliminazione del profilo: ${error.message}`, { durata: 8000 });
 
-  const cancelDelete = () => {
-    setShowDeleteConfirm(false);
+    }
   };
 
   return (
@@ -250,49 +281,24 @@ const EducatorProfile = () => {
         </div>
       </div>
 
-      {/* Finestra di Conferma Eliminazione */}
-      {showDeleteConfirm && (
-        <div className={styles.confirmOverlay}>
-          <div className={styles.confirmDialog}>
-            <div className={styles.warningIcon}>⚠️</div>
-            <h3>Conferma Eliminazione</h3>
-            <p>Sei sicuro di voler eliminare il tuo profilo educatore?</p>
+      {/* Sistema di notifiche integrato */}
+      <ContainerNotifiche notifiche={notifiche} />
 
-            <div className={styles.warningBox}>
-              <div className={styles.warningTitle}>ATTENZIONE:</div>
-              <ul className={styles.warningList}>
-                <li>• Tutti i tuoi dati verranno eliminati permanentemente</li>
-                <li>
-                  • Gli studenti assegnati perderanno l'accesso agli esercizi
-                </li>
-                <li>
-                  • La cronologia delle attività didattiche sarà persa per
-                  sempre
-                </li>
-                <li>• Tutti gli esercizi creati saranno eliminati</li>
-                <li>• Non sarà possibile recuperare il profilo</li>
-                <li>
-                  • Dovrai riregistrarti per utilizzare nuovamente
-                  l'applicazione
-                </li>
-              </ul>
-            </div>
-
-            <div className={styles.confirmButtons}>
-              <button className={styles.confirmBtn} onClick={confirmDelete}>
-                Sì, Elimina
-              </button>
-              <button className={styles.cancelBtn} onClick={cancelDelete}>
-                Annulla
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Dialogo di conferma integrato */}
+      <DialogoConferma
+        aperto={statoDialogo.aperto}
+        titolo={statoDialogo.titolo}
+        messaggio={statoDialogo.messaggio}
+        testoConferma={statoDialogo.testoConferma}
+        testoAnnulla={statoDialogo.testoAnnulla}
+        variante={statoDialogo.variante}
+        onConferma={gestisciConferma}
+        onAnnulla={gestisciAnnulla}
+        onChiudi={gestisciAnnulla}
+      />
       <Footer />
     </>
   );
 };
 
-export default EducatorProfile;
+export default ProfiloEducatore;
