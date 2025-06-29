@@ -3,7 +3,7 @@ import styles from './corpoHomePage.module.css';
 
 const CorpoHomePage = () => {
 const [isVisible] = useState(false);
-    // Dati strutturati per il contenuto
+    // Dati strutturati per il contenuto descrizioni
     const dsaData = {
         intro: {
             title: "Cosa sono i DSA?",
@@ -67,6 +67,7 @@ const [isVisible] = useState(false);
                 borderLeft: `4px solid ${disturbo.colore}`
             }}
         >
+            {/* Contenuto testuale del disturbo */}
             <div className={styles.disturboIcon}>{disturbo.icon}</div>
             <div className={styles.disturboContent}>
                 <h4 className={styles.disturboNome}>{disturbo.nome}</h4>
@@ -81,6 +82,7 @@ const [isVisible] = useState(false);
             className={`${styles.servizioCard} ${isVisible.servizi ? styles.slideIn : ''}`}
         >
             <div className={styles.servizioIcon}>{servizio.icon}</div>
+            {/* Contenuto descrittivo del servizio */}
             <div className={styles.servizioContent}>
                 <h4 className={styles.servizioTitolo}>{servizio.titolo}</h4>
                 <p className={styles.servizioDescrizione}>{servizio.descrizione}</p>
