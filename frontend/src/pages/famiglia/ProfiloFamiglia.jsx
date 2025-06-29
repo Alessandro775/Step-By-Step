@@ -12,10 +12,10 @@ const ProfiloFamilgia = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState({
-    cognome_famiglia: '',
-    email: '',
-    numero_telefono: '',
-    email_studente: ''
+    cognome_famiglia: "",
+    email: "",
+    numero_telefono: "",
+    email_studente: "",
   });
 
   // Integrazione sistema feedback
@@ -32,20 +32,24 @@ const ProfiloFamilgia = () => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/api/family-profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          "http://localhost:3000/api/family-profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
 
         if (!response.ok) {
-          throw new Error('Errore nel caricamento del profilo');
+          throw new Error("Errore nel caricamento del profilo");
         }
 
         const profileData = await response.json();
         setUserInfo(profileData);
       } catch (error) {
+
         console.error('Errore caricamento profilo:', error);
         errore('Errore nel caricamento del profilo', { durata: 6000 });
       }
@@ -60,39 +64,41 @@ const ProfiloFamilgia = () => {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const updateData = {
         cognome_famiglia: userInfo.cognome_famiglia,
         numero_telefono: userInfo.numero_telefono,
-        email_studente: userInfo.email_studente
+        email_studente: userInfo.email_studente,
       };
 
-      const response = await fetch('http://localhost:3000/api/family-profile', {
-        method: 'PUT',
+      const response = await fetch("http://localhost:3000/api/family-profile", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(updateData)
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Errore nel salvataggio');
+        throw new Error(errorData.error || "Errore nel salvataggio");
       }
 
       setIsEditing(false);
+
       successo('Profilo famiglia salvato con successo!', { durata: 4000 });
     } catch (error) {
       console.error('Errore salvataggio:', error);
       errore(`Errore nel salvataggio: ${error.message}`, { durata: 6000 });
+
     }
   };
 
   const handleInputChange = (field, value) => {
-    setUserInfo(prev => ({
+    setUserInfo((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -112,21 +118,22 @@ const ProfiloFamilgia = () => {
 
   const confirmDelete = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/family-profile', {
-        method: 'DELETE',
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/family-profile", {
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Errore dal server:', errorData);
-        throw new Error(errorData.error || 'Errore nell\'eliminazione');
+        console.error("Errore dal server:", errorData);
+        throw new Error(errorData.error || "Errore nell'eliminazione");
       }
 
       const result = await response.json();
+
       console.log('Eliminazione completata:', result);
       
       localStorage.removeItem('token');
@@ -141,11 +148,12 @@ const ProfiloFamilgia = () => {
     } catch (error) {
       console.error('Errore eliminazione profilo:', error);
       errore(`Errore nell'eliminazione del profilo: ${error.message}`, { durata: 8000 });
+
     }
   };
 
   const handleViewCronologia = () => {
-    navigate('/cronologia-famiglia');
+    navigate("/cronologia-famiglia");
   };
 
   return (
@@ -169,6 +177,7 @@ const ProfiloFamilgia = () => {
           {/* Blocco Informazioni Famiglia */}
           <div className={styles.infoBlock}>
             <div className={styles.blockHeader}>
+
               <h2 className={styles.blockTitle}>
                 Informazioni Famiglia
               </h2>
@@ -177,15 +186,14 @@ const ProfiloFamilgia = () => {
                 onClick={handleEdit}
               >
                 {isEditing ? 'Annulla' : 'Modifica'}
+
               </button>
             </div>
 
             <div className={styles.infoGrid}>
               <div className={styles.nameRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Cognome Famiglia
-                  </label>
+                  <label>Cognome Famiglia</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -206,9 +214,7 @@ const ProfiloFamilgia = () => {
                 <div className={styles.fieldSpacer}></div>
 
                 <div className={styles.infoItem}>
-                  <label>
-                    Numero Telefono
-                  </label>
+                  <label>Numero Telefono</label>
                   {isEditing ? (
                     <input
                       type="tel"
@@ -229,24 +235,21 @@ const ProfiloFamilgia = () => {
 
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Email Famiglia
-                  </label>
+                  <label>Email Famiglia</label>
                   <div className={styles.infoValue}>
                     <span className={styles.readonlyBadge}>SOLA LETTURA</span>
                     {userInfo.email || "Non specificata"}
                   </div>
                   <div className={styles.emailNote}>
-                    L'email famiglia non può essere modificata per motivi di sicurezza
+                    L'email famiglia non può essere modificata per motivi di
+                    sicurezza
                   </div>
                 </div>
               </div>
 
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Email Studente
-                  </label>
+                  <label>Email Studente</label>
                   {isEditing ? (
                     <input
                       type="email"
@@ -268,10 +271,7 @@ const ProfiloFamilgia = () => {
 
             {isEditing && (
               <div className={styles.saveSection}>
-                <button 
-                  className={styles.saveBtn}
-                  onClick={handleSave}
-                >
+                <button className={styles.saveBtn} onClick={handleSave}>
                   Salva Modifiche
                 </button>
               </div>
@@ -285,15 +285,13 @@ const ProfiloFamilgia = () => {
               <p>Le azioni in questa sezione sono irreversibili</p>
             </div>
 
-            <button 
-              className={styles.deleteBtn}
-              onClick={handleDeleteProfile}
-            >
+            <button className={styles.deleteBtn} onClick={handleDeleteProfile}>
               Elimina Profilo
             </button>
           </div>
         </div>
       </div>
+
 
       {/* Sistema di notifiche integrato */}
       <ContainerNotifiche notifiche={notifiche} />
@@ -310,7 +308,6 @@ const ProfiloFamilgia = () => {
         onAnnulla={gestisciAnnulla}
         onChiudi={gestisciAnnulla}
       />
-
       <Footer />
     </>
   );

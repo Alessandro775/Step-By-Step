@@ -3,9 +3,9 @@ const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const multer = require("multer"); // NUOVO
-const path = require("path"); // NUOVO
-const fs = require("fs"); // NUOVO
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 // Configurazioni base
 const app = express();
@@ -15,9 +15,9 @@ const JWT_SECRET = "balla";
 // Configurazione Database
 const db = mysql.createConnection({
 
-host: "localhost",
- user: "root",
- password: "",
+host: "172.20.10.3",
+ user: "alessandro",
+ password: "123456",
  database: "step_by_step",
  port: 3306,
 });
@@ -31,10 +31,10 @@ app.use(
 );
 app.use(express.json());
 
-// NUOVO: Servire file statici dalla cartella uploads
+// Servire file statici dalla cartella uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// NUOVO: Configurazione Multer per upload immagini
+//Configurazione Multer per upload immagini
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = path.join(__dirname, "uploads", "images");
@@ -82,7 +82,7 @@ const upload = multer({
   },
 });
 
-// NUOVA ROUTE: Upload immagine
+//Upload immagine
 app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
   //verifica che solo gli educatori possonocaricare le immagini
   if (req.utente.ruolo !== "E") {

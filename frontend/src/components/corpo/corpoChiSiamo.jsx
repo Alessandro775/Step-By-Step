@@ -1,10 +1,9 @@
 import React from 'react';
 import styles from './CorpoChiSiamo.module.css';
-
+//componente della pagina chi siamo, solo descrizioni testuali con titoli, sottotitoli e testi
 const CorpoChiSiamo = () => {
   return (
     <div className={styles.container}>
-      {/* Sezione Hero */}
       <div className={styles.heroSection}>
         <h1 className={styles.mainTitle}>Chi Siamo</h1>
         <div className={styles.subtitle}>
@@ -12,9 +11,7 @@ const CorpoChiSiamo = () => {
         </div>
       </div>
 
-      {/* Sezione principale del contenuto */}
       <div className={styles.contentSection}>
-        {/* Card del team */}
         <div className={styles.teamCard}>
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>Il Nostro Team</h2>
@@ -27,7 +24,6 @@ const CorpoChiSiamo = () => {
           </p>
         </div>
 
-        {/* Card della missione */}
         <div className={styles.missionCard}>
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>La Nostra Missione</h2>
@@ -39,7 +35,6 @@ const CorpoChiSiamo = () => {
           </p>
         </div>
 
-        {/* Sezione valori */}
         <div className={styles.valuesSection}>
           <h3 className={styles.valuesTitle}>I Nostri Valori</h3>
           <div className={styles.valuesGrid}>

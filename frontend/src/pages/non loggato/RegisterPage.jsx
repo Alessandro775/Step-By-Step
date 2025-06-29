@@ -6,45 +6,53 @@ import { useNavigate } from "react-router-dom";
 const BASE_URL = "http://localhost:3000";
 
 const RegisterPage = () => {
+  // Stati per i campi comuni del form
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [nome, setNome] = useState("");
   const [cognome, setCognome] = useState("");
   const [tipoUtente, setTipoUtente] = useState("");
+
+  // Stati specifici per studenti ed educatori
   const [istituto, setIstituto] = useState("");
   const [classe, setClasse] = useState("");
   const [annoScolastico, setAnnoScolastico] = useState("");
+
+  // Stati specifici per genitori
   const [numero_telefono, setnumero_telefono] = useState("");
   const [email_studente, setemail_studente] = useState("");
+
+  // Gestione errori e navigazione
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+  // Valida che le password corrispondano
   const validatePasswords = () => {
     const newErrors = {};
-
     if (password !== confirmPassword) {
       newErrors.confirmPassword = "Le password non corrispondono";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+  // Gestisce l'invio del form di registrazione
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(BASE_URL);
-
+    // Verifica che le password corrispondano
     if (!validatePasswords()) {
       return;
     }
 
     try {
+      // Costruisce l'oggetto userData in base al tipo di utente
       const userData = {
         ...(tipoUtente !== "genitore" && { nome }),
         cognome,
         email,
         password,
+        // Mappa il tipo utente al codice ruolo
         ruolo:
           tipoUtente === "studente"
             ? "S"
@@ -67,6 +75,7 @@ const RegisterPage = () => {
       console.log("=== REGISTRAZIONE ===");
       console.log("Dati inviati:", userData);
 
+      // Chiamata API per la registrazione
       const response = await fetch(`${BASE_URL}/api/register`, {
         method: "POST",
         headers: {
@@ -79,36 +88,38 @@ const RegisterPage = () => {
       console.log("Risposta registrazione:", data);
 
       if (!response.ok) {
-  // Gestisci diversi tipi di errore
-  if (
-    response.status === 409 ||
-    (data.error && data.error.toLowerCase().includes("email") && !data.error.toLowerCase().includes("studente"))
-  ) {
-    // Errore specifico per email genitore già esistente
-    setErrors((prev) => ({
-      ...prev,
-      email: "Questa email è già registrata",
-    }));
-  } else if (
-    response.status === 400 && 
-    data.error && 
-    data.error.toLowerCase().includes("studente non trovato")
-  ) {
-    // Errore specifico per email studente non trovata
-    setErrors((prev) => ({
-      ...prev,
-      email_studente: "Email studente non trovata.",
-    }));
-  } else {
-    // Altri errori generici
-    setErrors((prev) => ({
-      ...prev,
-      submit: data.error || "Errore durante la registrazione",
-    }));
-  }
-  return;
-}
-      // GESTIONE TOKEN E AUTO-LOGIN
+        // Gestione errori specifici
+        if (
+          response.status === 409 ||
+          (data.error &&
+            data.error.toLowerCase().includes("email") &&
+            !data.error.toLowerCase().includes("studente"))
+        ) {
+          // Errore specifico per email genitore già esistente
+          setErrors((prev) => ({
+            ...prev,
+            email: "Questa email è già registrata",
+          }));
+        } else if (
+          response.status === 400 &&
+          data.error &&
+          data.error.toLowerCase().includes("studente non trovato")
+        ) {
+          // Errore specifico per email studente non trovata
+          setErrors((prev) => ({
+            ...prev,
+            email_studente: "Email studente non trovata.",
+          }));
+        } else {
+          // Altri errori generici
+          setErrors((prev) => ({
+            ...prev,
+            submit: data.error || "Errore durante la registrazione",
+          }));
+        }
+        return;
+      }
+      //Gestione token e auto-login dopo la registrazione
       if (data.token) {
         console.log("Token ricevuto, salvando nel localStorage...");
 
@@ -119,7 +130,7 @@ const RegisterPage = () => {
         console.log("Token salvato:", data.token);
         console.log("Ruolo salvato:", data.ruolo);
 
-        // ✅ REINDIRIZZAMENTO BASATO SUL RUOLO
+        // REINDIRIZZAMENTO BASATO SUL RUOLO
         if (data.ruolo === "S") {
           console.log("Reindirizzamento a dashboard studente");
           navigate("/home-studente");
@@ -134,7 +145,7 @@ const RegisterPage = () => {
           navigate("/login");
         }
       } else {
-        // ✅ FALLBACK: Se non c'è token, reindirizza al login
+        //FALLBACK: Se non c'è token, reindirizza al login
         console.log("Nessun token ricevuto, reindirizzamento al login");
         alert("Registrazione completata! Effettua il login per continuare.");
         navigate("/login");
@@ -148,6 +159,7 @@ const RegisterPage = () => {
     }
   };
 
+  // Gestisce la validazione in tempo reale della conferma password
   const handleConfirmPasswordChange = (e) => {
     const value = e.target.value;
     setConfirmPassword(value);
@@ -159,6 +171,7 @@ const RegisterPage = () => {
   };
 
   return (
+    // Struttura del form di registrazione
     <div className={styles["register-section"]}>
       <div className={styles["form-container"]}>
         <p className={styles["form-title"]}>Registrazione</p>
@@ -198,6 +211,7 @@ const RegisterPage = () => {
                 className={styles["input-label"]}
                 htmlFor="tipoUtente"
               ></label>
+              {/* Lista a cascaata per selezionare il tipo di utente */}
               <select
                 id="tipoUtente"
                 value={tipoUtente}
@@ -212,7 +226,7 @@ const RegisterPage = () => {
               </select>
             </div>
           </div>
-
+          {/* sezioni aggiuntivr per lo studente*/}
           {tipoUtente === "studente" && (
             <div className={styles["additional-fields"]}>
               <div className={styles["form-grid"]}>
@@ -236,6 +250,7 @@ const RegisterPage = () => {
                     className={styles["input-label"]}
                     htmlFor="classe"
                   ></label>
+                  {/* Lista a cascaata per selezionare la classe frequentante*/}
                   <select
                     id="classe"
                     value={classe}
@@ -270,7 +285,7 @@ const RegisterPage = () => {
               </div>
             </div>
           )}
-
+          {/* sezioni aggiuntive per l'educatore */}
           {tipoUtente === "educatore" && (
             <div className={styles["additional-fields"]}>
               <label
@@ -288,7 +303,7 @@ const RegisterPage = () => {
               />
             </div>
           )}
-
+          {/* sezioni aggiuntive per il genitore */}
           {tipoUtente === "genitore" && (
             <div
               className={styles["additional-fields"]}
@@ -316,29 +331,30 @@ const RegisterPage = () => {
               </div>
               <div style={{ width: "15px" }}></div>
               <div style={{ flex: 1 }}>
-  <input
-    id="email_studente"
-    type="email"
-    value={email_studente}
-    onChange={(e) => {
-      setemail_studente(e.target.value);
-      // Pulisci l'errore email_studente quando l'utente digita
-      if (errors.email_studente) {
-        setErrors((prev) => ({ ...prev, email_studente: "" }));
-      }
-    }}
-    placeholder="Email Studente"
-    className={`${styles["custom-input"]} ${styles["student-email-input"]} ${
-      errors.email_studente ? styles["input-error"] : ""
-    }`}
-    required
-  />
-  {/* Messaggio di errore specifico per email studente */}
-  {errors.email_studente && (
-    <div className={styles["error-message"]}>{errors.email_studente}</div>
-  )}
-</div>
-
+                <input
+                  id="email_studente"
+                  type="email"
+                  value={email_studente}
+                  onChange={(e) => {
+                    setemail_studente(e.target.value);
+                    // Pulisci l'errore email_studente quando l'utente digita
+                    if (errors.email_studente) {
+                      setErrors((prev) => ({ ...prev, email_studente: "" }));
+                    }
+                  }}
+                  placeholder="Email Studente"
+                  className={`${styles["custom-input"]} ${
+                    styles["student-email-input"]
+                  } ${errors.email_studente ? styles["input-error"] : ""}`}
+                  required
+                />
+                {/* Messaggio di errore specifico per email studente */}
+                {errors.email_studente && (
+                  <div className={styles["error-message"]}>
+                    {errors.email_studente}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -402,6 +418,7 @@ const RegisterPage = () => {
                 }`}
                 required
               />
+              {/* Messaggio di errore specifico per la password */}
               {errors.confirmPassword && (
                 <div className={styles["error-message"]}>
                   {errors.confirmPassword}
@@ -410,7 +427,7 @@ const RegisterPage = () => {
             </div>
           </div>
 
-          {/* ✅ MOSTRA ERRORI DI SUBMIT */}
+          {/*MOSTRA ERRORI DI SUBMIT */}
           {errors.submit && (
             <div
               className={styles["error-message"]}

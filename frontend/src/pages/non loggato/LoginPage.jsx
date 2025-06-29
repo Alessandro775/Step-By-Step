@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./LoginPage.module.css";
+// URL base per le chiamate API
 const BASE_URL = "http://localhost:3000";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -14,6 +16,7 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Stato per i dati del form di login
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -25,10 +28,11 @@ const LoginPage = () => {
       setError("");
     }
   };
-
+  // Gestisce l'invio del form di login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Chiamata API per il login
     try {
       const response = await fetch(`${BASE_URL}/api/login`, {
         method: "POST",
@@ -47,11 +51,11 @@ const LoginPage = () => {
         throw new Error(data.error || "Errore login");
       }
 
-      // Salva il token e il ruolo
+      // Salva token e ruolo nel localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("ruolo", data.ruolo);
 
-      // Reindirizza in base al ruolo
+      // Reindirizza in base al ruolo utente
       switch (data.ruolo) {
         case "S":
           navigate("/home-studente");
@@ -73,6 +77,7 @@ const LoginPage = () => {
   };
 
   return (
+    //Struttura del form di login
     <div className={styles["login-container"]}>
       <form className={styles["login-form"]} onSubmit={handleSubmit}>
         <h2>Login</h2>
@@ -96,10 +101,11 @@ const LoginPage = () => {
             required
           />
         </div>
-        {/* Mostra il messaggio di errore */}
+        {/* pulsante di login con eventuali messaggi i errori  */}
         {error && <div className={styles["error-message"]}>{error}</div>}
         <button type="submit">Invia</button>
         <div className={styles.divider}>
+          {/* indirizzamento alla pagina di registrazione */}
           <span>Non hai un account?</span>
         </div>
         <button
