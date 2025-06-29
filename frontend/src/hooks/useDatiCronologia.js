@@ -1,5 +1,5 @@
-// servizi/api/utilitaApiDati.js
 export const utilitaApiDati = {
+  //preparazione dati grafico punteggi
   preparaDatiGraficoPunteggio: (cronologia) => {
     console.log("🔧 Preparazione dati punteggio - Input:", cronologia);
     
@@ -7,7 +7,7 @@ export const utilitaApiDati = {
       console.log("❌ Cronologia vuota o non array");
       return [];
     }
-
+//filtra i record validi e li ordina cronologicamnte
     const sortedData = cronologia
       .filter((record) => {
         const hasDate = record.data_completamento;
@@ -18,20 +18,20 @@ export const utilitaApiDati = {
       .sort((a, b) => new Date(a.data_completamento) - new Date(b.data_completamento));
 
     console.log("📊 Dati filtrati e ordinati:", sortedData.length, "record");
-
-    let cumulativeSum = 0;
-    let cumulativeCount = 0;
+//Variabili per calcolare la media cumulativa dei punteggi
+    let cumulativeSum = 0; // Somma cumulativa dei punteggi
+    let cumulativeCount = 0;  // Contatore degli esercizi processati
 
     const result = sortedData.map((record, index) => {
       // CONVERTO ESPLICITAMENTE A NUMERO
       const punteggio = parseFloat(record.punteggio) || 0;
       cumulativeSum += punteggio;
       cumulativeCount++;
-      
+       // Oggetto dati per il grafico
       const dataPoint = {
         esercizio: `Es. ${index + 1}`,
         punteggioSingolo: punteggio, // NUMERO, NON STRINGA
-        punteggioMedioCumulativo: Math.round((cumulativeSum / cumulativeCount) * 100) / 100,
+        punteggioMedioCumulativo: Math.round((cumulativeSum / cumulativeCount) * 100) / 100, // Media arrotondata
       };
       
       console.log("📈 Data point:", dataPoint);
@@ -41,27 +41,28 @@ export const utilitaApiDati = {
     console.log("✅ Dati finali punteggio:", result);
     return result;
   },
-
+//Prepara i dati della cronologia per il grafico errori e tentativi
   preparaDatiGraficoErroriTentativi: (cronologia) => {
     console.log("🔧 Preparazione dati errori/tentativi - Input:", cronologia);
-    
+    //validazione input
     if (!Array.isArray(cronologia) || cronologia.length === 0) {
       console.log("❌ Cronologia vuota o non array");
       return [];
     }
 
     const result = cronologia
-      .filter((record) => record.data_completamento)
-      .sort((a, b) => new Date(a.data_completamento) - new Date(b.data_completamento))
+      .filter((record) => record.data_completamento)  // Solo record completati
+      .sort((a, b) => new Date(a.data_completamento) - new Date(b.data_completamento)) // Ordine cronologico
       .map((record, index) => {
-        // CONVERTO ESPLICITAMENTE A NUMERO
+        // Converto il numero per grafico
         const errori = parseInt(record.numero_errori) || 0;
+         // Gestisce diversi nomi di campo per tentativi (flessibilità API)
         const tentativi = parseInt(record.tentativi || record.numero_tentativi) || 0;
         
         const dataPoint = {
           esercizio: `Es. ${index + 1}`,
-          errori: errori, // NUMERO, NON STRINGA
-          tentativi: tentativi, // NUMERO, NON STRINGA
+          errori: errori, // numero non stringa
+          tentativi: tentativi, // numero non stringa
         };
         
         console.log("📊 Data point errori:", dataPoint);
@@ -74,7 +75,7 @@ export const utilitaApiDati = {
 
   formattaDataOra: (dataStringa) => {
     return dataStringa 
-      ? new Date(dataStringa).toLocaleString("it-IT")
+      ? new Date(dataStringa).toLocaleString("it-IT") // Formato italiano
       : "N/D";
   }
 };
