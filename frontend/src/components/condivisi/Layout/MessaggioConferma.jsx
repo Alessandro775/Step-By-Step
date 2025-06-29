@@ -12,14 +12,15 @@ const MessaggioConferma = ({
   onClose,
   variant = 'default'
 }) => {
+  // Non renderizza nulla se il dialogo non è aperto
   if (!isOpen) return null;
-
+// Gestisce la chiusura del dialogo al clic sul backdrop
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       onCancel();
     }
   };
-
+// Gestisce gli eventi della tastiera per confermare o annullare
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       onCancel();
@@ -35,14 +36,15 @@ const MessaggioConferma = ({
 
   const getVariantIcon = () => {
     switch (variant) {
-      case 'danger': return '⚠️';
-      case 'warning': return '🔔';
-      default: return '❓';
+      case 'danger': return '⚠️'; //azioni pericolose
+      case 'warning': return '🔔'; //avvisi importanti
+      default: return '❓';//conferma generiche
     }
   };
 
   return (
     <div className={styles.overlay} onClick={handleBackdropClick}>
+      {/* Container principale del dialogo con styling dinamico */}
       <div className={`${styles.dialog} ${styles[variant]}`}>
         <div className={styles.header}>
           <div className={styles.icon}>{getVariantIcon()}</div>
@@ -54,6 +56,7 @@ const MessaggioConferma = ({
         </div>
         
         <div className={styles.footer}>
+          {/* Pulsante di conferma con styling dinamico */}
           <button 
             className={`${styles.button} ${styles.cancelButton}`}
             onClick={onCancel}

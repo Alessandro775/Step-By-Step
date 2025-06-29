@@ -5,6 +5,7 @@ const MessaggiStato = ({ error, success, onClear }) => {
   if (!error && !success) return null;
 
   return (
+    //messaggio di errore o successo
     <div className={styles.messagesSection}>
       {error && (
         <div className={styles.error}>

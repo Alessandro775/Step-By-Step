@@ -47,12 +47,6 @@
 .logo {
   height: 50px;
   width: auto;
-  transition: transform 0.2s ease;
-}
-
-/* Effetto hover del logo */
-.logo:hover {
-  transform: scale(1.05);
 }
 
 /* === SEZIONE CENTRALE === */
