@@ -46,6 +46,7 @@ const HeaderFamiglia = () => {
     )}
     {isProfilePage && (
       <li>
+        {/*pulsante di login*/}
         <button 
           className={header.logoutButton} 
           onClick={handleLogoutClick}
@@ -64,13 +65,15 @@ const HeaderFamiglia = () => {
           <div className={header.modalContent}>
             <h3>Conferma Logout</h3>
             <p>Sei sicuro di voler effettuare il logout?</p>
-            <div className={header.modalButtons}>
+            <div className={header.modalttons}>
+              {/*pulsante di conferma*/}
               <button 
                 className={header.confirmButton} 
                 onClick={confirmLogout}
               >
                 Conferma
               </button>
+              {/*pulsante di annullamento*/}
               <button 
                 className={header.cancelButton} 
                 onClick={cancelLogout}

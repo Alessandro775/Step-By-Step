@@ -4,15 +4,18 @@ import unibaLogo from "../../assets/logouniba.jpeg";
 import siteLogo from "../../assets/logosito.png";
 
 const Footer = () => (
+  //conttrollo dei loghi e tutto il resto testuale
   <footer className={styles.footer}>
+    {/*container principale*/}
     <div className={styles.container}>
       <div className={styles.leftSection}>
+        {/*area dedicata ai loghi*/}
         <div className={styles.logoContainer}>
           <img src={siteLogo} alt="Logo del sito" className={styles.logo} />
           <img src={unibaLogo} alt="Logo Università di Bari" className={styles.logo} />
         </div>
       </div>
-      
+
       <div className={styles.centerSection}>
         <h4>Dipartimento di Informatica</h4>
         <p>Università degli Studi di Bari "Aldo Moro"</p>

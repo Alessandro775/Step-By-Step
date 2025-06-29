@@ -36,8 +36,9 @@ const HeaderEducatore = () => {
   return (
     <>
       <div className={header.container}>
+        {/*bottone del logo cliccabile*/}
         <button className={header.logoButton} onClick={goToHome}>
-          <img src={logo} alt="Logo" className={header.logo} />
+          <img src={logo} alt="Logo" className={header.logo} /> {/*immagine del logo*/}
         </button>
         
         <h1 className={header.title}>Step By Step</h1>
@@ -67,12 +68,14 @@ const HeaderEducatore = () => {
             <h3>Conferma Logout</h3>
             <p>Sei sicuro di voler effettuare il logout?</p>
             <div className={header.modalButtons}>
+              {/*pulsante di conferma*/}
               <button 
                 className={header.confirmButton} 
                 onClick={confirmLogout}
               >
                 Conferma
               </button>
+              {/*pulsante annulla*/}
               <button 
                 className={header.cancelButton} 
                 onClick={cancelLogout}

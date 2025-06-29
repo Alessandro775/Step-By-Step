@@ -3,6 +3,7 @@ import CronologiaBase from "../../condivisi/Cronologia/CronologiaBase";
 
 const CronologiaFamiglia = () => {
   return (
+    //varie conofigurazioni
     <CronologiaBase
       apiEndpoint="family-cronologia"
       titolo="Cronologia di tuo figlio"

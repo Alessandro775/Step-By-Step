@@ -8,7 +8,6 @@ import logo from '../../assets/logosito.png'
 const Header = () => {
     const navigate = useNavigate();
 
-
     // Funzioni per la navigazione
     const goToHome = () => navigate('/');
     const goToChiSiamo = () => navigate('/chi-siamo');
@@ -17,15 +16,16 @@ const Header = () => {
 
     return (
         <header className={header.container}>
-            {/* Modifica l'immagine wrappandola in un zutton */}
+            {/*logo cliccabile*/}
             <button 
                 onClick={goToHome} 
                 className={header.logoButton}
             >
-                <img src={logo} alt="Logo" className={header.logo} />
+                <img src={logo} alt="Logo" className={header.logo} /> {/*immagine del logo*/}
             </button>
             <h1 className={header.title}>Step By Step</h1>
                 <nav>
+                {/*bottoni per navigare nelle varie pagine*/}
                 <ul className={header['nav-list']}>
                     <li><button onClick={goToChiSiamo}>Chi siamo</button></li>
                     <li><button onClick={goToEsercizi}>Esempio esercizio</button></li>
