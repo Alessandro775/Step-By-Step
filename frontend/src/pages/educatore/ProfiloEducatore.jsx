@@ -1,37 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './ProfilePageEducatore.module.css';
-import Header from '../../components/Header/HeaderEducatore';
-import Footer from '../../components/footer/Footer';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./ProfilePageEducatore.module.css";
+import Header from "../../components/Header/HeaderEducatore";
+import Footer from "../../components/footer/Footer";
 
 const EducatorProfile = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userInfo, setUserInfo] = useState({
-    nome: '',
-    cognome: '',
-    email: '',
-    istituto: ''
+    nome: "",
+    cognome: "",
+    email: "",
+    istituto: "",
   });
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/api/profile', {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3000/api/profile", {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!response.ok) {
-          throw new Error('Errore nel caricamento del profilo');
+          throw new Error("Errore nel caricamento del profilo");
         }
 
         const profileData = await response.json();
         setUserInfo(profileData);
       } catch (error) {
-        console.error('Errore caricamento profilo:', error);
+        console.error("Errore caricamento profilo:", error);
       }
     };
 
@@ -44,39 +44,39 @@ const EducatorProfile = () => {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const updateData = {
         nome: userInfo.nome,
         cognome: userInfo.cognome,
-        istituto: userInfo.istituto
+        istituto: userInfo.istituto,
       };
 
-      const response = await fetch('http://localhost:3000/api/profile', {
-        method: 'PUT',
+      const response = await fetch("http://localhost:3000/api/profile", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(updateData)
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Errore nel salvataggio');
+        throw new Error(errorData.error || "Errore nel salvataggio");
       }
 
       setIsEditing(false);
-      alert('Profilo salvato con successo!');
+      alert("Profilo salvato con successo!");
     } catch (error) {
-      console.error('Errore salvataggio:', error);
+      console.error("Errore salvataggio:", error);
       alert(`Errore nel salvataggio: ${error.message}`);
     }
   };
 
   const handleInputChange = (field, value) => {
-    setUserInfo(prev => ({
+    setUserInfo((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -86,33 +86,32 @@ const EducatorProfile = () => {
 
   const confirmDelete = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/profile', {
-        method: 'DELETE',
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/profile", {
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Errore dal server:', errorData);
-        throw new Error(errorData.error || 'Errore nell\'eliminazione');
+        console.error("Errore dal server:", errorData);
+        throw new Error(errorData.error || "Errore nell'eliminazione");
       }
 
       const result = await response.json();
-      console.log('Eliminazione completata:', result);
+      console.log("Eliminazione completata:", result);
       setShowDeleteConfirm(false);
 
-
       // Logout completo
-      localStorage.removeItem('token');
-      localStorage.removeItem('ruolo');
+      localStorage.removeItem("token");
+      localStorage.removeItem("ruolo");
 
-      alert('Profilo educatore eliminato con successo!');
-      navigate('/');
+      alert("Profilo educatore eliminato con successo!");
+      navigate("/");
     } catch (error) {
-      console.error('Errore eliminazione profilo:', error);
+      console.error("Errore eliminazione profilo:", error);
       alert(`Errore nell'eliminazione del profilo: ${error.message}`);
       setShowDeleteConfirm(false);
     }
@@ -127,7 +126,6 @@ const EducatorProfile = () => {
       <Header />
       <div className={styles.profileContainer}>
         <div className={styles.profileContent}>
-          
           {/* Blocco di Benvenuto */}
           <div className={styles.welcomeBlock}>
             <div className={styles.welcomeContent}>
@@ -144,37 +142,31 @@ const EducatorProfile = () => {
           {/* Blocco Informazioni Personali */}
           <div className={styles.infoBlock}>
             <div className={styles.blockHeader}>
-              <h2 className={styles.blockTitle}>
-                Informazioni Personali
-              </h2>
-              <button 
-                className={styles.editBtn}
-                onClick={handleEdit}
-              >
-                {isEditing ? 'Annulla' : 'Modifica'}
+              <h2 className={styles.blockTitle}>Informazioni Personali</h2>
+              <button className={styles.editBtn} onClick={handleEdit}>
+                {isEditing ? "Annulla" : "Modifica"}
               </button>
             </div>
 
-           <div className={styles.avatarSection}>
-          </div>
+            <div className={styles.avatarSection}></div>
 
             <div className={styles.infoGrid}>
               <div className={styles.nameRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Nome
-                  </label>
+                  <label>Nome</label>
                   {isEditing ? (
                     <input
                       type="text"
                       className={styles.inputField}
                       value={userInfo.nome}
-                      onChange={(e) => handleInputChange('nome', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("nome", e.target.value)
+                      }
                       placeholder="Inserisci il nome"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.nome || 'Non specificato'}
+                      {userInfo.nome || "Non specificato"}
                     </div>
                   )}
                 </div>
@@ -182,20 +174,20 @@ const EducatorProfile = () => {
                 <div className={styles.fieldSpacer}></div>
 
                 <div className={styles.infoItem}>
-                  <label>
-                    Cognome
-                  </label>
+                  <label>Cognome</label>
                   {isEditing ? (
                     <input
                       type="text"
                       className={styles.inputField}
                       value={userInfo.cognome}
-                      onChange={(e) => handleInputChange('cognome', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("cognome", e.target.value)
+                      }
                       placeholder="Inserisci il cognome"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.cognome || 'Non specificato'}
+                      {userInfo.cognome || "Non specificato"}
                     </div>
                   )}
                 </div>
@@ -203,12 +195,10 @@ const EducatorProfile = () => {
 
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Email
-                  </label>
+                  <label>Email</label>
                   <div className={styles.infoValue}>
                     <span className={styles.readonlyBadge}>SOLA LETTURA</span>
-                    {userInfo.email || 'Non specificata'}
+                    {userInfo.email || "Non specificata"}
                   </div>
                   <div className={styles.emailNote}>
                     L'email non può essere modificata per motivi di sicurezza
@@ -218,20 +208,20 @@ const EducatorProfile = () => {
 
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Istituto
-                  </label>
+                  <label>Istituto</label>
                   {isEditing ? (
                     <input
                       type="text"
                       className={styles.inputField}
                       value={userInfo.istituto}
-                      onChange={(e) => handleInputChange('istituto', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("istituto", e.target.value)
+                      }
                       placeholder="Inserisci l'istituto"
                     />
                   ) : (
                     <div className={styles.infoValue}>
-                      {userInfo.istituto || 'Non specificato'}
+                      {userInfo.istituto || "Non specificato"}
                     </div>
                   )}
                 </div>
@@ -240,10 +230,7 @@ const EducatorProfile = () => {
 
             {isEditing && (
               <div className={styles.saveSection}>
-                <button 
-                  className={styles.saveBtn}
-                  onClick={handleSave}
-                >
+                <button className={styles.saveBtn} onClick={handleSave}>
                   Salva Modifiche
                 </button>
               </div>
@@ -256,10 +243,7 @@ const EducatorProfile = () => {
               <h3>Zona Pericolosa</h3>
               <p>Le azioni in questa sezione sono irreversibili</p>
             </div>
-            <button 
-              className={styles.deleteBtn}
-              onClick={handleDeleteProfile}
-            >
+            <button className={styles.deleteBtn} onClick={handleDeleteProfile}>
               Elimina Profilo
             </button>
           </div>
@@ -273,30 +257,32 @@ const EducatorProfile = () => {
             <div className={styles.warningIcon}>⚠️</div>
             <h3>Conferma Eliminazione</h3>
             <p>Sei sicuro di voler eliminare il tuo profilo educatore?</p>
-            
+
             <div className={styles.warningBox}>
               <div className={styles.warningTitle}>ATTENZIONE:</div>
               <ul className={styles.warningList}>
                 <li>• Tutti i tuoi dati verranno eliminati permanentemente</li>
-                <li>• Gli studenti assegnati perderanno l'accesso agli esercizi</li>
-                <li>• La cronologia delle attività didattiche sarà persa per sempre</li>
+                <li>
+                  • Gli studenti assegnati perderanno l'accesso agli esercizi
+                </li>
+                <li>
+                  • La cronologia delle attività didattiche sarà persa per
+                  sempre
+                </li>
                 <li>• Tutti gli esercizi creati saranno eliminati</li>
                 <li>• Non sarà possibile recuperare il profilo</li>
-                <li>• Dovrai riregistrarti per utilizzare nuovamente l'applicazione</li>
+                <li>
+                  • Dovrai riregistrarti per utilizzare nuovamente
+                  l'applicazione
+                </li>
               </ul>
             </div>
 
             <div className={styles.confirmButtons}>
-              <button 
-                className={styles.confirmBtn}
-                onClick={confirmDelete}
-              >
+              <button className={styles.confirmBtn} onClick={confirmDelete}>
                 Sì, Elimina
               </button>
-              <button 
-                className={styles.cancelBtn}
-                onClick={cancelDelete}
-              >
+              <button className={styles.cancelBtn} onClick={cancelDelete}>
                 Annulla
               </button>
             </div>

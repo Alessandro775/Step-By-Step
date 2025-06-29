@@ -1,38 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './ProfilePageFamiglia.module.css';
-import Header from '../../components/Header/HeaderFamiglia';
-import Footer from '../../components/footer/Footer';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./ProfilePageFamiglia.module.css";
+import Header from "../../components/Header/HeaderFamiglia";
+import Footer from "../../components/footer/Footer";
 
 const profiloFamilgia = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userInfo, setUserInfo] = useState({
-    cognome_famiglia: '',
-    email: '',
-    numero_telefono: '',
-    email_studente: ''
+    cognome_famiglia: "",
+    email: "",
+    numero_telefono: "",
+    email_studente: "",
   });
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/api/family-profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          "http://localhost:3000/api/family-profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
 
         if (!response.ok) {
-          throw new Error('Errore nel caricamento del profilo');
+          throw new Error("Errore nel caricamento del profilo");
         }
 
         const profileData = await response.json();
         setUserInfo(profileData);
       } catch (error) {
-        console.error('Errore caricamento profilo:', error);
+        console.error("Errore caricamento profilo:", error);
       }
     };
 
@@ -45,39 +48,39 @@ const profiloFamilgia = () => {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const updateData = {
         cognome_famiglia: userInfo.cognome_famiglia,
         numero_telefono: userInfo.numero_telefono,
-        email_studente: userInfo.email_studente
+        email_studente: userInfo.email_studente,
       };
 
-      const response = await fetch('http://localhost:3000/api/family-profile', {
-        method: 'PUT',
+      const response = await fetch("http://localhost:3000/api/family-profile", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(updateData)
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Errore nel salvataggio');
+        throw new Error(errorData.error || "Errore nel salvataggio");
       }
 
       setIsEditing(false);
-      alert('Profilo famiglia salvato con successo!');
+      alert("Profilo famiglia salvato con successo!");
     } catch (error) {
-      console.error('Errore salvataggio:', error);
+      console.error("Errore salvataggio:", error);
       alert(`Errore nel salvataggio: ${error.message}`);
     }
   };
 
   const handleInputChange = (field, value) => {
-    setUserInfo(prev => ({
+    setUserInfo((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -87,37 +90,37 @@ const profiloFamilgia = () => {
 
   const confirmDelete = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/family-profile', {
-        method: 'DELETE',
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/family-profile", {
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Errore dal server:', errorData);
-        throw new Error(errorData.error || 'Errore nell\'eliminazione');
+        console.error("Errore dal server:", errorData);
+        throw new Error(errorData.error || "Errore nell'eliminazione");
       }
 
       const result = await response.json();
-      console.log('Eliminazione completata:', result);
+      console.log("Eliminazione completata:", result);
       setShowDeleteConfirm(false);
-      
-      localStorage.removeItem('token');
-      localStorage.removeItem('ruolo');
-      alert('Profilo famiglia eliminato con successo!');
-      navigate('/');
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("ruolo");
+      alert("Profilo famiglia eliminato con successo!");
+      navigate("/");
     } catch (error) {
-      console.error('Errore eliminazione profilo:', error);
+      console.error("Errore eliminazione profilo:", error);
       alert(`Errore nell'eliminazione del profilo: ${error.message}`);
       setShowDeleteConfirm(false);
     }
   };
 
   const handleViewCronologia = () => {
-    navigate('/cronologia-famiglia');
+    navigate("/cronologia-famiglia");
   };
 
   const cancelDelete = () => {
@@ -145,24 +148,17 @@ const profiloFamilgia = () => {
           {/* Blocco Informazioni Famiglia */}
           <div className={styles.infoBlock}>
             <div className={styles.blockHeader}>
-              <h2 className={styles.blockTitle}>
-                Informazioni Famiglia
-              </h2>
+              <h2 className={styles.blockTitle}>Informazioni Famiglia</h2>
 
-              <button 
-                className={styles.editBtn}
-                onClick={handleEdit}
-              >
-                {isEditing ? 'Annulla' : 'Modifica'}
+              <button className={styles.editBtn} onClick={handleEdit}>
+                {isEditing ? "Annulla" : "Modifica"}
               </button>
             </div>
 
             <div className={styles.infoGrid}>
               <div className={styles.nameRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Cognome Famiglia
-                  </label>
+                  <label>Cognome Famiglia</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -183,9 +179,7 @@ const profiloFamilgia = () => {
                 <div className={styles.fieldSpacer}></div>
 
                 <div className={styles.infoItem}>
-                  <label>
-                    Numero Telefono
-                  </label>
+                  <label>Numero Telefono</label>
                   {isEditing ? (
                     <input
                       type="tel"
@@ -206,24 +200,21 @@ const profiloFamilgia = () => {
 
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Email Famiglia
-                  </label>
+                  <label>Email Famiglia</label>
                   <div className={styles.infoValue}>
                     <span className={styles.readonlyBadge}>SOLA LETTURA</span>
                     {userInfo.email || "Non specificata"}
                   </div>
                   <div className={styles.emailNote}>
-                    L'email famiglia non può essere modificata per motivi di sicurezza
+                    L'email famiglia non può essere modificata per motivi di
+                    sicurezza
                   </div>
                 </div>
               </div>
 
               <div className={styles.singleRow}>
                 <div className={styles.infoItem}>
-                  <label>
-                    Email Studente
-                  </label>
+                  <label>Email Studente</label>
                   {isEditing ? (
                     <input
                       type="email"
@@ -245,10 +236,7 @@ const profiloFamilgia = () => {
 
             {isEditing && (
               <div className={styles.saveSection}>
-                <button 
-                  className={styles.saveBtn}
-                  onClick={handleSave}
-                >
+                <button className={styles.saveBtn} onClick={handleSave}>
                   Salva Modifiche
                 </button>
               </div>
@@ -262,10 +250,7 @@ const profiloFamilgia = () => {
               <p>Le azioni in questa sezione sono irreversibili</p>
             </div>
 
-            <button 
-              className={styles.deleteBtn}
-              onClick={handleDeleteProfile}
-            >
+            <button className={styles.deleteBtn} onClick={handleDeleteProfile}>
               Elimina Profilo
             </button>
           </div>
@@ -283,10 +268,16 @@ const profiloFamilgia = () => {
             <div className={styles.warningBox}>
               <div className={styles.warningTitle}>ATTENZIONE:</div>
               <ul className={styles.warningList}>
-                <li>• Tutti i dati della famiglia verranno eliminati permanentemente</li>
+                <li>
+                  • Tutti i dati della famiglia verranno eliminati
+                  permanentemente
+                </li>
                 <li>• Il collegamento con lo studente sarà perso</li>
                 <li>• Non sarà possibile recuperare il profilo</li>
-                <li>• Dovrai riregistrarti per utilizzare nuovamente l'applicazione</li>
+                <li>
+                  • Dovrai riregistrarti per utilizzare nuovamente
+                  l'applicazione
+                </li>
               </ul>
             </div>
 
@@ -295,10 +286,7 @@ const profiloFamilgia = () => {
                 Sì, Elimina
               </button>
 
-              <button 
-                className={styles.cancelBtn}
-                onClick={cancelDelete}
-              >
+              <button className={styles.cancelBtn} onClick={cancelDelete}>
                 Annulla
               </button>
             </div>

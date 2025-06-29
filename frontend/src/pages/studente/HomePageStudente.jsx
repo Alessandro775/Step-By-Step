@@ -1,17 +1,17 @@
-import React from 'react';
+import React from "react";
 
-import Footer from '../../components/footer/Footer'; 
-import Header from '../../components/Header/HeaderStudente'; 
-import Corpo from '../../components/studente/CorpoHomePage';
+import Footer from "../../components/footer/Footer";
+import Header from "../../components/Header/HeaderStudente";
+import Corpo from "../../components/studente/CorpoHomePage";
 
 const HomePageStudente = () => {
-    return (
-        <>
-            <Header /> 
-            <Corpo />
-            <Footer /> 
-        </>
-    );
+  return (
+    <>
+      <Header /> {/* componente Header*/}
+      <Corpo /> {/*componente corpo della pagina homePageStudente */}
+      <Footer /> {/*componente Footer */}
+    </>
+  );
 };
 
 export default HomePageStudente;
