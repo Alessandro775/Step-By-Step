@@ -19,9 +19,9 @@ CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://loc
 
 # Configurazione Database
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
+    'host': '172.20.10.3',
+    'user': 'alessandro',
+    'password': '123456',
     'database': 'step_by_step',
     'port': 3306
 }
@@ -429,10 +429,7 @@ def check_pronunciation():
             try:
                 result = whisper_model.transcribe(temp_audio.name, language='it')
                 
-                testo_trascritto = result["text"].strip()
-                
-
-             
+                testo_trascritto = result["text"].strip()  
 
             except Exception as whisper_error:
                 return jsonify({
