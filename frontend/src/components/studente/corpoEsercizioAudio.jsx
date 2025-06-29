@@ -6,38 +6,38 @@ import styles from "./corpoEsercizioAudio.module.css";
 
 const CorpoEsercizioAudio = () => {
   // ✅ Destrutturazione completa con nomi corretti
-  const {
-    currentView,
-    esercizi,
-    loading,
-    error,
-    hasError,
-    esercizioCorrente,
-    isRecording,
-    microphonePermission,
-    serverStatus,
-    parolaRiferimento,
-    immagineParola,
-    imageError,
-    feedback,
-    risultato, // ✅ Nome corretto
-    numeroTentativi,
-    tentativiRimanenti,
-    tempoImpiegato,
-    esercizioCompletato,
-    statisticheFinali,
-    MAX_TENTATIVI,
-    // Azioni
-    loadEsercizi,
-    startEsercizio,
-    tornaAllaHome, // ✅ Nome corretto dal hook
-    startRegistrazione, // ✅ Nome corretto dal hook
-    stopRegistrazione, // ✅ Nome corretto dal hook
-    ripetEsercizio,
-    // Setters
-    setImageError,
-    setMicrophonePermission
-  } = useLogicaEsercizio();
+const {
+  currentView,
+  esercizi,
+  loading,
+  error,
+  hasError,
+  esercizioCorrente,
+  isRecording,
+  microphonePermission,
+  serverStatus,
+  parolaRiferimento,
+  immagineParola,
+  imageError,
+  feedback,
+  results, // ✅ Ora è unificato come results
+  numeroTentativi,
+  tentativiRimanenti,
+  tempoImpiegato,
+  esercizioCompletato,
+  statisticheFinali,
+  MAX_TENTATIVI,
+  // Azioni
+  loadEsercizi,
+  startEsercizio,
+  tornaAllaHome,
+  startRegistrazione,
+  stopRegistrazione,
+  ripetEsercizio,
+  // Setters
+  setImageError,
+  setMicrophonePermission
+} = useLogicaEsercizio();
 
   // ✅ Funzione per richiedere permessi microfono
   const handleRequestMicrophone = async () => {
@@ -147,7 +147,7 @@ const CorpoEsercizioAudio = () => {
           
           // ✅ Stati risultati
           feedback={feedback}
-          results={risultato} // ✅ Passa risultato come results per compatibilità
+          results={results} // ✅ Passa risultato come results per compatibilità
           
           // ✅ Funzioni di navigazione (senza prefisso "on")
           tornaHome={() => {
