@@ -1,12 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import header from './header.module.css'
 import { useNavigate, useLocation } from 'react-router-dom'
 import logo from '../../assets/logosito.png'
+import ContainerNotifiche from '../condivisi/Layout/ContainerNotifiche';
+import DialogoConferma from '../condivisi/Layout/DialogoConferma';
+import { useFeedback } from '../../hooks/useFeedback';
+import { usaDialogoConferma } from '../../hooks/usaDialogoConferma';
 
 const HeaderEducatore = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Integrazione sistema feedback
+  const { notifiche, successo, errore } = useFeedback();
+  
+  // Integrazione sistema conferma
+  const { 
+    statoDialogo, 
+    mostraConferma, 
+    gestisciConferma, 
+    gestisciAnnulla 
+  } = usaDialogoConferma();
 
   // Funzioni per la navigazione
   const goToHome = () => navigate('/home-educatore');
@@ -15,22 +29,35 @@ const HeaderEducatore = () => {
   // Verifica se siamo nella pagina del profilo
   const isProfilePage = location.pathname === '/profilo-educatore';
 
-  // Funzione per mostrare la conferma
-  const handleLogoutClick = () => {
-    setShowConfirm(true);
+  // Funzione per mostrare la conferma di logout
+  const handleLogoutClick = async () => {
+    const conferma = await mostraConferma({
+      titolo: "Conferma Logout",
+      messaggio: "Sei sicuro di voler effettuare il logout?",
+      testoConferma: "Sì, Logout",
+      testoAnnulla: "Annulla",
+      variante: "avviso"
+    });
+
+    if (conferma) {
+      confirmLogout();
+    }
   };
 
   // Funzione di logout confermato
   const confirmLogout = () => {
-    localStorage.removeItem('userToken');
-    sessionStorage.clear();
-    navigate('/');
-    setShowConfirm(false);
-  };
-
-  // Funzione per annullare il logout
-  const cancelLogout = () => {
-    setShowConfirm(false);
+    try {
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('token');
+      localStorage.removeItem('ruolo');
+      sessionStorage.clear();
+      
+      navigate('/');
+      
+    } catch (error) {
+      console.error('Errore durante il logout:', error);
+      errore('Errore durante il logout', { durata: 4000 });
+    }
   };
 
   return (
@@ -45,44 +72,37 @@ const HeaderEducatore = () => {
         <nav className={header.nav}>
           <ul className={header['nav-list']}>           
             {!isProfilePage && (
-              <button className={header.navButton} onClick={goToProfilo}>Profilo </button>
-             )}
+              <button className={header.navButton} onClick={goToProfilo}>
+                Profilo 
+              </button>
+            )}
             {isProfilePage && ( 
-                <button 
-                  className={header.logoutButton} 
-                  onClick={handleLogoutClick}
-                >
-                  Logout
-                </button>
-              
+              <button 
+                className={header.logoutButton} 
+                onClick={handleLogoutClick}
+              >
+                Logout
+              </button>
             )}
           </ul>
         </nav>
       </div>
 
-      {/* Modal di conferma */}
-      {showConfirm && (
-        <div className={header.modalOverlay}>
-          <div className={header.modalContent}>
-            <h3>Conferma Logout</h3>
-            <p>Sei sicuro di voler effettuare il logout?</p>
-            <div className={header.modalButtons}>
-              <button 
-                className={header.confirmButton} 
-                onClick={confirmLogout}
-              >
-                Conferma
-              </button>
-              <button 
-                className={header.cancelButton} 
-                onClick={cancelLogout}
-              >
-                Annulla
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Sistema di notifiche integrato */}
+      <ContainerNotifiche notifiche={notifiche} />
+
+      {/* Dialogo di conferma integrato */}
+      <DialogoConferma
+        aperto={statoDialogo.aperto}
+        titolo={statoDialogo.titolo}
+        messaggio={statoDialogo.messaggio}
+        testoConferma={statoDialogo.testoConferma}
+        testoAnnulla={statoDialogo.testoAnnulla}
+        variante={statoDialogo.variante}
+        onConferma={gestisciConferma}
+        onAnnulla={gestisciAnnulla}
+        onChiudi={gestisciAnnulla}
+      />
     </>
   );
 };

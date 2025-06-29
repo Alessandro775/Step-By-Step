@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/footer/Footer";
-import Header from "../../components/Header/HeaderEducatore";
+import Header from "../../components/header/HeaderEducatore";
 import Cronologia from "../../components/educatore/Cronologia/CronologiaEducatore";
 
 const CronologiaEducatore = () => {
