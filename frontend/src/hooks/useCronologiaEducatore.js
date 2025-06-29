@@ -1,8 +1,9 @@
-// hooks/useCronologiaEducatore.js
 import { useMemo } from 'react';
-
+//hook per la gestione per la gestione e validazione dei dati studenti nella cronologia educatore
 export const useCronologiaEducatore = (studenteSelezionato) => {
+  //validazione memorizza dati dello studente
   const validazione = useMemo(() => {
+    //controlla se è stato selezionato uno studente
     if (!studenteSelezionato) {
       return {
         errore: {
@@ -12,9 +13,9 @@ export const useCronologiaEducatore = (studenteSelezionato) => {
         dettagliDebug: null
       };
     }
-
+//estrae ID dello studente gestendo diversi formati di dati API
     const idStudente = studenteSelezionato.idStudente || studenteSelezionato.id;
-    
+    //verifica che ID sia presente e valido 
     if (!idStudente) {
       return {
         errore: {
@@ -26,7 +27,7 @@ export const useCronologiaEducatore = (studenteSelezionato) => {
     }
 
     const nomeCompleto = `${studenteSelezionato.nome || ''} ${studenteSelezionato.cognome || ''}`.trim() || 'Studente';
-    
+    //restituisce i dati validati e processati
     return {
       errore: null,
       idStudente,
@@ -36,9 +37,9 @@ export const useCronologiaEducatore = (studenteSelezionato) => {
   }, [studenteSelezionato]);
 
   return {
-    idStudente: validazione.idStudente,
-    nomeCompleto: validazione.nomeCompleto,
-    erroreValidazione: validazione.errore,
-    dettagliDebug: validazione.dettagliDebug
+    idStudente: validazione.idStudente, // ID dello studente (null se errore)
+    nomeCompleto: validazione.nomeCompleto, // Nome completo formattato (null se errore)
+    erroreValidazione: validazione.errore, // Oggetto errore con titolo e messaggio
+    dettagliDebug: validazione.dettagliDebug //Informazioni di debug per sviluppatori
   };
 };

@@ -4,7 +4,7 @@ import { useFeedback } from './useFeedback';
 import { serviziEsercizi } from '../servizi/api/serviziEsercizi';
 
 export const useLogicaEsercizio = () => {
-  // ===== STATI PRINCIPALI =====
+  //  STATI PRINCIPALI 
   const [currentView, setCurrentView] = useState('home');
   const [esercizioCorrente, setEsercizioCorrente] = useState(null);
   const [esercizi, setEsercizi] = useState([]);
@@ -12,19 +12,19 @@ export const useLogicaEsercizio = () => {
   const [error, setError] = useState(null);
   const [hasError, setHasError] = useState(false);
 
-  // ===== STATI REGISTRAZIONE =====
+  // STATI REGISTRAZIONE 
   const [isRecording, setIsRecording] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState('prompt');
   const [serverStatus, setServerStatus] = useState('checking');
 
-  // ===== STATI ESERCIZIO =====
+  // STATI ESERCIZIO
   const [parolaRiferimento, setParolaRiferimento] = useState('');
   const [immagineParola, setImmagineParola] = useState('');
   const [imageError, setImageError] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [results, setResults] = useState(null);
   
-  // ===== STATI CONTATORI =====
+  // STATI CONTATORI
   const [numeroTentativi, setNumeroTentativi] = useState(0);
   const [tentativiRimanenti, setTentativiRimanenti] = useState(10);
   const [tempoInizio, setTempoInizio] = useState(null);
@@ -32,22 +32,22 @@ export const useLogicaEsercizio = () => {
   const [esercizioCompletato, setEsercizioCompletato] = useState(false);
   const [statisticheFinali, setStatisticheFinali] = useState(null);
 
-  // ===== STATI UTENTE =====
+  //sTATI UTENTE 
   const [idStudente, setIdStudente] = useState(null);
   const [idEsercizioAssegnato, setIdEsercizioAssegnato] = useState(null);
 
-  // ===== REFS =====
+  // REFS
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
 
-  // ===== COSTANTI =====
+  // COSTANTI 
   const MAX_TENTATIVI = 10;
 
-  // ===== HOOKS =====
+  //  HOOKS 
   const { successo, errore, avviso } = useFeedback();
 
-  // ===== INIZIALIZZAZIONE =====
+  //INIZIALIZZAZIONE 
   useEffect(() => {
     const initializeUser = () => {
       const token = localStorage.getItem('token');

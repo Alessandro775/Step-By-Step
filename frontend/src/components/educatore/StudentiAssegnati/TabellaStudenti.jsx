@@ -7,15 +7,15 @@ import ContainerNotifiche from '../../condivisi/Layout/ContainerNotifiche';
 import styles from './TabellaStudenti.module.css';
 
 const TabellaStudenti = ({
-  studenti,
-  onVisualizzaContenuti,
-  onVisualizzaCronologia,
-  onEliminaStudente
+  studenti, // Lista degli studenti assegnati all'educatore
+  onVisualizzaContenuti, // Handler per navigazione ai contenuti
+  onVisualizzaCronologia, // Handler per navigazione alla cronologia
+  onEliminaStudente  // Handler per eliminazione studente
 }) => {
   const { statoDialogo, mostraConferma, gestisciConferma, gestisciAnnulla } = usaDialogoConferma();
   const { notifiche, info, avviso } = useFeedback();
 
-  // ✅ Gestione eliminazione con conferma
+  //  Gestione eliminazione con conferma
   const handleEliminaConferma = async (idStudente, nomeCompleto) => {
     const conferma = await mostraConferma({
       titolo: "Rimuovi Studente",
@@ -26,12 +26,13 @@ const TabellaStudenti = ({
     });
 
     if (conferma) {
+      // Feedback immediato all'utente
       avviso(`Rimozione di ${nomeCompleto} in corso...`, { durata: 2000 });
       onEliminaStudente(idStudente, nomeCompleto);
     }
   };
 
-  // ✅ Gestione azioni con feedback
+  // Gestione azioni con feedback
   const handleVisualizzaContenuti = (idStudente, nomeCompleto) => {
     onVisualizzaContenuti(idStudente, nomeCompleto);
   };
@@ -43,10 +44,14 @@ const TabellaStudenti = ({
   if (studenti.length === 0) {
     return (
       <>
+      {/* Notifiche sempre visibili anche in stato vuoto */}
         <ContainerNotifiche notifiche={notifiche} />
         <div className={styles.emptyState}>
+          {/* Icona rappresentativa per stato vuoto */}
           <div className={styles.emptyIcon}>👥</div>
+          {/* Messaggio principale */}
           <p><strong>Nessuno studente associato al momento</strong></p>
+          {/* Suggerimento per l'azione successiva */}
           <p>Aggiungi studenti utilizzando il form sopra per iniziare a gestire i loro contenuti ed esercizi.</p>
         </div>
       </>
@@ -55,6 +60,7 @@ const TabellaStudenti = ({
 
   return (
     <>
+      {/* Sistema di notifiche sempre presente */}
       <ContainerNotifiche notifiche={notifiche} />
       <DialogoConferma
         aperto={statoDialogo.aperto}
@@ -67,9 +73,9 @@ const TabellaStudenti = ({
         onAnnulla={gestisciAnnulla}
         onChiudi={gestisciAnnulla}
       />
-      
+      {/* === TABELLA PRINCIPALE === */}
       <div className={styles.tableContainer}>
-              
+         {/*tabella*/}     
         <table className={styles.table}>
           <thead>
             <tr>
@@ -80,6 +86,7 @@ const TabellaStudenti = ({
               <th>⚙️ Azioni</th>
             </tr>
           </thead>
+          {/*corpo tabella*/}
           <tbody>
             {studenti.map((studente) => {
               const nomeCompleto = `${studente.nome || "N/D"} ${studente.cognome || "N/D"}`.trim();
@@ -88,6 +95,7 @@ const TabellaStudenti = ({
                 : "N/D";
 
               return (
+                {/*celle con i dati*/}
                 <tr key={studente.idStudente} className={styles.studentRow}>
                   <td className={styles.nameCell}>{studente.nome || "N/D"}</td>
                   <td className={styles.nameCell}>{studente.cognome || "N/D"}</td>
@@ -95,6 +103,7 @@ const TabellaStudenti = ({
                   <td className={styles.dateCell}>{dataAssegnazione}</td>
                   <td className={styles.actionsCell}>
                     <div className={styles.buttonGroup}>
+                      {/*pulsante contenuti*/}
                       <button
                         className={styles.viewButton}
                         onClick={() => handleVisualizzaContenuti(studente.idStudente, nomeCompleto)}
@@ -102,7 +111,7 @@ const TabellaStudenti = ({
                       >
                         📋 Contenuti
                       </button>
-
+                      {/*pulsante cronologia*/}
                       <button
                         className={styles.historyButton}
                         onClick={() => handleVisualizzaCronologia(studente.idStudente, nomeCompleto)}
@@ -110,7 +119,7 @@ const TabellaStudenti = ({
                       >
                         📊 Cronologia
                       </button>
-
+                      {/*pulsante eliminazione*/}
                       <button
                         className={styles.deleteButton}
                         onClick={() => handleEliminaConferma(studente.idStudente, nomeCompleto)}

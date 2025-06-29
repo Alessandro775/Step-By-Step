@@ -1,12 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import header from './header.module.css'
 import { useNavigate, useLocation } from 'react-router-dom'
 import logo from '../../assets/logosito.png'
+import ContainerNotifiche from '../condivisi/Layout/ContainerNotifiche';
+import DialogoConferma from '../condivisi/Layout/DialogoConferma';
+import { useFeedback } from '../../hooks/useFeedback';
+import { usaDialogoConferma } from '../../hooks/usaDialogoConferma';
 
 const HeaderStudente = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Integrazione sistema feedback
+  const { notifiche, successo, errore } = useFeedback();
+  
+  // Integrazione sistema conferma
+  const { 
+    statoDialogo, 
+    mostraConferma, 
+    gestisciConferma, 
+    gestisciAnnulla 
+  } = usaDialogoConferma();
 
   // Funzioni per la navigazione
   const goToHome = () => navigate('/home-studente');
@@ -17,41 +31,65 @@ const HeaderStudente = () => {
   const isProfilePage = location.pathname === '/profilo-studente';
   const isCronologyPage = location.pathname === '/cronologia-studente';
 
-  const handleLogoutClick = () => {
-    setShowConfirm(true);
+  // Funzione per mostrare la conferma di logout
+  const handleLogoutClick = async () => {
+    const conferma = await mostraConferma({
+      titolo: "Conferma Logout",
+      messaggio: "Sei sicuro di voler effettuare il logout?",
+      testoConferma: "Sì, Logout",
+      testoAnnulla: "Annulla",
+      variante: "avviso"
+    });
+
+    if (conferma) {
+      confirmLogout();
+    }
   };
 
+  // Funzione di logout confermato
   const confirmLogout = () => {
-    localStorage.removeItem('userToken');
-    sessionStorage.clear();
-    navigate('/');
-    setShowConfirm(false);
-  };
-
-  const cancelLogout = () => {
-    setShowConfirm(false);
+    try {
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('token');
+      localStorage.removeItem('ruolo');
+      localStorage.removeItem('studenteSelezionato');
+      sessionStorage.clear();
+      
+      navigate('/');
+      
+    } catch (error) {
+      console.error('Errore durante il logout:', error);
+      errore('Errore durante il logout', { durata: 4000 });
+    }
   };
 
   return (
     <>
       <div className={header.container}>
+        {/*bottone del logo*/}
         <button className={header.logoButton} onClick={goToHome}>
           <img src={logo} alt="Logo" className={header.logo} />
         </button>
         
         <h1 className={header.title}>Step By Step</h1>
-        
+        {/*vari bottoni*/}
         <nav className={header.nav}>
           <ul className={header['nav-list']}>
-
             {!isCronologyPage && (
-              <li><button className={header.navButton} onClick={goToCronologia}>Cronologia</button></li>
+              <li>
+                <button className={header.navButton} onClick={goToCronologia}>
+                  Cronologia
+                </button>
+              </li>
             )}
             {!isProfilePage && (
-              <button className={header.navButton} onClick={goToProfilo}>Profilo </button>
+              <button className={header.navButton} onClick={goToProfilo}>
+                Profilo 
+              </button>
             )}
             {isProfilePage && (
               <li>
+                {/*bottone logout*/}
                 <button 
                   className={header.logoutButton} 
                   onClick={handleLogoutClick}
@@ -64,31 +102,23 @@ const HeaderStudente = () => {
         </nav>
       </div>
 
-      {showConfirm && (
-        <div className={header.modalOverlay}>
-          <div className={header.modalContent}>
-            <h3>Conferma Logout</h3>
-            <p>Sei sicuro di voler effettuare il logout?</p>
-            <div className={header.modalButtons}>
-              <button 
-                className={header.confirmButton} 
-                onClick={confirmLogout}
-              >
-                Conferma
-              </button>
-              <button 
-                className={header.cancelButton} 
-                onClick={cancelLogout}
-              >
-                Annulla
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Sistema di notifiche integrato */}
+      <ContainerNotifiche notifiche={notifiche} />
+
+      {/* Dialogo di conferma integrato */}
+      <DialogoConferma
+        aperto={statoDialogo.aperto}
+        titolo={statoDialogo.titolo}
+        messaggio={statoDialogo.messaggio}
+        testoConferma={statoDialogo.testoConferma}
+        testoAnnulla={statoDialogo.testoAnnulla}
+        variante={statoDialogo.variante}
+        onConferma={gestisciConferma}
+        onAnnulla={gestisciAnnulla}
+        onChiudi={gestisciAnnulla}
+      />
     </>
   );
-
 };
 
 export default HeaderStudente;
