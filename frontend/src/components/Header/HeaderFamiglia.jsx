@@ -1,33 +1,63 @@
-import React, { useState } from 'react';
+import React from 'react';
 import header from './header.module.css'
 import { useNavigate, useLocation } from 'react-router-dom'
 import logo from '../../assets/logosito.png'
+import ContainerNotifiche from '../condivisi/Layout/ContainerNotifiche';
+import DialogoConferma from '../condivisi/Layout/DialogoConferma';
+import { useFeedback } from '../../hooks/useFeedback';
+import { usaDialogoConferma } from '../../hooks/usaDialogoConferma';
 
 const HeaderFamiglia = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Integrazione sistema feedback
+  const { notifiche, successo, errore } = useFeedback();
+  
+  // Integrazione sistema conferma
+  const { 
+    statoDialogo, 
+    mostraConferma, 
+    gestisciConferma, 
+    gestisciAnnulla 
+  } = usaDialogoConferma();
 
   // Funzioni per la navigazione
-  const goToHome = () => navigate('/Home-Famiglia');
+  const goToHome = () => navigate('/home-famiglia');
   const goToProfilo = () => navigate('/profilo-famiglia');
 
   // Verifica se siamo nella pagina del profilo
   const isProfilePage = location.pathname === '/profilo-famiglia';
 
-  const handleLogoutClick = () => {
-    setShowConfirm(true);
+  // Funzione per mostrare la conferma di logout
+  const handleLogoutClick = async () => {
+    const conferma = await mostraConferma({
+      titolo: "Conferma Logout",
+      messaggio: "Sei sicuro di voler effettuare il logout?",
+      testoConferma: "Sì, Logout",
+      testoAnnulla: "Annulla",
+      variante: "avviso"
+    });
+
+    if (conferma) {
+      confirmLogout();
+    }
   };
 
+  // Funzione di logout confermato
   const confirmLogout = () => {
-    localStorage.removeItem('userToken');
-    sessionStorage.clear();
-    navigate('/');
-    setShowConfirm(false);
-  };
+    try {
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('token');
+      localStorage.removeItem('ruolo');
+      sessionStorage.clear();
+     
+      navigate('/');
 
-  const cancelLogout = () => {
-    setShowConfirm(false);
+    } catch (error) {
+      console.error('Errore durante il logout:', error);
+      errore('Errore durante il logout', { durata: 4000 });
+    }
   };
 
   return (
@@ -39,51 +69,44 @@ const HeaderFamiglia = () => {
         
         <h1 className={header.title}>Step By Step</h1>
         
-       <nav className={header.nav}>
-  <ul className={header['nav-list']}>
-    {!isProfilePage && (
-      <li><button onClick={goToProfilo}>Profilo</button></li>
-    )}
-    {isProfilePage && (
-      <li>
-        <button 
-          className={header.logoutButton} 
-          onClick={handleLogoutClick}
-        >
-          Logout
-        </button>
-      </li>
-    )}
-  </ul>
-</nav>
-
+        <nav className={header.nav}>
+          <ul className={header['nav-list']}>
+            {!isProfilePage && (
+              <li>
+                <button onClick={goToProfilo}>Profilo</button>
+              </li>
+            )}
+            {isProfilePage && (
+              <li>
+                <button 
+                  className={header.logoutButton} 
+                  onClick={handleLogoutClick}
+                >
+                  Logout
+                </button>
+              </li>
+            )}
+          </ul>
+        </nav>
       </div>
 
-      {showConfirm && (
-        <div className={header.modalOverlay}>
-          <div className={header.modalContent}>
-            <h3>Conferma Logout</h3>
-            <p>Sei sicuro di voler effettuare il logout?</p>
-            <div className={header.modalButtons}>
-              <button 
-                className={header.confirmButton} 
-                onClick={confirmLogout}
-              >
-                Conferma
-              </button>
-              <button 
-                className={header.cancelButton} 
-                onClick={cancelLogout}
-              >
-                Annulla
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Sistema di notifiche integrato */}
+      <ContainerNotifiche notifiche={notifiche} />
+
+      {/* Dialogo di conferma integrato */}
+      <DialogoConferma
+        aperto={statoDialogo.aperto}
+        titolo={statoDialogo.titolo}
+        messaggio={statoDialogo.messaggio}
+        testoConferma={statoDialogo.testoConferma}
+        testoAnnulla={statoDialogo.testoAnnulla}
+        variante={statoDialogo.variante}
+        onConferma={gestisciConferma}
+        onAnnulla={gestisciAnnulla}
+        onChiudi={gestisciAnnulla}
+      />
     </>
   );
-
 };
 
 export default HeaderFamiglia;

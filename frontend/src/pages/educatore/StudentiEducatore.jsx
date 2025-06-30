@@ -1,6 +1,6 @@
 import React from "react";
-import Footer from "../../components/footer/Footer"; // Importa il componente Footer
-import Header from "../../components/header/HeaderEducatore"; // Importa il componente Header
+import Footer from "../../components/footer/Footer";
+import Header from "../../components/header/HeaderEducatore"; 
 import Studenti from "../../components/educatore/StudentiAssegnati/StudentiEducatore";
 
 const StudentiEducatore = () => {

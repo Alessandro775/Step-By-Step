@@ -10,7 +10,7 @@ const ContenutoEducatore = () => {
   // Gestisce il ritorno alla home educatore
   const handleTornaIndietro = () => {
     sessionStorage.removeItem("studenteSelezionato");
-    navigate("/home-educatore");
+    navigate("/home-educatore"); 
   };
 
   // Listener per evento di ritorno alla lista studenti
@@ -18,7 +18,7 @@ const ContenutoEducatore = () => {
     const handleBackEvent = () => {
       handleTornaIndietro();
     };
-
+    // Aggiunge il listener per l'evento personalizzato
     window.addEventListener("backToStudenti", handleBackEvent);
 
     // Cleanup del listener

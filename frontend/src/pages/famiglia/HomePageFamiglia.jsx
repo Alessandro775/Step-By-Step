@@ -1,7 +1,7 @@
 import React from "react";
 
-import Footer from "../../components/footer/Footer"; // Importa il componente Footer
-import Header from "../../components/Header/HeaderFamiglia"; // Importa il componente Header
+import Footer from "../../components/footer/Footer";
+import Header from "../../components/header/HeaderFamiglia"; 
 import Cronologia from "../../components/famiglia/CronologiaFamiglia/CronologiaFamiglia";
 
 const HomePageFamiglia = () => {

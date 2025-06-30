@@ -10,18 +10,20 @@ import mysql.connector
 from mysql.connector import Error
 import requests
 
+# Inizializzazione dell'applicazione Flask
 app = Flask(__name__)
 
-# Configurazione CORS espansa
+# Configurazione CORS espansa per permettere richieste da frontend React
+# Permette connessioni da localhost:3000 (frontend React) e 
 CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"],
      methods=['GET', 'POST', 'OPTIONS'],
      allow_headers=['Content-Type'])
 
-# Configurazione Database
+# Configurazione Database MySQL per la persistenza dei dati degli esercizi
 DB_CONFIG = {
-    'host': '172.20.10.3',
-    'user': 'alessandro',
-    'password': '123456',
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
     'database': 'step_by_step',
     'port': 3306
 }
@@ -43,6 +45,7 @@ def get_parole_per_studente(id_studente):
     
     try:
         cursor = connection.cursor()
+        # Query per recuperare esercizi di pronuncia assegnati allo studente
         query = """
         SELECT ea.idEsercizioAssegnato, ea.testo, ea.immagine 
         FROM esercizio_assegnato ea
@@ -56,12 +59,13 @@ def get_parole_per_studente(id_studente):
         results = cursor.fetchall()
         
         parole_studente = []
+         # Elaborazione di ogni risultato per normalizzare i dati
         for row in results:
             id_esercizio_assegnato = row[0]
             testo = row[1]
             immagine = row[2]
             
-            # Gestione migliorata delle immagini
+             # Gestione migliorata delle immagini con validazione URL
             if immagine and isinstance(immagine, str) and immagine.strip():
                 immagine = immagine.strip()
                 
@@ -69,10 +73,10 @@ def get_parole_per_studente(id_studente):
                 if immagine.startswith('http://localhost:3000/uploads'):
                     # Mantieni l'URL così com'è
                     pass
-                # Se inizia con '/', è un file locale - aggiungi il dominio del frontend
+                # Gestione percorsi relativi
                 elif immagine.startswith('/'):
                     immagine = f'http://localhost:3000{immagine}'
-                # Se non inizia con http, aggiungilo
+                 # Gestione URL senza protocollo
                 elif not immagine.startswith(('http://', 'https://')):
                     if immagine.startswith('//'):
                         immagine = 'https:' + immagine
@@ -98,6 +102,7 @@ def get_parole_per_studente(id_studente):
         print(f"Errore query parole studente: {e}")
         return []
     finally:
+        # Chiusura sicura della connessione database
         if connection.is_connected():
             cursor.close()
             connection.close()
@@ -111,6 +116,7 @@ def get_parole_from_db():
     
     try:
         cursor = connection.cursor()
+         # Query per recuperare tutte le parole di pronuncia uniche
         query = """
         SELECT DISTINCT ea.testo, ea.immagine 
         FROM esercizio_assegnato ea
@@ -123,6 +129,7 @@ def get_parole_from_db():
         results = cursor.fetchall()
         
         parole_con_immagini = []
+         # Elaborazione e validazione delle immagini
         for row in results:
             testo = row[0]
             immagine = row[1]
@@ -166,7 +173,7 @@ def salva_risultato_pronuncia(id_studente, id_esercizio_assegnato, feedback, sim
     try:
         cursor = connection.cursor()
         
-        # Calcola il punteggio basato sul feedback
+        # Calcolo del punteggio basato sul feedback dell'AI
         if feedback == "BRAVO":
             punteggio = 100
             numero_errori = max(0, numero_tentativi - 1)  # L'ultimo tentativo è quello giusto
@@ -176,7 +183,8 @@ def salva_risultato_pronuncia(id_studente, id_esercizio_assegnato, feedback, sim
         else:  # SBAGLIATO
             punteggio = min(30, int(similarity * 100))
             numero_errori = numero_tentativi
-        
+
+        # Inserimento del risultato nella tabella risultato
         query = """
         INSERT INTO risultato 
         (idStudente, idEsercizioAssegnato, punteggio, numero_errori, tempo, 
@@ -204,11 +212,11 @@ def salva_risultato_pronuncia(id_studente, id_esercizio_assegnato, feedback, sim
         if connection.is_connected():
             cursor.close()
             connection.close()
-# Carica le parole dal database all'avvio (per compatibilità)
+# Caricamento delle parole dal database all'avvio (per compatibilità)
 PAROLE = get_parole_from_db()
 
 
-# Carica il modello Whisper
+# Inizializzazione del modello Whisper per il riconoscimento vocale
 try:
     whisper_model = whisper.load_model("base")
     print("✅ Modello Whisper caricato correttamente")
@@ -233,6 +241,7 @@ def health_check():
 def get_esercizi_studente():
     """Ottieni tutti gli esercizi assegnati a uno studente specifico"""
     try:
+        # Estrazione dell'ID studente dai parametri della query
         id_studente = request.args.get('idStudente')
         
         if not id_studente:
@@ -250,7 +259,7 @@ def get_esercizi_studente():
         
         cursor = connection.cursor()
         
-        # Query per ottenere tutti gli esercizi assegnati allo studente
+        # Query completa per ottenere esercizi con stato di completamento
         query = """
         SELECT ea.idEsercizioAssegnato, ea.testo, ea.immagine, 
                ea.data_assegnazione, e.tipologia, e.descrizione,
@@ -269,6 +278,7 @@ def get_esercizi_studente():
         results = cursor.fetchall()
         
         esercizi_assegnati = []
+        # Elaborazione di ogni esercizio con gestione immagini
         for row in results:
             id_esercizio_assegnato = row[0]
             testo = row[1]
@@ -278,7 +288,7 @@ def get_esercizi_studente():
             descrizione = row[5]
             completato = row[6] is not None  # Se c'è un risultato, è completato
             
-            # Gestione immagine
+            # Gestione e validazione dell'URL dell'immagine
             if immagine and isinstance(immagine, str) and immagine.strip():
                 immagine = immagine.strip()
                 if not immagine.startswith(('http://', 'https://')):
@@ -299,6 +309,7 @@ def get_esercizi_studente():
         
         print(f"✅ Trovati {len(esercizi_assegnati)} esercizi per studente {id_studente}")
         
+        # Calcolo delle statistiche degli esercizi
         return jsonify({
             'esercizi': esercizi_assegnati,
             'totali': len(esercizi_assegnati),
@@ -324,6 +335,7 @@ def get_esercizi_studente():
 def get_esercizio_specifico():
     """Ottieni un esercizio specifico per ID"""
     try:
+        # Estrazione dei parametri richiesti
         id_esercizio_assegnato = request.args.get('idEsercizioAssegnato')
         id_studente = request.args.get('idStudente')
         
@@ -354,6 +366,7 @@ def get_esercizio_specifico():
         cursor.execute(query, (id_esercizio_assegnato, id_studente))
         result = cursor.fetchone()
         
+        # Controlli di autorizzazione e stato
         if not result:
             return jsonify({
                 'error': 'Esercizio non trovato o non assegnato a questo studente',
@@ -366,7 +379,7 @@ def get_esercizio_specifico():
                 'status': 'error'
             }), 400
         
-        # Gestione immagine
+         # Gestione dell'immagine associata
         immagine = result[2]
         if immagine and isinstance(immagine, str) and immagine.strip():
             immagine = immagine.strip()
@@ -403,12 +416,14 @@ def get_esercizio_specifico():
 @app.route('/check_pronunciation', methods=['POST'])
 def check_pronunciation():
     try:
+        # Verifica disponibilità del modello Whisper
         if whisper_model is None:
             return jsonify({
                 'error': 'Modello Whisper non disponibile',
                 'status': 'error'
             })
 
+        # Estrazione dei dati dalla richiesta
         audio_data = request.files['audio']
         parola_riferimento = request.form.get('reference_text', '').strip()
         id_studente = request.form.get('idStudente')
@@ -416,17 +431,20 @@ def check_pronunciation():
         tempo_impiegato = float(request.form.get('tempoImpiegato', 0))
         numero_tentativi = int(request.form.get('numeroTentativi', 1))
 
+         # Validazione dei parametri obbligatori
         if not parola_riferimento or not id_studente or not id_esercizio_assegnato:
             return jsonify({
                 'error': 'Parametri mancanti',
                 'status': 'error'
             })
 
+         # Elaborazione dell'audio con file temporaneo
         with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_audio:
             
             audio_data.save(temp_audio.name)
             
             try:
+                # Trascrizione dell'audio con Whisper (modello italiano)
                 result = whisper_model.transcribe(temp_audio.name, language='it')
                 
                 testo_trascritto = result["text"].strip()  
@@ -437,16 +455,18 @@ def check_pronunciation():
                     'status': 'error'
                 })
             finally:
+                 # Pulizia del file temporaneo
                 try:
                     os.unlink(temp_audio.name)
                 except:
                     pass
 
+         # Estrazione della prima parola pronunciata e calcolo similarità
         parola_pronunciata = testo_trascritto.split()[0].lower() if testo_trascritto.split() else ""
         parola_riferimento_pulita = parola_riferimento.lower()
         similarity = difflib.SequenceMatcher(None, parola_riferimento_pulita, parola_pronunciata).ratio()
 
-        # Valutazione con Ollama (codice esistente...)
+        # Valutazione con AI Ollama per feedback intelligente
         try:
             evaluation_prompt = f"""
             Valuta la pronuncia italiana:
@@ -465,14 +485,14 @@ def check_pronunciation():
             )
             feedback = response.message.content.strip().upper()
         except:
-            # Fallback
+             # Sistema di fallback basato su similarità
             if similarity > 0.8:
                 feedback = "BRAVO"
             elif similarity >= 0.5 and similarity < 0.8:
                 feedback = "PROVA A FARE DI MEGLIO"
             else:
                 feedback = "SBAGLIATO"
-
+         # Normalizzazione del feedback
         if "BRAVO" in feedback:
             feedback = "BRAVO"
         elif "PROVA A FARE DI MEGLIO" in feedback:
@@ -483,7 +503,8 @@ def check_pronunciation():
         corrections = []
         esercizio_completato = False
         
-        # ✅ ESERCIZIO COMPLETATO: BRAVO O 10 TENTATIVI
+         # Logica di completamento dell'esercizio
+         # COMPLETATO se: pronuncia corretta (BRAVO) O raggiunto limite tentativi (10)
         if feedback == "BRAVO" or numero_tentativi >= 10:
             esercizio_completato = True
             
@@ -498,8 +519,9 @@ def check_pronunciation():
                 numero_tentativi=numero_tentativi
             )
         else:
+            # Generazione di suggerimenti per migliorare la pronuncia
             corrections = generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, similarity)
-
+          # Risposta completa con tutti i dati dell'analisi
         return jsonify({
             'transcribed_text': parola_pronunciata,
             'reference_text': parola_riferimento,
@@ -525,12 +547,14 @@ def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, 
     ref_lower = parola_riferimento.lower()
     spoken_lower = parola_pronunciata.lower()
 
+    # Suggerimenti basati sul livello di similarità
     if similarity < 0.3:
         tips.append(f"🎯 Concentrati sui suoni italiani della parola '{parola_riferimento}'")
         tips.append("🔊 Parla più chiaramente, pronuncia ogni sillaba")
     elif similarity < 0.6:
         tips.append(f"📢 Migliora la pronuncia italiana di '{parola_riferimento}'")
 
+     # Suggerimenti specifici per suoni italiani difficili
     if 'gli' in ref_lower and 'gli' not in spoken_lower:
         tips.append("🗣️ Il suono 'GLI' si pronuncia come 'LI' con la lingua sul palato")
     elif 'gn' in ref_lower and 'gn' not in spoken_lower:
@@ -544,11 +568,14 @@ def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, 
     elif ref_lower.endswith('e') and not spoken_lower.endswith('e'):
         tips.append("⏰ Non dimenticare la 'E' finale italiana")
 
+     # Suggerimento per parole lunghe sull'accento
     if len(parola_riferimento) > 3:
         tips.append(f"🎵 Controlla l'accento italiano della parola '{parola_riferimento}'")
 
+      # Restituisce massimo 3 suggerimenti per non sovraccaricare l'utente
     return tips[:3]
 
+# Avvio del server Flask
 if __name__ == '__main__':
     print("🚀 Avviando server Flask per pronuncia italiana...")
     print(f"📚 Parole disponibili: {len(PAROLE)}")

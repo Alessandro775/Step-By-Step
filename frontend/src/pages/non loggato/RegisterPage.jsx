@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import styles from "./RegisterPage.module.css";
 import { useNavigate } from "react-router-dom";
 
-// const BASE_URL = import.meta.env.VITE_BASE_URL || "http://172.29.0.201:3000";
+// URL base per le chiamate API al server backend;
 const BASE_URL = "http://localhost:3000";
 
+//Componente RegisterPage - Gestisce la registrazione di nuovi utenti
 const RegisterPage = () => {
+  // Hook per la navigazione tra le pagine
+  const navigate = useNavigate();
   // Stati per i campi comuni del form
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,21 +26,25 @@ const RegisterPage = () => {
   const [numero_telefono, setnumero_telefono] = useState("");
   const [email_studente, setemail_studente] = useState("");
 
-  // Gestione errori e navigazione
+  // Gestione errori 
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate();
 
-  // Valida che le password corrispondano
+  // Funzione per validare che le password inserite corrispondano
   const validatePasswords = () => {
     const newErrors = {};
+    // Verifica corrispondenza password
     if (password !== confirmPassword) {
       newErrors.confirmPassword = "Le password non corrispondono";
     }
+     // Aggiorna lo state degli errori
     setErrors(newErrors);
+     // Restituisce true se non ci sono errori
     return Object.keys(newErrors).length === 0;
   };
-  // Gestisce l'invio del form di registrazione
+
+  // Funzione principale per gestire l'invio del form di registrazione
   const handleSubmit = async (e) => {
+     // Previene il comportamento di default del form
     e.preventDefault();
     console.log(BASE_URL);
     // Verifica che le password corrispondano
@@ -48,23 +55,28 @@ const RegisterPage = () => {
     try {
       // Costruisce l'oggetto userData in base al tipo di utente
       const userData = {
+        // Nome non richiesto per i genitori
         ...(tipoUtente !== "genitore" && { nome }),
         cognome,
         email,
         password,
         // Mappa il tipo utente al codice ruolo
         ruolo:
+        
           tipoUtente === "studente"
             ? "S"
             : tipoUtente === "educatore"
             ? "E"
             : "G",
+            // Campi specifici per studenti
         ...(tipoUtente === "studente" && {
           istituto,
           classe: parseInt(classe),
           anno_scolastico: parseInt(annoScolastico),
         }),
+         // Campi specifici per educatori
         ...(tipoUtente === "educatore" && { istituto }),
+         // Campi specifici per genitori/famiglie
         ...(tipoUtente === "genitore" && {
           numero_telefono,
           email_studente,
@@ -87,8 +99,8 @@ const RegisterPage = () => {
       const data = await response.json();
       console.log("Risposta registrazione:", data);
 
+       // Gestisce gli errori di registrazione con messaggi specifici
       if (!response.ok) {
-        // Gestione errori specifici
         if (
           response.status === 409 ||
           (data.error &&
@@ -145,12 +157,13 @@ const RegisterPage = () => {
           navigate("/login");
         }
       } else {
-        //FALLBACK: Se non c'è token, reindirizza al login
+        //FALLBACK:Se non viene restituito un token, reindirizza al login
         console.log("Nessun token ricevuto, reindirizzamento al login");
         alert("Registrazione completata! Effettua il login per continuare.");
         navigate("/login");
       }
     } catch (error) {
+       // Gestisce errori di rete o altri errori imprevisti
       console.error("Errore durante la registrazione:", error);
       setErrors((prev) => ({
         ...prev,
@@ -169,9 +182,8 @@ const RegisterPage = () => {
       setErrors((prev) => ({ ...prev, confirmPassword: "" }));
     }
   };
-
+    //Renderizzazione del componente
   return (
-    // Struttura del form di registrazione
     <div className={styles["register-section"]}>
       <div className={styles["form-container"]}>
         <p className={styles["form-title"]}>Registrazione</p>
@@ -226,7 +238,7 @@ const RegisterPage = () => {
               </select>
             </div>
           </div>
-          {/* sezioni aggiuntivr per lo studente*/}
+          {/* sezioni aggiuntive per lo studente*/}
           {tipoUtente === "studente" && (
             <div className={styles["additional-fields"]}>
               <div className={styles["form-grid"]}>

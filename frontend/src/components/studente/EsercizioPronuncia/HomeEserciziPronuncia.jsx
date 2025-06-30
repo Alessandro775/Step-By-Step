@@ -12,11 +12,11 @@ const HomeEserciziPronuncia = ({ esercizi, loading, error, onStartEsercizio, onR
     onStartEsercizio, 
     onRetry
   );
-
+//caricamento
   if (loading) {
     return <CaricamentoSpinner messaggio="Caricamento esercizi..." />;
   }
-
+//errore, mostra il messaggio
   if (error) {
     return (
       <MessaggioErrore 
@@ -32,8 +32,9 @@ const HomeEserciziPronuncia = ({ esercizi, loading, error, onStartEsercizio, onR
 
   return (
     <>
+    {/*componente che mostra la panoramica generale dei progressi*/}
       <StatisticheEsercizi statistiche={statistiche} />
-
+    {/*reinderizza solo se ci sono esercizi rimanenti*/}
       {eserciziRimanenti.length > 0 && (
         <div className={styles.section}>
           <h2>🎯 Esercizi da Completare - Leggi la parola mostrata ad alta voce</h2>
@@ -50,7 +51,7 @@ const HomeEserciziPronuncia = ({ esercizi, loading, error, onStartEsercizio, onR
           </div>
         </div>
       )}
-
+    {/*reidirizza solo se ci sono esercizi completati*/}
       {eserciziCompletati.length > 0 && (
         <div className={styles.section}>
           <h2>✅ Esercizi Completati</h2>
@@ -67,7 +68,7 @@ const HomeEserciziPronuncia = ({ esercizi, loading, error, onStartEsercizio, onR
           </div>
         </div>
       )}
-
+    {/* Mostrato quando non ci sono esercizi assegnati */}
       {esercizi.length === 0 && (
         <div className={styles.empty}>
           <h2>📚 Nessun Esercizio Assegnato</h2>

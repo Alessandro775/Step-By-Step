@@ -7,35 +7,56 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Configurazioni base
+// Configurazioni base dell'applicazione
 const app = express();
 const port = 3000;
-const JWT_SECRET = "balla";
+const JWT_SECRET = "balla"; // Chiave segreta per la firma dei token JWT
 
-// Configurazione Database
+// Configurazione Database MySQL
 const db = mysql.createConnection({
-
-host: "172.20.10.3",
- user: "alessandro",
- password: "123456",
- database: "step_by_step",
- port: 3306,
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "step_by_step",
+  port: 3306,
 });
 
-// Abilita richieste cross-origin da qualsiasi dominio
+// Connessione DB e Avvio Server
+db.connect((err) => {
+  if (err) {
+    console.error("Errore di connessione al database:", err);
+    process.exit(1);
+  }
+  console.log("Connessione al database stabilita con successo!");
+
+  app.listen(port, () => {
+    console.log(`Server in ascolto sulla porta ${port}`);
+  });
+});
+
+/**
+ * Configurazione CORS
+ * Abilita richieste cross-origin da qualsiasi dominio per permettere
+ */
 app.use(
   cors({
-    origin: "*",
-    credentials: true,
+    origin: "*", // Permette richieste da qualsiasi origine
+    credentials: true, // Abilita l'invio di cookies e credenziali
   })
 );
+
+// Middleware per il parsing automatico del JSON nelle richieste
 app.use(express.json());
 
-// Servire file statici dalla cartella uploads
+// Servire file statici dalla cartella uploads per immagini e media
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-//Configurazione Multer per upload immagini
+// Configurazione Multer per l'upload delle immagini
 const storage = multer.diskStorage({
+  /**
+   * Definisce la cartella di destinazione per i file caricati
+   * Crea automaticamente la struttura di cartelle se non esiste
+   */
   destination: function (req, file, cb) {
     const uploadPath = path.join(__dirname, "uploads", "images");
 
@@ -46,6 +67,11 @@ const storage = multer.diskStorage({
 
     cb(null, uploadPath);
   },
+
+  /**
+   * Genera un nome file unico per evitare conflitti
+   * Utilizza timestamp e numero casuale per garantire unicità
+   */
   filename: function (req, file, cb) {
     // Genera nome file unico: timestamp + nome originale
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -54,7 +80,10 @@ const storage = multer.diskStorage({
   },
 });
 
-// Filtro per accettare solo immagini
+/**
+ * Filtro per accettare solo file immagine
+ * Valida il tipo per garantire che vengano caricati solo formati supportati
+ */
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     "image/jpeg",
@@ -65,7 +94,7 @@ const fileFilter = (req, file, cb) => {
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
+    cb(null, true); // File accettato
   } else {
     cb(
       new Error("Tipo di file non supportato. Usa JPG, PNG, GIF o WebP"),
@@ -74,15 +103,16 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+//Configurazione completa di Multer
 const upload = multer({
   storage: storage, // dove salvare i file
   fileFilter: fileFilter, //quali file accettare
   limits: {
-    fileSize: 5 * 1024 * 1024, //dimensione massima file
+    fileSize: 5 * 1024 * 1024, // Dimensione massima: 5MB
   },
 });
 
-//Upload immagine
+//Route per l'upload di immagini
 app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
   //verifica che solo gli educatori possonocaricare le immagini
   if (req.utente.ruolo !== "E") {
@@ -92,15 +122,17 @@ app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
   }
 
   try {
+    // Verifica che sia stato caricato un file
     if (!req.file) {
       return res.status(400).json({ error: "Nessun file caricato" });
     }
 
-    // Costruisci l'URL dell'immagine
+    // Costruisce l'URL pubblico dell'immagine caricata
     const imageUrl = `http://localhost:${port}/uploads/images/${req.file.filename}`;
 
     console.log("Immagine caricata:", req.file.filename);
 
+    // Restituisce l'URL dell'immagine per l'utilizzo nel frontend
     res.json({
       message: "Immagine caricata con successo",
       imageUrl: imageUrl,
@@ -114,7 +146,10 @@ app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
   }
 });
 
-// MODIFICA la route esistente per creare contenuti
+/**
+ * Route per creare un nuovo contenuto e assegnarlo a uno studente
+ * Permette agli educatori di creare esercizi personalizzati con testo e immagini
+ */
 app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
   if (req.utente.ruolo !== "E") {
     return res.status(403).json({
@@ -131,7 +166,7 @@ app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
   console.log("Studente:", idStudente);
   console.log("Dati:", { testo, immagine, idEsercizio });
 
-  // Validazione dati
+  // Validazione dei dati obbligatori
   if (!testo || !idEsercizio) {
     return res.status(400).json({
       error: "Campi obbligatori mancanti: testo, idEsercizio",
@@ -159,7 +194,7 @@ app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
         });
       }
 
-      // Inserisci in esercizio_assegnato con l'URL dell'immagine
+      // Inserisce il nuovo esercizio assegnato con URL dell'immagine
       const insertQuery = `
       INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine) 
       VALUES (?, ?, ?, CURDATE(), ?, ?)
@@ -186,7 +221,10 @@ app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
   );
 });
 
-// Gestione errori Multer
+/**
+ * Gestione errori Multer per upload file
+ * Fornisce messaggi di errore specifici per problemi di upload
+ */
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === "LIMIT_FILE_SIZE") {
@@ -231,9 +269,13 @@ function autentica(req, res, next) {
   }
 }
 
-//Route Autenticazione
+/**
+ * Route per la registrazione di nuovi utenti
+ * con validazione specifica per ogni tipo di utente
+ */
 app.post("/api/register", async (req, res) => {
   console.log("Dati ricevuti:", req.body);
+  // Estrazione di tutti i campi possibili dalla richiesta
   const {
     nome,
     cognome,
@@ -249,13 +291,18 @@ app.post("/api/register", async (req, res) => {
   } = req.body;
 
   try {
+    // Hashing sicuro della password con bcrypt
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    /**
+     * Gestione specifica per la registrazione delle famiglie (ruolo "G")
+     * Include validazione dell'esistenza dello studente collegato
+     */
     if (ruolo === "G") {
       console.log("Registrazione famiglia in corso...");
 
-      // Prima verifichiamo che lo studente esista
+      // Verifica che lo studente esista nel sistema
       db.query(
         "SELECT idStudente FROM studente WHERE email = ?",
         [email_studente],
@@ -267,13 +314,14 @@ app.post("/api/register", async (req, res) => {
               .json({ error: "Errore durante la verifica dello studente" });
           }
 
+          // Se lo studente non esiste, blocca la registrazione
           if (studentResult.length === 0) {
             return res
               .status(400)
               .json({ error: "Studente non trovato con l'email specificata" });
           }
 
-          // Se lo studente esiste, procediamo con l'inserimento della famiglia
+          // Inserimento della famiglia nel database
           const insertFamigliaQuery =
             "INSERT INTO famiglia (cognome_famiglia, email, password, numero_telefono, email_studente) VALUES (?, ?, ?, ?, ?)";
           const params = [
@@ -287,6 +335,7 @@ app.post("/api/register", async (req, res) => {
           db.query(insertFamigliaQuery, params, (err, result) => {
             if (err) {
               console.error("Errore registrazione:", err);
+              // Gestione specifica per email duplicate
               if (err.code === "ER_DUP_ENTRY") {
                 return res.status(409).json({ error: "Email già registrata" });
               }
@@ -297,7 +346,7 @@ app.post("/api/register", async (req, res) => {
 
             console.log("Registrazione famiglia completata per:", email);
 
-            // GENERA TOKEN DOPO REGISTRAZIONE FAMIGLIA
+            // Generazione automatica del token JWT per auto-login
             const newUserId = result.insertId;
             const token = jwt.sign(
               {
@@ -310,7 +359,7 @@ app.post("/api/register", async (req, res) => {
               }
             );
 
-            // RESTITUISCI TOKEN E DATI UTENTE
+            // Risposta con token per login automatico
             res.status(201).json({
               message: "Registrazione completata con successo",
               token,
@@ -325,10 +374,14 @@ app.post("/api/register", async (req, res) => {
         }
       );
     } else {
-      // Gestione altri ruoli (studente, educatore)
+      /**
+       * Gestione per studenti (ruolo "S") ed educatori (ruolo "E")
+       * Costruisce query e parametri specifici per ogni tipo di utente
+       */
       let query, params;
 
       if (ruolo === "S") {
+        // Query per inserimento studente
         query =
           "INSERT INTO studente (nome, cognome, email, password, istituto, classe, anno_scolastico) VALUES (?, ?, ?, ?, ?, ?, ?)";
         params = [
@@ -341,14 +394,17 @@ app.post("/api/register", async (req, res) => {
           anno_scolastico,
         ];
       } else if (ruolo === "E") {
+        // Query per inserimento educatore
         query =
           "INSERT INTO educatore (nome, cognome, email, password, istituto) VALUES (?, ?, ?, ?, ?)";
         params = [nome, cognome, email, hashedPassword, istituto];
       }
 
+      // Esecuzione dell'inserimento nel databas
       db.query(query, params, (err, result) => {
         if (err) {
           console.error("Errore registrazione:", err);
+          // Gestione email duplicate
           if (err.code === "ER_DUP_ENTRY") {
             return res.status(409).json({ error: "Email già registrata" });
           }
@@ -359,7 +415,7 @@ app.post("/api/register", async (req, res) => {
 
         console.log("Registrazione completata per:", email);
 
-        // GENERA TOKEN DOPO REGISTRAZIONE STUDENTE/EDUCATORE
+        // Generazione token per auto-login
         const newUserId = result.insertId;
         const token = jwt.sign(
           {
@@ -392,11 +448,13 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
+/**
+ * Route per il login degli utenti
+ * Gestisce l'autenticazione per tutti i tipi di utenti (studenti, educatori, famiglie)
+ */
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   console.log("Tentativo login per:", email);
-
-  // Funzione helper per promisificare le query  MySQL
   const queryAsync = (query, params) => {
     return new Promise((resolve, reject) => {
       db.query(query, params, (err, results) => {
@@ -410,7 +468,10 @@ app.post("/api/login", async (req, res) => {
     let result;
     let ruolo;
 
-    // Prima cerca nella tabella studenti
+    /**
+     * Ricerca sequenziale dell'utente nelle diverse tabelle
+     * Prima cerca tra gli studenti, poi educatori, infine famiglie
+     */
     result = await queryAsync(
       "SELECT *, 'S' as ruolo FROM studente WHERE email = ?",
       [email]
@@ -440,14 +501,17 @@ app.post("/api/login", async (req, res) => {
 
     const user = result[0];
 
-    // Verifica la password
+    // Verifica la password con bcrypt
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       console.log("Password non valida per utente:", email);
       return res.status(401).json({ error: "Credenziali non valide" });
     }
 
-    // Genera il token JWT
+    /**
+     * Estrazione dell'ID utente specifico per ogni tipo
+     * Ogni tabella ha un nome diverso per la chiave primaria
+     */
     const userId =
       user.ruolo === "E"
         ? user.idEducatore
@@ -455,6 +519,7 @@ app.post("/api/login", async (req, res) => {
         ? user.idStudente
         : user.idFamiglia;
 
+    // Generazione del token JWT per la sessione
     const token = jwt.sign(
       {
         id: userId,
@@ -466,7 +531,7 @@ app.post("/api/login", async (req, res) => {
       }
     );
 
-    // Invia la risposta
+    // Risposta con token e dati utente
     res.json({
       token,
       ruolo: user.ruolo,
@@ -570,7 +635,7 @@ app.put("/api/profile", autentica, (req, res) => {
 // Route per aggiornare i dati del profilo educatore
 // Route per aggiornare i dati del profilo studente (SENZA email)
 app.put("/api/student-profile", autentica, (req, res) => {
-  if (req.utente.ruolo !== "S"){
+  if (req.utente.ruolo !== "S") {
     return res.status(403).json({
       error: "Accesso negato. Solo gli studenti possono modificare il profilo.",
     });
@@ -919,17 +984,18 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
         AND (ea.attivo IS NULL OR ea.attivo = TRUE)
       ORDER BY ea.data_assegnazione DESC
     `;
-  
-    db.query(query, [idStudente, idEducatore], (err, results) => {
-      if (err) {
-        console.error("Errore query contenuti:", err);
-        return res.status(500).json({ error: "Errore database" });
-      }
-  
-      console.log("Contenuti attivi trovati:", results.length);
-      res.json(results);
-    });
-  });
+
+      db.query(query, [idStudente, idEducatore], (err, results) => {
+        if (err) {
+          console.error("Errore query contenuti:", err);
+          return res.status(500).json({ error: "Errore database" });
+        }
+
+        console.log("Contenuti attivi trovati:", results.length);
+        res.json(results);
+      });
+    }
+  );
 });
 
 // Route per visualizzare la cronologia di uno studente
@@ -1123,7 +1189,8 @@ app.delete(
   (req, res) => {
     if (req.utente.ruolo !== "E") {
       return res.status(403).json({
-        error: "Accesso negato. Solo gli educatori possono eliminare contenuti.",
+        error:
+          "Accesso negato. Solo gli educatori possono eliminare contenuti.",
       });
     }
 
@@ -1175,7 +1242,7 @@ app.delete(
           // Se la colonna non esiste, la aggiunge
           if (columnExists.length === 0) {
             console.log("⚠️ Campo 'attivo' non trovato, lo aggiungo...");
-            
+
             const addColumnQuery = `
               ALTER TABLE esercizio_assegnato 
               ADD COLUMN attivo BOOLEAN DEFAULT TRUE
@@ -1184,8 +1251,8 @@ app.delete(
             db.query(addColumnQuery, (err) => {
               if (err) {
                 console.error("Errore aggiunta colonna attivo:", err);
-                return res.status(500).json({ 
-                  error: "Errore nell'aggiunta del campo attivo" 
+                return res.status(500).json({
+                  error: "Errore nell'aggiunta del campo attivo",
                 });
               }
 
@@ -1200,10 +1267,13 @@ app.delete(
 
               db.query(updateExistingQuery, (err) => {
                 if (err) {
-                  console.error("Errore aggiornamento esercizi esistenti:", err);
+                  console.error(
+                    "Errore aggiornamento esercizi esistenti:",
+                    err
+                  );
                 }
                 console.log("✅ Esercizi esistenti impostati come attivi");
-                
+
                 // Procedi con il soft delete
                 performSoftDelete();
               });
@@ -1223,80 +1293,98 @@ app.delete(
             WHERE idEsercizioAssegnato = ?
           `;
 
-          db.query(contaRisultati, [idEsercizioAssegnato], (err, conteggioRisultati) => {
-            if (err) {
-              console.error("Errore conteggio risultati:", err);
-              return res.status(500).json({ error: "Errore database" });
-            }
+          db.query(
+            contaRisultati,
+            [idEsercizioAssegnato],
+            (err, conteggioRisultati) => {
+              if (err) {
+                console.error("Errore conteggio risultati:", err);
+                return res.status(500).json({ error: "Errore database" });
+              }
 
-            const numeroRisultati = conteggioRisultati[0].totale;
-            console.log(`📊 Esercizio ha ${numeroRisultati} risultati collegati`);
+              const numeroRisultati = conteggioRisultati[0].totale;
+              console.log(
+                `📊 Esercizio ha ${numeroRisultati} risultati collegati`
+              );
 
-            // ✅ SOFT DELETE: Marca come non attivo SENZA toccare i risultati
-            const disattivaEsercizio = `
+              // ✅ SOFT DELETE: Marca come non attivo SENZA toccare i risultati
+              const disattivaEsercizio = `
               UPDATE esercizio_assegnato 
               SET attivo = FALSE 
               WHERE idEsercizioAssegnato = ? AND idStudente = ? AND idEducatore = ?
             `;
 
-            db.query(
-              disattivaEsercizio,
-              [idEsercizioAssegnato, idStudente, idEducatore],
-              (err, result) => {
-                if (err) {
-                  console.error("Errore disattivazione esercizio:", err);
-                  return res.status(500).json({ 
-                    error: "Errore disattivazione esercizio" 
-                  });
-                }
+              db.query(
+                disattivaEsercizio,
+                [idEsercizioAssegnato, idStudente, idEducatore],
+                (err, result) => {
+                  if (err) {
+                    console.error("Errore disattivazione esercizio:", err);
+                    return res.status(500).json({
+                      error: "Errore disattivazione esercizio",
+                    });
+                  }
 
-                if (result.affectedRows === 0) {
-                  return res.status(404).json({
-                    error: "Contenuto non trovato o già eliminato"
-                  });
-                }
+                  if (result.affectedRows === 0) {
+                    return res.status(404).json({
+                      error: "Contenuto non trovato o già eliminato",
+                    });
+                  }
 
-                // ✅ VERIFICA POST-ELIMINAZIONE: I risultati sono ancora lì?
-                const verificaRisultatiPostEliminazione = `
+                  // ✅ VERIFICA POST-ELIMINAZIONE: I risultati sono ancora lì?
+                  const verificaRisultatiPostEliminazione = `
                   SELECT COUNT(*) as totale FROM risultato 
                   WHERE idEsercizioAssegnato = ?
                 `;
 
-                db.query(verificaRisultatiPostEliminazione, [idEsercizioAssegnato], (err, verificaFinale) => {
-                  if (err) {
-                    console.error("Errore verifica finale:", err);
-                  } else {
-                    const risultatiFinali = verificaFinale[0].totale;
-                    console.log(`✅ Dopo soft delete: ${risultatiFinali} risultati ancora presenti`);
-                    
-                    if (risultatiFinali !== numeroRisultati) {
-                      console.error(`❌ PROBLEMA: Risultati persi! Prima: ${numeroRisultati}, Dopo: ${risultatiFinali}`);
-                    } else {
-                      console.log(`🎉 SUCCESSO: Tutti i ${numeroRisultati} risultati sono stati preservati!`);
-                    }
-                  }
+                  db.query(
+                    verificaRisultatiPostEliminazione,
+                    [idEsercizioAssegnato],
+                    (err, verificaFinale) => {
+                      if (err) {
+                        console.error("Errore verifica finale:", err);
+                      } else {
+                        const risultatiFinali = verificaFinale[0].totale;
+                        console.log(
+                          `✅ Dopo soft delete: ${risultatiFinali} risultati ancora presenti`
+                        );
 
-                  console.log("✅ Contenuto disattivato con successo - RISULTATI PRESERVATI");
-                  res.json({ 
-                    message: "Contenuto rimosso con successo",
-                    note: "I risultati dello studente sono stati preservati completamente",
-                    preservaRisultati: true,
-                    debug: {
-                      risultatiPreservati: numeroRisultati,
-                      risultatiFinali: verificaFinale?.[0]?.totale || numeroRisultati,
-                      esercizioDisattivato: true
+                        if (risultatiFinali !== numeroRisultati) {
+                          console.error(
+                            `❌ PROBLEMA: Risultati persi! Prima: ${numeroRisultati}, Dopo: ${risultatiFinali}`
+                          );
+                        } else {
+                          console.log(
+                            `🎉 SUCCESSO: Tutti i ${numeroRisultati} risultati sono stati preservati!`
+                          );
+                        }
+                      }
+
+                      console.log(
+                        "✅ Contenuto disattivato con successo - RISULTATI PRESERVATI"
+                      );
+                      res.json({
+                        message: "Contenuto rimosso con successo",
+                        note: "I risultati dello studente sono stati preservati completamente",
+                        preservaRisultati: true,
+                        debug: {
+                          risultatiPreservati: numeroRisultati,
+                          risultatiFinali:
+                            verificaFinale?.[0]?.totale || numeroRisultati,
+                          esercizioDisattivato: true,
+                        },
+                      });
                     }
-                  });
-                });
-              }
-            );
-          });
+                  );
+                }
+              );
+            }
+          );
         }
       }
     );
   }
 );
-
 
 // Route per ottenere tutti gli esercizi disponibili
 app.get("/api/esercizi", autentica, (req, res) => {
@@ -2016,19 +2104,6 @@ app.delete("/api/family-profile", autentica, (req, res) => {
         famiglia: result.affectedRows,
       },
     });
-  });
-});
-
-// Connessione DB e Avvio Server
-db.connect((err) => {
-  if (err) {
-    console.error("Errore di connessione al database:", err);
-    process.exit(1);
-  }
-  console.log("Connessione al database stabilita con successo!");
-
-  app.listen(port, () => {
-    console.log(`Server in ascolto sulla porta ${port}`);
   });
 });
 
