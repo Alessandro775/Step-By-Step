@@ -21,9 +21,9 @@ CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://loc
 
 # Configurazione Database MySQL per la persistenza dei dati degli esercizi
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
+    'host': '172.29.3.212',
+    'user': 'alessandro',
+    'password': '123456',
     'database': 'step_by_step',
     'port': 3306
 }
