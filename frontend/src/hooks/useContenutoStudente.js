@@ -16,13 +16,10 @@ export const useContenutoStudente = () => {
 
   useEffect(() => {
     // Recupera dati studente da sessionStorage
-    const studenteData = sessionStorage.getItem("studenteSelezionato");
-    console.log("📊 Dati studente da sessionStorage:", studenteData);
-    
+    const studenteData = sessionStorage.getItem("studenteSelezionato");    
     if (studenteData) {
       try {
         const parsedData = JSON.parse(studenteData);
-        console.log("✅ Studente caricato:", parsedData);
         setStudenteInfo(parsedData);
         fetchContenuti(parsedData.id || parsedData.idStudente);
       } catch (err) {
@@ -51,10 +48,8 @@ export const useContenutoStudente = () => {
        // Imposta stati di caricamento
       setLoading(true);
       setError(null);
-      console.log("🔄 Caricamento contenuti per studente:", idStudente);
       // Chiamata API per recuperare contenuti
       const data = await serviziContenuti.fetchContenuti(idStudente);
-      console.log("✅ Contenuti caricati:", data);
        // Aggiorna stato con i contenuti ricevuti
       setContenuti(data);
        // Notifica se non ci sono contenuti
@@ -77,27 +72,21 @@ export const useContenutoStudente = () => {
   const fetchEsercizi = async () => {
     try {
       // Tentativo con metodo principale
-      setLoadingEsercizi(true);
-      console.log("🔄 Caricamento tipi esercizi...");
-      
+      setLoadingEsercizi(true);      
       let data;
       try {
         // Prova prima il metodo principale
         data = await serviziContenuti.fetchEsercizi();
       } catch (error) {
-        console.log("⚠️ Metodo principale fallito, provo alternativo...");
         // Se fallisce, prova il metodo alternativo
         data = await serviziContenuti.fetchEserciziAlternativo();
       }
-      
-      console.log("✅ Tipi esercizi caricati:", data);
       
       setEsercizi(data);
       // Gestione diversi scenari di risposta
       if (data.length === 0) {
         avviso('Nessun tipo di esercizio disponibile', { durata: 3000 });
       } else {
-        console.log(`📚 Caricati ${data.length} tipi di esercizi:`, data.map(e => e.titolo || e.nome));
         successo(`Caricati ${data.length} tipi di esercizio`, { durata: 2000 });
       }
     } catch (err) {
@@ -105,7 +94,6 @@ export const useContenutoStudente = () => {
       errore('Errore nel caricamento dei tipi di esercizi: ' + err.message, { durata: 5000 });
       
       // Imposta esercizi mock per test se il server non risponde
-      console.log("🔧 Imposto esercizi mock per debugging...");
       setEsercizi([
         { id: 1, titolo: "Pronuncia Sillabe", tipologia: "pronuncia_sillabe" },
         { id: 2, titolo: "Pronuncia Parole", tipologia: "pronuncia_parole" },
@@ -125,13 +113,10 @@ export const useContenutoStudente = () => {
     }
 
     try {
-      console.log("🔄 Riassegnazione esercizio:", { idEsercizioAssegnato, testo });
       // Estrazione ID studente con fallback
       const idStudente = studenteInfo.id || studenteInfo.idStudente;
       // Chiamata API per riassegnazione
       const result = await serviziContenuti.riassegnaEsercizio(idStudente, idEsercizioAssegnato);
-      
-      console.log("✅ Risultato riassegnazione:", result);
       // Notifica di successo con messaggio dettagliato
       successo(`✅ ${result.message || 'Esercizio riassegnato con successo'}\n\n🔄 Lo studente ora ha una nuova copia dell'esercizio da completare.`, { durata: 6000 });
       // Ricarica contenuti per aggiornare la vista
@@ -150,12 +135,9 @@ export const useContenutoStudente = () => {
     }
 
     try {
-      console.log("🗑️ Eliminazione contenuto:", { idEsercizioAssegnato, titolo });
       // Estrazione ID studente con fallback
       const idStudente = studenteInfo.id || studenteInfo.idStudente;
       await serviziContenuti.eliminaContenuto(idStudente, idEsercizioAssegnato);
-      
-      console.log("✅ Contenuto eliminato");
       // Chiamata API per eliminazione
       successo(`Contenuto "${titolo}" eliminato con successo`, { durata: 4000 });
       // Ricarica contenuti per aggiornare la vista
