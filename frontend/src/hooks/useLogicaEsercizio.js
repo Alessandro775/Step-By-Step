@@ -307,103 +307,104 @@ export const useLogicaEsercizio = () => {
 
   // ===== VALUTAZIONE AUDIO CORRETTA =====
   const inviaAudioPerValutazione = useCallback(async (audioBlob, tentativoCorrente) => {
-    console.log('🔍 Inizio valutazione audio...');
-    
-    try {
-      setFeedback('Analizzando la pronuncia...');
+  console.log('🔍 Inizio valutazione audio...');
+  
+  try {
+    setFeedback('Analizzando la pronuncia...');
 
-      if (!parolaRiferimento || !idStudente || !idEsercizioAssegnato) {
-        throw new Error('Dati mancanti per la valutazione');
-      }
-
-      if (!audioBlob || audioBlob.size === 0) {
-        throw new Error('Audio non valido');
-      }
-
-      const tempoTotale = tempoInizio ? Math.round((Date.now() - tempoInizio) / 1000) : 0;
-      
-      // ✅ FORMDATA SECONDO LE SPECIFICHE DEL BACKEND
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.wav');
-      formData.append('reference_text', parolaRiferimento); // ✅ Nome corretto
-      formData.append('idStudente', idStudente.toString());
-      formData.append('idEsercizioAssegnato', idEsercizioAssegnato.toString());
-      formData.append('tempoImpiegato', tempoTotale.toString());
-      formData.append('numeroTentativi', tentativoCorrente.toString());
-
-      console.log('📤 Invio dati per valutazione:', {
-        parolaRiferimento,
-        idStudente,
-        idEsercizioAssegnato,
-        tempoTotale,
-        tentativoCorrente,
-        audioBlobSize: audioBlob.size
-      });
-
-      // ✅ ENDPOINT CORRETTO
-      const response = await fetch('http://127.0.0.1:5001/check_pronunciation', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Errore HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('📥 Risultati valutazione ricevuti:', data);
-
-      if (data.status !== 'success') {
-        throw new Error(data.error || 'Errore nell\'analisi');
-      }
-
-      // ✅ AGGIORNA STATI CON NOMI CORRETTI DAL BACKEND
-      setFeedback(data.feedback || 'Analisi completata');
-      
-      setResults({
-        referencetext: data.reference_text,
-        transcribedtext: data.transcribed_text,
-        similarityscore: data.similarity_score,
-        corrections: data.corrections,
-      });
-
-      setTentativiRimanenti(data.tentativi_rimanenti || 0);
-
-      if (data.esercizio_completato) {
-        console.log('🎉 Esercizio completato!');
-        setEsercizioCompletato(true);
-        
-        const messaggioFinale = data.feedback?.includes('BRAVO') 
-          ? `Perfetto! Hai pronunciato correttamente "${data.reference_text}"!`
-          : `Hai raggiunto il limite di ${MAX_TENTATIVI} tentativi per "${data.reference_text}".`;
-
-        setStatisticheFinali({
-          parola: data.reference_text,
-          tempoimpiegato: data.tempo_impiegato || tempoTotale,
-          numerotentativi: data.numero_tentativi || tentativoCorrente,
-          punteggio: data.similarity_score,
-          feedback: data.feedback,
-          messaggio: messaggioFinale,
-          tipo: data.feedback?.includes('BRAVO') ? 'successo' : 'limite'
-        });
-
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-          
-        if (data.feedback?.includes('BRAVO')) {
-          successo(messaggioFinale, { durata: 5000 });
-        } else {
-          avviso(messaggioFinale, { durata: 5000 });
-        }
-      }
-
-    } catch (error) {
-      console.error('❌ Errore valutazione audio:', error);
-      setFeedback('Errore di connessione nell\'analisi');
-      errore('Errore nell\'analisi della pronuncia: ' + error.message);
+    if (!parolaRiferimento || !idStudente || !idEsercizioAssegnato) {
+      throw new Error('Dati mancanti per la valutazione');
     }
-  }, [parolaRiferimento, idStudente, idEsercizioAssegnato, tempoInizio, MAX_TENTATIVI, successo, avviso, errore]);
+
+    if (!audioBlob || audioBlob.size === 0) {
+      throw new Error('Audio non valido');
+    }
+
+    const tempoTotale = tempoInizio ? Math.round((Date.now() - tempoInizio) / 1000) : 0;
+    
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+    formData.append('reference_text', parolaRiferimento);
+    formData.append('idStudente', idStudente.toString());
+    formData.append('idEsercizioAssegnato', idEsercizioAssegnato.toString());
+    formData.append('tempoImpiegato', tempoTotale.toString());
+    formData.append('numeroTentativi', tentativoCorrente.toString());
+
+    console.log('📤 Invio dati per valutazione:', {
+      parolaRiferimento,
+      idStudente,
+      idEsercizioAssegnato,
+      tempoTotale,
+      tentativoCorrente,
+      audioBlobSize: audioBlob.size
+    });
+
+    const response = await fetch('http://127.0.0.1:5001/check_pronunciation', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Errore HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('📥 Risultati valutazione ricevuti:', data);
+
+    if (data.status !== 'success') {
+      throw new Error(data.error || 'Errore nell\'analisi');
+    }
+
+    // ✅ AGGIORNA STATI CON FEEDBACK AI DINAMICO
+    setFeedback(data.feedback || 'Analisi completata');
+    
+    setResults({
+      referencetext: data.reference_text,
+      transcribedtext: data.transcribed_text,
+      similarityscore: data.similarity_score,
+      corrections: data.corrections,
+    });
+
+    setTentativiRimanenti(data.tentativi_rimanenti || 0);
+
+    if (data.esercizio_completato) {
+      console.log('🎉 Esercizio completato!');
+      setEsercizioCompletato(true);
+      
+      // ✅ MESSAGGIO FINALE BASATO SU SIMILARITÀ INVECE CHE SU FEEDBACK PREIMPOSTATO
+      const messaggioFinale = data.similarity_score > 80
+        ? `Perfetto! Hai pronunciato correttamente "${data.reference_text}"!`
+        : `Hai raggiunto il limite di ${MAX_TENTATIVI} tentativi per "${data.reference_text}".`;
+
+      setStatisticheFinali({
+        parola: data.reference_text,
+        tempoimpiegato: data.tempo_impiegato || tempoTotale,
+        numerotentativi: data.numero_tentativi || tentativoCorrente,
+        punteggio: data.similarity_score,
+        feedback: data.feedback, // ✅ FEEDBACK AI ORIGINALE
+        messaggio: messaggioFinale,
+        tipo: data.similarity_score > 80 ? 'successo' : 'limite'
+      });
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+        
+      // ✅ NOTIFICHE BASATE SU SIMILARITÀ
+      if (data.similarity_score > 80) {
+        successo(messaggioFinale, { durata: 5000 });
+      } else {
+        avviso(messaggioFinale, { durata: 5000 });
+      }
+    }
+
+  } catch (error) {
+    console.error('❌ Errore valutazione audio:', error);
+    setFeedback('Errore di connessione nell\'analisi');
+    errore('Errore nell\'analisi della pronuncia: ' + error.message);
+  }
+}, [parolaRiferimento, idStudente, idEsercizioAssegnato, tempoInizio, MAX_TENTATIVI, successo, avviso, errore]);
+
 
   // ===== TIMER =====
   useEffect(() => {

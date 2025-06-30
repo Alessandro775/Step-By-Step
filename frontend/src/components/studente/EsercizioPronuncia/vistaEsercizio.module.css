@@ -156,7 +156,29 @@
     background: var(--error) !important;
   }
   
-  /* Feedback */
+  /* ✅ NUOVO: Contenitore feedback AI centrato */
+  .feedbackContainer {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+    font-size: 1.4rem;
+  }
+
+  /* ✅ NUOVO: Feedback AI con stesso stile di results */
+  .feedbackAi {
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    background: #b6dac6;
+    padding: 1rem;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+  
+  /* Feedback legacy (mantenuto per compatibilità) */
   .feedback {
     padding: 1rem;
     border-radius: 4px;
@@ -185,12 +207,15 @@
     color: var(--white);
   }
   
-  /* Risultati */
+  /* ✅ AGGIORNATO: Risultati centrati */
   .results {
-    background: var(--white);
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    background: #b6dac6;
     padding: 1rem;
     border-radius: 4px;
-    margin: 1rem 0;
+    margin: 1rem auto; /* Centrato con margin auto */
     border: 1px solid var(--border);
   }
   
@@ -228,6 +253,15 @@
   
   .finalStats.limite {
     background: var(--warning);
+  }
+  
+  /* ✅ AGGIORNATO: Feedback AI nelle statistiche finali con stesso colore */
+  .finalStats .feedbackAi {
+    background: rgba(182, 218, 198, 0.9); /* #b6dac6 con trasparenza */
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    width: 100%;
+    max-width: none;
   }
   
   .statsCard {
@@ -291,5 +325,10 @@
       gap: 0.5rem;
       text-align: center;
     }
+    
+    /* ✅ NUOVO: Responsive per feedback e results */
+    .results,
+    .feedbackAi {
+      width: 95%;
+    }
   }
-  

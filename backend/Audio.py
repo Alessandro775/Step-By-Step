@@ -174,14 +174,14 @@ def salva_risultato_pronuncia(id_studente, id_esercizio_assegnato, feedback, sim
         cursor = connection.cursor()
         
         # Calcolo del punteggio basato sul feedback dell'AI
-        if feedback == "BRAVO":
-            punteggio = 100
-            numero_errori = max(0, numero_tentativi - 1)  # L'ultimo tentativo è quello giusto
-        elif feedback == "PROVA A FARE DI MEGLIO":
+        if similarity > 0.8:
+            punteggio = max(80, int(similarity * 100))
+            numero_errori = max(0, numero_tentativi - 1)
+        elif similarity >= 0.5:
             punteggio = max(50, int(similarity * 100))
             numero_errori = numero_tentativi - 1
-        else:  # SBAGLIATO
-            punteggio = min(30, int(similarity * 100))
+        else:
+            punteggio = min(40, int(similarity * 100))
             numero_errori = numero_tentativi
 
         # Inserimento del risultato nella tabella risultato
@@ -445,9 +445,24 @@ def check_pronunciation():
             
             try:
                 # Trascrizione dell'audio con Whisper (modello italiano)
-                result = whisper_model.transcribe(temp_audio.name, language='it')
-                
-                testo_trascritto = result["text"].strip()  
+                # Soppressione di token di punteggiatura comuni
+                suppress_tokens = [0, 11, 13, 30]  # !, ,, ., ?
+                result = whisper_model.transcribe(
+                    temp_audio.name, 
+                    language='it',
+                    initial_prompt="Trascrivi solo la parola pronunciata senza punteggiatura. Considera accenti regionali italiani."
+                )
+                testo_trascritto = result["text"].strip()
+
+                # Rimuovi tutta la punteggiatura prima di estrarre la parola
+                import re
+
+                # Dopo la trascrizione
+                testo_trascritto = result["text"].strip()
+                # Rimuovi tutta la punteggiatura residua
+                testo_pulito = re.sub(r'[^\w\s]', '', testo_trascritto)
+                # Estrai solo la prima parola
+                parola_pronunciata = testo_pulito.split()[0].lower() if testo_pulito.split() else ""
 
             except Exception as whisper_error:
                 return jsonify({
@@ -469,21 +484,32 @@ def check_pronunciation():
         # Valutazione con AI Ollama per feedback intelligente
         try:
             evaluation_prompt = f"""
-            Valuta la pronuncia italiana:
-            PAROLA DA PRONUNCIARE: "{parola_riferimento}"
-            PAROLA PRONUNCIATA: "{parola_pronunciata}"
-            
-            Rispondi SOLO con: "BRAVO", "PROVA A FARE DI MEGLIO" o "SBAGLIATO"
-            """
-            
+                Sei un eduatore specializzato in fonologia per dsa. 
+                Valuta questa pronuncia e fornisci un feedback stimolante e costruttivo per bambini delle scuole elementari-medie:
+
+                PAROLA DA PRONUNCIARE: "{parola_riferimento}"
+                PAROLA PRONUNCIATA: "{parola_pronunciata}"
+                SIMILARITÀ: {similarity:.2f}
+                TENTATIVO: {numero_tentativi}/10
+
+                Fornisci un feedback che:
+                - Sia motivante e personalizzato
+                - Evidenzi i progressi specifici
+                - Dia consigli pratici per migliorare
+                - Usi un tono incoraggiante ma onesto
+                - Sia lungo 30 caratteri massimo
+                - non contenga nomi di bambini
+                """
+
             response = chat(
-                model='gemma3',
-                messages=[
-                    {'role': 'system', 'content': 'Rispondi SOLO con "BRAVO", "PROVA A FARE DI MEGLIO" o "SBAGLIATO".'},
-                    {'role': 'user', 'content': evaluation_prompt}
-                ],
-            )
-            feedback = response.message.content.strip().upper()
+                    model='gemma3',
+                    messages=[
+                        {'role': 'system', 'content': ' Sei un eduatore specializzato in fonologia per dsa. Dai un feedback costruttivo e stimolante per bambini delle scuole elementari-medie.'},
+                        {'role': 'user', 'content': evaluation_prompt}
+                    ],
+                )
+            feedback = response.message.content.strip()
+
         except:
              # Sistema di fallback basato su similarità
             if similarity > 0.8:
@@ -492,42 +518,32 @@ def check_pronunciation():
                 feedback = "PROVA A FARE DI MEGLIO"
             else:
                 feedback = "SBAGLIATO"
-         # Normalizzazione del feedback
-        if "BRAVO" in feedback:
-            feedback = "BRAVO"
-        elif "PROVA A FARE DI MEGLIO" in feedback:
-            feedback = "PROVA A FARE DI MEGLIO"
-        else:
-            feedback = "SBAGLIATO"
 
         corrections = []
+       # Logica di completamento basata su metriche oggettive
         esercizio_completato = False
-        
-         # Logica di completamento dell'esercizio
-         # COMPLETATO se: pronuncia corretta (BRAVO) O raggiunto limite tentativi (10)
-        if feedback == "BRAVO" or numero_tentativi >= 10:
+
+        if similarity > 0.8 or numero_tentativi >= 10:
             esercizio_completato = True
             
             # Salva il risultato nel database
             salva_risultato_pronuncia(
                 id_studente=id_studente,
                 id_esercizio_assegnato=id_esercizio_assegnato,
-                feedback=feedback,
+                feedback=feedback,  # Feedback AI originale
                 similarity=similarity,
                 parola_pronunciata=parola_pronunciata,
                 tempo_impiegato=tempo_impiegato,
                 numero_tentativi=numero_tentativi
             )
-        else:
-            # Generazione di suggerimenti per migliorare la pronuncia
-            corrections = generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, similarity)
-          # Risposta completa con tutti i dati dell'analisi
+
+       
+           # Risposta completa con tutti i dati dell'analisi
         return jsonify({
             'transcribed_text': parola_pronunciata,
             'reference_text': parola_riferimento,
             'feedback': feedback,
             'similarity_score': round(similarity * 100, 1),
-            'corrections': corrections,
             'esercizio_completato': esercizio_completato,
             'tempo_impiegato': tempo_impiegato,
             'numero_tentativi': numero_tentativi,
@@ -541,39 +557,6 @@ def check_pronunciation():
             'status': 'error'
         })
 
-def generate_italian_pronunciation_tips(parola_riferimento, parola_pronunciata, similarity):
-    """Genera suggerimenti specifici per pronuncia italiana"""
-    tips = []
-    ref_lower = parola_riferimento.lower()
-    spoken_lower = parola_pronunciata.lower()
-
-    # Suggerimenti basati sul livello di similarità
-    if similarity < 0.3:
-        tips.append(f"🎯 Concentrati sui suoni italiani della parola '{parola_riferimento}'")
-        tips.append("🔊 Parla più chiaramente, pronuncia ogni sillaba")
-    elif similarity < 0.6:
-        tips.append(f"📢 Migliora la pronuncia italiana di '{parola_riferimento}'")
-
-     # Suggerimenti specifici per suoni italiani difficili
-    if 'gli' in ref_lower and 'gli' not in spoken_lower:
-        tips.append("🗣️ Il suono 'GLI' si pronuncia come 'LI' con la lingua sul palato")
-    elif 'gn' in ref_lower and 'gn' not in spoken_lower:
-        tips.append("🔤 Il suono 'GN' è come 'NI' in spagnolo (come in 'bagno')")
-    elif 'sc' in ref_lower and 'sc' not in spoken_lower:
-        tips.append("📝 'SC' davanti a E/I si pronuncia 'SH' (come in 'pesce')")
-    elif 'ch' in ref_lower and 'ch' not in spoken_lower:
-        tips.append("🎵 'CH' in italiano si pronuncia 'K' (come in 'che')")
-    elif 'r' in ref_lower and ('l' in spoken_lower or 'r' not in spoken_lower):
-        tips.append("🔄 La 'R' italiana è vibrante, fai vibrare la lingua")
-    elif ref_lower.endswith('e') and not spoken_lower.endswith('e'):
-        tips.append("⏰ Non dimenticare la 'E' finale italiana")
-
-     # Suggerimento per parole lunghe sull'accento
-    if len(parola_riferimento) > 3:
-        tips.append(f"🎵 Controlla l'accento italiano della parola '{parola_riferimento}'")
-
-      # Restituisce massimo 3 suggerimenti per non sovraccaricare l'utente
-    return tips[:3]
 
 # Avvio del server Flask
 if __name__ == '__main__':
