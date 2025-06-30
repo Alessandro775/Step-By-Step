@@ -33,6 +33,7 @@ const CronologiaEducatore = () => {
       <Header />  {/* Header specifico per l'educatore */}
       {/* Componente principale per la visualizzazione della cronologia */}
       <Cronologia  
+       studenteSelezionato={studenteSelezionato}
         onTornaIndietro={handleTornaIndietro}
       />
       <Footer /> {/* Footer della pagina */} 

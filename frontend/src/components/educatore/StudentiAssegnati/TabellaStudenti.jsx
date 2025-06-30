@@ -94,9 +94,8 @@ const TabellaStudenti = ({
                 ? utilitaApiDati.formattaData(studente.data_assegnazione)
                 : "N/D";
 
-              return (
-                {/*celle con i dati*/}
-                <tr key={studente.idStudente} className={styles.studentRow}>
+              return ( 
+                <tr key={studente.idStudente} className={styles.studentRow}> {/*celle con i dati*/}
                   <td className={styles.nameCell}>{studente.nome || "N/D"}</td>
                   <td className={styles.nameCell}>{studente.cognome || "N/D"}</td>
                   <td className={styles.emailCell}>{studente.email}</td>

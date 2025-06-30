@@ -12,26 +12,36 @@ const app = express();
 const port = 3000;
 const JWT_SECRET = "balla"; // Chiave segreta per la firma dei token JWT
 
-
- // Configurazione Database MySQL
-
+// Configurazione Database MySQL
 const db = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "step_by_step",
+  port: 3306,
+});
 
-host: "172.20.10.3",
- user: "alessandro",
- password: "123456",
- database: "step_by_step",
- port: 3306,
+// Connessione DB e Avvio Server
+db.connect((err) => {
+  if (err) {
+    console.error("Errore di connessione al database:", err);
+    process.exit(1);
+  }
+  console.log("Connessione al database stabilita con successo!");
+
+  app.listen(port, () => {
+    console.log(`Server in ascolto sulla porta ${port}`);
+  });
 });
 
 /**
- * Configurazione CORS 
+ * Configurazione CORS
  * Abilita richieste cross-origin da qualsiasi dominio per permettere
  */
 app.use(
   cors({
     origin: "*", // Permette richieste da qualsiasi origine
-    credentials: true,  // Abilita l'invio di cookies e credenziali
+    credentials: true, // Abilita l'invio di cookies e credenziali
   })
 );
 
@@ -41,8 +51,7 @@ app.use(express.json());
 // Servire file statici dalla cartella uploads per immagini e media
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-
- // Configurazione Multer per l'upload delle immagini
+// Configurazione Multer per l'upload delle immagini
 const storage = multer.diskStorage({
   /**
    * Definisce la cartella di destinazione per i file caricati
@@ -85,7 +94,7 @@ const fileFilter = (req, file, cb) => {
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);  // File accettato
+    cb(null, true); // File accettato
   } else {
     cb(
       new Error("Tipo di file non supportato. Usa JPG, PNG, GIF o WebP"),
@@ -94,12 +103,12 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
- //Configurazione completa di Multer
+//Configurazione completa di Multer
 const upload = multer({
   storage: storage, // dove salvare i file
   fileFilter: fileFilter, //quali file accettare
   limits: {
-    fileSize: 5 * 1024 * 1024,  // Dimensione massima: 5MB
+    fileSize: 5 * 1024 * 1024, // Dimensione massima: 5MB
   },
 });
 
@@ -113,12 +122,12 @@ app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
   }
 
   try {
-     // Verifica che sia stato caricato un file
+    // Verifica che sia stato caricato un file
     if (!req.file) {
       return res.status(400).json({ error: "Nessun file caricato" });
     }
 
-     // Costruisce l'URL pubblico dell'immagine caricata
+    // Costruisce l'URL pubblico dell'immagine caricata
     const imageUrl = `http://localhost:${port}/uploads/images/${req.file.filename}`;
 
     console.log("Immagine caricata:", req.file.filename);
@@ -157,7 +166,7 @@ app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
   console.log("Studente:", idStudente);
   console.log("Dati:", { testo, immagine, idEsercizio });
 
- // Validazione dei dati obbligatori
+  // Validazione dei dati obbligatori
   if (!testo || !idEsercizio) {
     return res.status(400).json({
       error: "Campi obbligatori mancanti: testo, idEsercizio",
@@ -185,7 +194,7 @@ app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
         });
       }
 
-       // Inserisce il nuovo esercizio assegnato con URL dell'immagine
+      // Inserisce il nuovo esercizio assegnato con URL dell'immagine
       const insertQuery = `
       INSERT INTO esercizio_assegnato (idStudente, idEsercizio, idEducatore, data_assegnazione, testo, immagine) 
       VALUES (?, ?, ?, CURDATE(), ?, ?)
@@ -266,7 +275,7 @@ function autentica(req, res, next) {
  */
 app.post("/api/register", async (req, res) => {
   console.log("Dati ricevuti:", req.body);
-   // Estrazione di tutti i campi possibili dalla richiesta
+  // Estrazione di tutti i campi possibili dalla richiesta
   const {
     nome,
     cognome,
@@ -282,7 +291,7 @@ app.post("/api/register", async (req, res) => {
   } = req.body;
 
   try {
-     // Hashing sicuro della password con bcrypt
+    // Hashing sicuro della password con bcrypt
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -305,7 +314,7 @@ app.post("/api/register", async (req, res) => {
               .json({ error: "Errore durante la verifica dello studente" });
           }
 
-           // Se lo studente non esiste, blocca la registrazione
+          // Se lo studente non esiste, blocca la registrazione
           if (studentResult.length === 0) {
             return res
               .status(400)
@@ -350,7 +359,7 @@ app.post("/api/register", async (req, res) => {
               }
             );
 
-           // Risposta con token per login automatico
+            // Risposta con token per login automatico
             res.status(201).json({
               message: "Registrazione completata con successo",
               token,
@@ -365,7 +374,6 @@ app.post("/api/register", async (req, res) => {
         }
       );
     } else {
-      
       /**
        * Gestione per studenti (ruolo "S") ed educatori (ruolo "E")
        * Costruisce query e parametri specifici per ogni tipo di utente
@@ -373,7 +381,7 @@ app.post("/api/register", async (req, res) => {
       let query, params;
 
       if (ruolo === "S") {
-         // Query per inserimento studente
+        // Query per inserimento studente
         query =
           "INSERT INTO studente (nome, cognome, email, password, istituto, classe, anno_scolastico) VALUES (?, ?, ?, ?, ?, ?, ?)";
         params = [
@@ -511,7 +519,7 @@ app.post("/api/login", async (req, res) => {
         ? user.idStudente
         : user.idFamiglia;
 
-     // Generazione del token JWT per la sessione
+    // Generazione del token JWT per la sessione
     const token = jwt.sign(
       {
         id: userId,
@@ -523,7 +531,7 @@ app.post("/api/login", async (req, res) => {
       }
     );
 
-      // Risposta con token e dati utente
+    // Risposta con token e dati utente
     res.json({
       token,
       ruolo: user.ruolo,
@@ -627,7 +635,7 @@ app.put("/api/profile", autentica, (req, res) => {
 // Route per aggiornare i dati del profilo educatore
 // Route per aggiornare i dati del profilo studente (SENZA email)
 app.put("/api/student-profile", autentica, (req, res) => {
-  if (req.utente.ruolo !== "S"){
+  if (req.utente.ruolo !== "S") {
     return res.status(403).json({
       error: "Accesso negato. Solo gli studenti possono modificare il profilo.",
     });
@@ -976,17 +984,18 @@ app.get("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
         AND (ea.attivo IS NULL OR ea.attivo = TRUE)
       ORDER BY ea.data_assegnazione DESC
     `;
-  
-    db.query(query, [idStudente, idEducatore], (err, results) => {
-      if (err) {
-        console.error("Errore query contenuti:", err);
-        return res.status(500).json({ error: "Errore database" });
-      }
-  
-      console.log("Contenuti attivi trovati:", results.length);
-      res.json(results);
-    });
-  });
+
+      db.query(query, [idStudente, idEducatore], (err, results) => {
+        if (err) {
+          console.error("Errore query contenuti:", err);
+          return res.status(500).json({ error: "Errore database" });
+        }
+
+        console.log("Contenuti attivi trovati:", results.length);
+        res.json(results);
+      });
+    }
+  );
 });
 
 // Route per visualizzare la cronologia di uno studente
@@ -1180,7 +1189,8 @@ app.delete(
   (req, res) => {
     if (req.utente.ruolo !== "E") {
       return res.status(403).json({
-        error: "Accesso negato. Solo gli educatori possono eliminare contenuti.",
+        error:
+          "Accesso negato. Solo gli educatori possono eliminare contenuti.",
       });
     }
 
@@ -1232,7 +1242,7 @@ app.delete(
           // Se la colonna non esiste, la aggiunge
           if (columnExists.length === 0) {
             console.log("⚠️ Campo 'attivo' non trovato, lo aggiungo...");
-            
+
             const addColumnQuery = `
               ALTER TABLE esercizio_assegnato 
               ADD COLUMN attivo BOOLEAN DEFAULT TRUE
@@ -1241,8 +1251,8 @@ app.delete(
             db.query(addColumnQuery, (err) => {
               if (err) {
                 console.error("Errore aggiunta colonna attivo:", err);
-                return res.status(500).json({ 
-                  error: "Errore nell'aggiunta del campo attivo" 
+                return res.status(500).json({
+                  error: "Errore nell'aggiunta del campo attivo",
                 });
               }
 
@@ -1257,10 +1267,13 @@ app.delete(
 
               db.query(updateExistingQuery, (err) => {
                 if (err) {
-                  console.error("Errore aggiornamento esercizi esistenti:", err);
+                  console.error(
+                    "Errore aggiornamento esercizi esistenti:",
+                    err
+                  );
                 }
                 console.log("✅ Esercizi esistenti impostati come attivi");
-                
+
                 // Procedi con il soft delete
                 performSoftDelete();
               });
@@ -1280,80 +1293,98 @@ app.delete(
             WHERE idEsercizioAssegnato = ?
           `;
 
-          db.query(contaRisultati, [idEsercizioAssegnato], (err, conteggioRisultati) => {
-            if (err) {
-              console.error("Errore conteggio risultati:", err);
-              return res.status(500).json({ error: "Errore database" });
-            }
+          db.query(
+            contaRisultati,
+            [idEsercizioAssegnato],
+            (err, conteggioRisultati) => {
+              if (err) {
+                console.error("Errore conteggio risultati:", err);
+                return res.status(500).json({ error: "Errore database" });
+              }
 
-            const numeroRisultati = conteggioRisultati[0].totale;
-            console.log(`📊 Esercizio ha ${numeroRisultati} risultati collegati`);
+              const numeroRisultati = conteggioRisultati[0].totale;
+              console.log(
+                `📊 Esercizio ha ${numeroRisultati} risultati collegati`
+              );
 
-            // ✅ SOFT DELETE: Marca come non attivo SENZA toccare i risultati
-            const disattivaEsercizio = `
+              // ✅ SOFT DELETE: Marca come non attivo SENZA toccare i risultati
+              const disattivaEsercizio = `
               UPDATE esercizio_assegnato 
               SET attivo = FALSE 
               WHERE idEsercizioAssegnato = ? AND idStudente = ? AND idEducatore = ?
             `;
 
-            db.query(
-              disattivaEsercizio,
-              [idEsercizioAssegnato, idStudente, idEducatore],
-              (err, result) => {
-                if (err) {
-                  console.error("Errore disattivazione esercizio:", err);
-                  return res.status(500).json({ 
-                    error: "Errore disattivazione esercizio" 
-                  });
-                }
+              db.query(
+                disattivaEsercizio,
+                [idEsercizioAssegnato, idStudente, idEducatore],
+                (err, result) => {
+                  if (err) {
+                    console.error("Errore disattivazione esercizio:", err);
+                    return res.status(500).json({
+                      error: "Errore disattivazione esercizio",
+                    });
+                  }
 
-                if (result.affectedRows === 0) {
-                  return res.status(404).json({
-                    error: "Contenuto non trovato o già eliminato"
-                  });
-                }
+                  if (result.affectedRows === 0) {
+                    return res.status(404).json({
+                      error: "Contenuto non trovato o già eliminato",
+                    });
+                  }
 
-                // ✅ VERIFICA POST-ELIMINAZIONE: I risultati sono ancora lì?
-                const verificaRisultatiPostEliminazione = `
+                  // ✅ VERIFICA POST-ELIMINAZIONE: I risultati sono ancora lì?
+                  const verificaRisultatiPostEliminazione = `
                   SELECT COUNT(*) as totale FROM risultato 
                   WHERE idEsercizioAssegnato = ?
                 `;
 
-                db.query(verificaRisultatiPostEliminazione, [idEsercizioAssegnato], (err, verificaFinale) => {
-                  if (err) {
-                    console.error("Errore verifica finale:", err);
-                  } else {
-                    const risultatiFinali = verificaFinale[0].totale;
-                    console.log(`✅ Dopo soft delete: ${risultatiFinali} risultati ancora presenti`);
-                    
-                    if (risultatiFinali !== numeroRisultati) {
-                      console.error(`❌ PROBLEMA: Risultati persi! Prima: ${numeroRisultati}, Dopo: ${risultatiFinali}`);
-                    } else {
-                      console.log(`🎉 SUCCESSO: Tutti i ${numeroRisultati} risultati sono stati preservati!`);
-                    }
-                  }
+                  db.query(
+                    verificaRisultatiPostEliminazione,
+                    [idEsercizioAssegnato],
+                    (err, verificaFinale) => {
+                      if (err) {
+                        console.error("Errore verifica finale:", err);
+                      } else {
+                        const risultatiFinali = verificaFinale[0].totale;
+                        console.log(
+                          `✅ Dopo soft delete: ${risultatiFinali} risultati ancora presenti`
+                        );
 
-                  console.log("✅ Contenuto disattivato con successo - RISULTATI PRESERVATI");
-                  res.json({ 
-                    message: "Contenuto rimosso con successo",
-                    note: "I risultati dello studente sono stati preservati completamente",
-                    preservaRisultati: true,
-                    debug: {
-                      risultatiPreservati: numeroRisultati,
-                      risultatiFinali: verificaFinale?.[0]?.totale || numeroRisultati,
-                      esercizioDisattivato: true
+                        if (risultatiFinali !== numeroRisultati) {
+                          console.error(
+                            `❌ PROBLEMA: Risultati persi! Prima: ${numeroRisultati}, Dopo: ${risultatiFinali}`
+                          );
+                        } else {
+                          console.log(
+                            `🎉 SUCCESSO: Tutti i ${numeroRisultati} risultati sono stati preservati!`
+                          );
+                        }
+                      }
+
+                      console.log(
+                        "✅ Contenuto disattivato con successo - RISULTATI PRESERVATI"
+                      );
+                      res.json({
+                        message: "Contenuto rimosso con successo",
+                        note: "I risultati dello studente sono stati preservati completamente",
+                        preservaRisultati: true,
+                        debug: {
+                          risultatiPreservati: numeroRisultati,
+                          risultatiFinali:
+                            verificaFinale?.[0]?.totale || numeroRisultati,
+                          esercizioDisattivato: true,
+                        },
+                      });
                     }
-                  });
-                });
-              }
-            );
-          });
+                  );
+                }
+              );
+            }
+          );
         }
       }
     );
   }
 );
-
 
 // Route per ottenere tutti gli esercizi disponibili
 app.get("/api/esercizi", autentica, (req, res) => {
@@ -2073,19 +2104,6 @@ app.delete("/api/family-profile", autentica, (req, res) => {
         famiglia: result.affectedRows,
       },
     });
-  });
-});
-
-// Connessione DB e Avvio Server
-db.connect((err) => {
-  if (err) {
-    console.error("Errore di connessione al database:", err);
-    process.exit(1);
-  }
-  console.log("Connessione al database stabilita con successo!");
-
-  app.listen(port, () => {
-    console.log(`Server in ascolto sulla porta ${port}`);
   });
 });
 
