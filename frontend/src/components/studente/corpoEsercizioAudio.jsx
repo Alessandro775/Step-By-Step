@@ -42,7 +42,6 @@ const {
   // Funzione per richiedere permessi microfono
   const handleRequestMicrophone = async () => {
     try {
-      console.log("🎤 Richiedendo permesso microfono...");
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: true,
         video: false 
@@ -50,7 +49,6 @@ const {
       
       // Se arriva qui, il permesso è stato concesso
       setMicrophonePermission("granted");
-      console.log("✅ Permesso microfono concesso");
       
       // Chiudi lo stream per liberare il microfono
       stream.getTracks().forEach(track => track.stop());
@@ -112,11 +110,9 @@ const {
           loading={loading}
           error={error}
           onStartEsercizio={(esercizio) => {
-            console.log("🎯 Avvio esercizio:", esercizio);
             startEsercizio(esercizio);
           }}
           onRetry={() => {
-            console.log("🔄 Ricaricamento esercizi...");
             loadEsercizi();
           }}
         />
@@ -151,7 +147,6 @@ const {
           
           //  Funzioni di navigazione (senza prefisso "on")
           tornaHome={() => {
-            console.log("🏠 Tornando alla home...");
             tornaAllaHome();
           }}
           
@@ -160,23 +155,19 @@ const {
           
           //  Funzioni registrazione (senza prefisso "on")  
           startRecording={() => {
-            console.log("🎤 Avvio registrazione...");
             startRegistrazione();
           }}
           stopRecording={() => {
-            console.log("⏹️ Stop registrazione...");
             stopRegistrazione();
           }}
           
           //  Funzioni utilità
           setImageError={(hasError) => {
-            console.log("🖼️ Errore immagine:", hasError);
             setImageError(hasError);
           }}
           
           //  Funzioni esercizio
           onRipeti={() => {
-            console.log("🔄 Ripetizione esercizio...");
             ripetEsercizio();
           }}
         />

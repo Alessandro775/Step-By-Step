@@ -145,12 +145,12 @@ const VistaEsercizio = ({
               disabled={
                 microphonePermission !== "granted" || //microfono
                 serverStatus !== "connected" || //tentativi eseguiti
-                numeroTentativi >= MAX_TENTATIVI
+                numeroTentativi > MAX_TENTATIVI
               }
             >
               {/*testo dinamico basato sullo stato*/}
               {isRecording ? "⏹️ Ferma" : 
-               numeroTentativi >= MAX_TENTATIVI ? "🚫 Limite Raggiunto" : 
+               numeroTentativi > (MAX_TENTATIVI) ? "🚫 Limite Raggiunto" : 
                `🎤 Registra (${numeroTentativi}/${MAX_TENTATIVI})`}
             </button>
           </div>
