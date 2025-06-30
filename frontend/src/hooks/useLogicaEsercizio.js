@@ -56,11 +56,9 @@ export const useLogicaEsercizio = () => {
         try {
           // Decodifica il payload del JWT (parte centrale del token)
           const payload = JSON.parse(atob(token.split('.')[1]));
-          console.log('🔐 Token decodificato:', payload);
           // Verifica che l'utente sia uno studente (ruolo 'S')
           if (payload.ruolo === 'S') {
             setIdStudente(payload.id);
-            console.log('✅ ID Studente impostato:', payload.id);
           } else {
             // Se non è uno studente, nega l'accesso
             setError('Accesso negato: solo gli studenti possono fare esercizi');
@@ -89,7 +87,6 @@ export const useLogicaEsercizio = () => {
   // funzioni server
   const checkServerHealth = useCallback(async () => {
     try {
-      console.log('🔍 Verifica stato server...');
       const response = await fetch('http://127.0.0.1:5001/health', {
         method: 'GET',
         headers: {
@@ -98,7 +95,6 @@ export const useLogicaEsercizio = () => {
       });
       // Determina lo stato in base alla risposta
       const status = response.ok ? 'connected' : 'error';
-      console.log('🔍 Stato server:', status);
       setServerStatus(status);
     } catch (error) {
       // Se la richiesta fallisce, il server è disconnesso
@@ -109,13 +105,11 @@ export const useLogicaEsercizio = () => {
   // Richiede i permessi per accedere al microfono
   const requestMicrophonePermission = useCallback(async () => {
     try {
-      console.log('🎤 Richiesta permesso microfono...');
       // Tenta di accedere al microfono
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setMicrophonePermission('granted');
        // Chiude immediatamente lo stream (era solo per testare i permessi)
       stream.getTracks().forEach(track => track.stop());
-      console.log('✅ Permesso microfono concesso');
     } catch (error) {
       console.error('❌ Errore permesso microfono:', error);
       // Determina il tipo di errore per impostare lo stato corretto
@@ -139,8 +133,6 @@ export const useLogicaEsercizio = () => {
       setError(null);
       setHasError(false);
       
-      console.log('📚 Caricamento esercizi per studente:', idStudente);
-      
       // Chiama l'API per ottenere gli esercizi dello studente
       const response = await fetch(`http://127.0.0.1:5001/get_esercizi_studente?idStudente=${idStudente}`, {
         method: 'GET',
@@ -154,7 +146,6 @@ export const useLogicaEsercizio = () => {
       }
 
       const data = await response.json();
-      console.log('📚 Dati esercizi ricevuti:', data);
       // Processa la risposta del server
       if (data.status === 'success') {
         setEsercizi(data.esercizi || []);
@@ -162,7 +153,6 @@ export const useLogicaEsercizio = () => {
         if (!data.esercizi || data.esercizi.length === 0) {
           avviso('Nessun esercizio assegnato al momento', { durata: 4000 });
         } else {
-          console.log('✅ Caricati', data.esercizi.length, 'esercizi');
           successo(`Caricati ${data.esercizi.length} esercizi`, { durata: 2000 });
         }
       } else {
@@ -181,9 +171,7 @@ export const useLogicaEsercizio = () => {
   }, [idStudente, avviso, errore, successo]);
 
   // avvio esercizio
-  const startEsercizio = useCallback((esercizio) => {
-    console.log('🎯 Avvio esercizio completo:', esercizio);
-    
+  const startEsercizio = useCallback((esercizio) => {    
     try {
        // Verifica che l'esercizio non sia già completato
       if (esercizio.completato) {
@@ -193,7 +181,6 @@ export const useLogicaEsercizio = () => {
 
       // Validazione dei dati essenziali dell'esercizio
       if (!esercizio.testo) {
-        console.error('❌ Testo esercizio mancante:', esercizio);
         errore('Dati esercizio incompleti: testo mancante');
         return;
       }
@@ -209,12 +196,6 @@ export const useLogicaEsercizio = () => {
         errore('ID studente non disponibile');
         return;
       }
- // Log dei dati dell'esercizio per debugging
-      console.log('📝 Impostazione dati esercizio:');
-      console.log('   - Testo:', esercizio.testo);
-      console.log('   - ID Assegnato:', esercizio.idEsercizioAssegnato);
-      console.log('   - ID Studente:', idStudente);
-      console.log('   - Immagine:', esercizio.immagine);
 // Imposta i dati dell'esercizio corrente
       setEsercizioCorrente(esercizio);
       setParolaRiferimento(esercizio.testo);
@@ -234,8 +215,6 @@ export const useLogicaEsercizio = () => {
       // Cambia la vista all'esercizio
       setCurrentView('esercizio');
       successo(`Iniziando esercizio: ${esercizio.testo}`, { durata: 2000 });
-      
-      console.log('✅ Esercizio avviato con successo');
     } catch (error) {
       console.error('❌ Errore avvio esercizio:', error);
       errore('Errore nell\'avvio dell\'esercizio: ' + error.message);
@@ -243,9 +222,7 @@ export const useLogicaEsercizio = () => {
   }, [idStudente, avviso, successo, errore, MAX_TENTATIVI]);
 
   // ===== REGISTRAZIONE =====
-  const startRegistrazione = useCallback(async () => {
-    console.log('🎤 Tentativo avvio registrazione...');
-    
+  const startRegistrazione = useCallback(async () => {    
     try {
       // Verifica che non si sia raggiunto il limite di tentativi
       if (numeroTentativi >= MAX_TENTATIVI) {
@@ -271,8 +248,6 @@ export const useLogicaEsercizio = () => {
       const nuovoNumeroTentativi = numeroTentativi + 1;
       setNumeroTentativi(nuovoNumeroTentativi);
       setTentativiRimanenti(MAX_TENTATIVI - nuovoNumeroTentativi);
-
-      console.log('🎤 Avvio registrazione audio...');
       // Ottiene l'accesso al microfono
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
        // Crea un nuovo MediaRecorder per registrare l'audio
@@ -287,10 +262,8 @@ export const useLogicaEsercizio = () => {
       };
  // Gestisce la fine della registrazione
       mediaRecorderRef.current.onstop = () => {
-        console.log('🎤 Registrazione completata, creazione blob...');
            // Crea un blob audio dai chunk registrati
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        console.log('🎤 Blob creato, dimensione:', audioBlob.size);
           // Chiude lo stream del microfono
         stream.getTracks().forEach(track => track.stop());
         // Invia l'audio per la valutazione
@@ -301,8 +274,6 @@ export const useLogicaEsercizio = () => {
       setIsRecording(true);
       setFeedback('Registrazione in corso...');
       setResults(null);
-      
-      console.log('✅ Registrazione avviata');
     } catch (error) {
       console.error('❌ Errore durante la registrazione:', error);
       errore(`Errore durante la registrazione: ${error.message}`);
@@ -312,7 +283,6 @@ export const useLogicaEsercizio = () => {
   const stopRegistrazione = useCallback(() => {
     try {
       if (mediaRecorderRef.current && isRecording) {
-        console.log('⏹️ Stop registrazione...');
         mediaRecorderRef.current.stop();
         setIsRecording(false);
         setFeedback('Elaborazione audio...');
@@ -324,9 +294,7 @@ export const useLogicaEsercizio = () => {
   }, [isRecording, errore]);
 
   // valutazione audio corretta
-  const inviaAudioPerValutazione = useCallback(async (audioBlob, tentativoCorrente) => {
-    console.log('🔍 Inizio valutazione audio...');
-    
+  const inviaAudioPerValutazione = useCallback(async (audioBlob, tentativoCorrente) => {    
     try {
       setFeedback('Analizzando la pronuncia...');
  // Validazione dei dati necessari per la valutazione
@@ -348,16 +316,6 @@ export const useLogicaEsercizio = () => {
       formData.append('idEsercizioAssegnato', idEsercizioAssegnato.toString()); // ID assegnazione
       formData.append('tempoImpiegato', tempoTotale.toString()); // Tempo impiegato
       formData.append('numeroTentativi', tentativoCorrente.toString()); // Numero tentativo
-
-      console.log('📤 Invio dati per valutazione:', {
-        parolaRiferimento,
-        idStudente,
-        idEsercizioAssegnato,
-        tempoTotale,
-        tentativoCorrente,
-        audioBlobSize: audioBlob.size
-      });
-
       // Invia la richiesta al server di analisi vocale
       const response = await fetch('http://127.0.0.1:5001/check_pronunciation', {
         method: 'POST',
@@ -369,7 +327,6 @@ export const useLogicaEsercizio = () => {
       }
 
       const data = await response.json();
-      console.log('📥 Risultati valutazione ricevuti:', data);
 // Verifica che l'analisi sia andata a buon fine
       if (data.status !== 'success') {
         throw new Error(data.error || 'Errore nell\'analisi');
@@ -388,7 +345,6 @@ export const useLogicaEsercizio = () => {
       setTentativiRimanenti(data.tentativi_rimanenti || 0);
   // Verifica se l'esercizio è stato completato
       if (data.esercizio_completato) {
-        console.log('🎉 Esercizio completato!');
         setEsercizioCompletato(true);
         // Determina il messaggio finale in base al risultato
         const messaggioFinale = data.feedback?.includes('BRAVO') 

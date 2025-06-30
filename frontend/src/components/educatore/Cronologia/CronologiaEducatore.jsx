@@ -3,11 +3,6 @@ import CronologiaBase from "../../condivisi/Cronologia/CronologiaBase";
 import styles from '../../condivisi/Cronologia/CronologiaBase.module.css';
 
 const CronologiaEducatore = ({ studenteSelezionato, onTornaIndietro }) => {
-  console.log("🔧 CronologiaEducatore - Props ricevute:", {
-    studenteSelezionato, // Dati dello studente di cui visualizzare la cronologia
-    onTornaIndietro: typeof onTornaIndietro, // Funzione per navigazione indietro
-    hasId: studenteSelezionato?.id || studenteSelezionato?.idStudente
-  });
 //validazione dati studente
   if (!studenteSelezionato) {
     return (
@@ -26,20 +21,12 @@ const CronologiaEducatore = ({ studenteSelezionato, onTornaIndietro }) => {
         <h2>❌ Errore</h2>
         <p>ID studente non trovato.</p>
         <p className={styles.debugInfo}>
-          Debug: {JSON.stringify(studenteSelezionato)}
         </p>
       </div>
     );
   }
 
   const nomeCompleto = `${studenteSelezionato.nome || ''} ${studenteSelezionato.cognome || ''}`.trim() || 'Studente';
-  
-  console.log("✅ CronologiaEducatore - Dati costruiti:", {
-    idStudente,
-    nomeCompleto,
-    apiEndpoint: `studenti/${idStudente}/cronologia`
-  });
-
   return (
     <CronologiaBase
      // Endpoint API specifico per la cronologia dello studente

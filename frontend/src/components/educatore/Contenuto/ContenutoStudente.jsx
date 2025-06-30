@@ -47,7 +47,6 @@ const ContenutoStudente = () => {
   } = usaDialogoConferma();
 
   const handleRiassegnaEsercizio = async (idEsercizioAssegnato, testo) => {
-    console.log("🔄 Riassegnazione richiesta:", { idEsercizioAssegnato, testo });
     //mostra dialogo con dettagli precisi
     const conferma = await mostraConferma({
       titolo: "Conferma Riassegnazione",
@@ -63,7 +62,6 @@ const ContenutoStudente = () => {
   };
 
   const handleEliminaContenuto = async (idEsercizioAssegnato, titolo) => {
-    console.log("🗑️ Eliminazione richiesta:", { idEsercizioAssegnato, titolo });
     //dialogo di conferma sulle azioni
     const conferma = await mostraConferma({
       titolo: "Conferma Eliminazione",

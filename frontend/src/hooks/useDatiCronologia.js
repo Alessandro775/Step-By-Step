@@ -1,10 +1,7 @@
 export const utilitaApiDati = {
   //preparazione dati grafico punteggi
-  preparaDatiGraficoPunteggio: (cronologia) => {
-    console.log("🔧 Preparazione dati punteggio - Input:", cronologia);
-    
+  preparaDatiGraficoPunteggio: (cronologia) => {    
     if (!Array.isArray(cronologia) || cronologia.length === 0) {
-      console.log("❌ Cronologia vuota o non array");
       return [];
     }
 //filtra i record validi e li ordina cronologicamnte
@@ -12,12 +9,9 @@ export const utilitaApiDati = {
       .filter((record) => {
         const hasDate = record.data_completamento;
         const hasScore = record.punteggio !== null && record.punteggio !== undefined;
-        console.log("🔍 Record:", record.titolo, "Data:", hasDate, "Punteggio:", record.punteggio);
         return hasDate && hasScore;
       })
       .sort((a, b) => new Date(a.data_completamento) - new Date(b.data_completamento));
-
-    console.log("📊 Dati filtrati e ordinati:", sortedData.length, "record");
 //Variabili per calcolare la media cumulativa dei punteggi
     let cumulativeSum = 0; // Somma cumulativa dei punteggi
     let cumulativeCount = 0;  // Contatore degli esercizi processati
@@ -33,20 +27,14 @@ export const utilitaApiDati = {
         punteggioSingolo: punteggio, // NUMERO, NON STRINGA
         punteggioMedioCumulativo: Math.round((cumulativeSum / cumulativeCount) * 100) / 100, // Media arrotondata
       };
-      
-      console.log("📈 Data point:", dataPoint);
       return dataPoint;
     });
-
-    console.log("✅ Dati finali punteggio:", result);
     return result;
   },
 //Prepara i dati della cronologia per il grafico errori e tentativi
   preparaDatiGraficoErroriTentativi: (cronologia) => {
-    console.log("🔧 Preparazione dati errori/tentativi - Input:", cronologia);
     //validazione input
     if (!Array.isArray(cronologia) || cronologia.length === 0) {
-      console.log("❌ Cronologia vuota o non array");
       return [];
     }
 
@@ -64,12 +52,8 @@ export const utilitaApiDati = {
           errori: errori, // numero non stringa
           tentativi: tentativi, // numero non stringa
         };
-        
-        console.log("📊 Data point errori:", dataPoint);
         return dataPoint;
       });
-
-    console.log("✅ Dati finali errori/tentativi:", result);
     return result;
   },
 
