@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ProfiloEducatore.module.css';
@@ -8,7 +7,6 @@ import ContainerNotifiche from '../../components/condivisi/Layout/ContainerNotif
 import DialogoConferma from '../../components/condivisi/Layout/DialogoConferma';
 import { useFeedback } from '../../hooks/useFeedback';
 import { usaDialogoConferma } from '../../hooks/usaDialogoConferma';
-
 
 const ProfiloEducatore = () => {
   // Hook per la navigazione tra le pagine
@@ -57,7 +55,6 @@ const ProfiloEducatore = () => {
         // Gestisce gli errori mostrando una notifica di errore
         console.error('Errore caricamento profilo:', error);
         errore('Errore nel caricamento del profilo', { durata: 6000 });
-
       }
     };
     // Esegue il caricamento del profilo
@@ -101,7 +98,6 @@ const ProfiloEducatore = () => {
       // Gestisce gli errori di salvataggio
       console.error('Errore salvataggio:', error);
       errore(`Errore nel salvataggio: ${error.message}`, { durata: 6000 });
-
     }
   };
   // Funzione per gestire le modifiche ai campi di input
@@ -146,7 +142,6 @@ const ProfiloEducatore = () => {
       }
 
       const result = await response.json();
-
       console.log('Eliminazione completata:', result);
 
       //Effettua il logout completo rimuovendo i dati dal localStorage
@@ -164,7 +159,6 @@ const ProfiloEducatore = () => {
         // Gestisce gli errori di eliminazione
       console.error('Errore eliminazione profilo:', error);
       errore(`Errore nell'eliminazione del profilo: ${error.message}`, { durata: 8000 });
-
     }
   };
   // Renderizza il profilo educatore
@@ -314,7 +308,7 @@ const ProfiloEducatore = () => {
         onAnnulla={gestisciAnnulla}
         onChiudi={gestisciAnnulla}
       />
-      {/* Footer della pagina */}
+
       <Footer />
     </>
   );

@@ -98,13 +98,11 @@ const ProfiloFamilgia = () => {
 
       // Disattiva la modalità modifica e mostra messaggio di successo
       setIsEditing(false);
-
       successo('Profilo famiglia salvato con successo!', { durata: 4000 });
     } catch (error) {
       // Gestisce gli errori di salvataggio
       console.error('Errore salvataggio:', error);
       errore(`Errore nel salvataggio: ${error.message}`, { durata: 6000 });
-
     }
   };
   // Funzione per gestire le modifiche ai campi di input
@@ -166,12 +164,11 @@ const ProfiloFamilgia = () => {
       // Gestisce gli errori di eliminazione
       console.error('Errore eliminazione profilo:', error);
       errore(`Errore nell'eliminazione del profilo: ${error.message}`, { durata: 8000 });
-
     }
   };
   //Funzione per navigare alla cronologia dello studente
   const handleViewCronologia = () => {
-    navigate("/cronologia-famiglia");
+    navigate('/cronologia-famiglia');
   };
     //Renderizzazione del componente
   return (
@@ -196,7 +193,6 @@ const ProfiloFamilgia = () => {
           {/* Blocco Informazioni Famiglia */}
           <div className={styles.infoBlock}>
             <div className={styles.blockHeader}>
-
               <h2 className={styles.blockTitle}>
                 Informazioni Famiglia
               </h2>
@@ -205,7 +201,6 @@ const ProfiloFamilgia = () => {
                 onClick={handleEdit}
               >
                 {isEditing ? 'Annulla' : 'Modifica'}
-
               </button>
             </div>
             {/* Form per la visualizzazione/modifica del profilo famiglia */}
@@ -328,6 +323,7 @@ const ProfiloFamilgia = () => {
         onAnnulla={gestisciAnnulla}
         onChiudi={gestisciAnnulla}
       />
+
       <Footer />
     </>
   );
