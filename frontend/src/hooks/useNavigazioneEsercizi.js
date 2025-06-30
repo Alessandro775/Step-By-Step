@@ -7,7 +7,6 @@ const useNavigazioneEsercizi = () => {
   const navigate = useNavigate();
 //Naviga verso l'esercizio appropriato basato sul tipo specificato
   const navigaAEsercizio = useCallback((tipoEsercizio) => {
-    console.log('Navigando a esercizio tipo:', tipoEsercizio);
     //Switch statement per mappare tipi di esercizi a route specifiche
     switch(tipoEsercizio) {
       case 'pronuncia':

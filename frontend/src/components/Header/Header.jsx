@@ -28,7 +28,7 @@ const Header = () => {
                 {/*bottoni per navigare nelle varie pagine*/}
                 <ul className={header['nav-list']}>
                     <li><button onClick={goToChiSiamo}>Chi siamo</button></li>
-                    <li><button onClick={goToEsercizi}>Esempio esercizio</button></li>
+                    <li><button onClick={goToEsercizi}>Esempi esercizi</button></li>
                     <li><button onClick={goToLogin}>Login</button></li>
                 </ul>
             </nav>

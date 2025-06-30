@@ -22,15 +22,6 @@ const FormAggiungiContenuto = ({
     resetUpload //funzione per resettare upload
   } = uploadProps;
 
-  // Debug dettagliato
-  console.log("🎯 FormAggiungiContenuto - Debug completo:", {
-    esercizi,
-    numeroEsercizi: esercizi?.length || 0,
-    primoEsercizio: esercizi?.[0],
-    loadingEsercizi,
-    submitting
-  });
-
   return (
     <div className={styles.overlay}>
       {/* Container principale del form */}
@@ -87,10 +78,7 @@ const FormAggiungiContenuto = ({
                     : "Seleziona un tipo di esercizio"
                 }
               </option>
-              {esercizi.map((esercizio) => {
-                // Debug per ogni esercizio
-                console.log("📝 Rendering option per esercizio:", esercizio);
-                
+              {esercizi.map((esercizio) => {                
                 // gestisci diversi formati di dati
                 const id = esercizio.id || esercizio.idEsercizio;
                 const nome = esercizio.titolo || esercizio.nome || esercizio.tipologia || `Esercizio ${id}`;

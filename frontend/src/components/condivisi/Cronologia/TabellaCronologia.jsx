@@ -51,7 +51,6 @@ const TabellaCronologia = ({ cronologia, mostraFormatoDataOraCompleto = false })
         } catch (error) {
           // Raccoglie errori senza interrompere il processamento
           errori.push(error.message);
-          console.error(`Errore processamento record ${index}:`, error, record);
         }
       });
 // Aggiorna gli stati con i risultati del processamento
@@ -69,8 +68,6 @@ const TabellaCronologia = ({ cronologia, mostraFormatoDataOraCompleto = false })
             azione: {
               testo: "📋 Dettagli",
               onClick: () => {
-                // Log dettagliati per debug
-                console.error("Errori dettagliati:", errori);
                 avviso(`Errori trovati: ${errori.join(', ')}`, { durata: 10000 });
               }
             }
@@ -107,7 +104,6 @@ const TabellaCronologia = ({ cronologia, mostraFormatoDataOraCompleto = false })
   };
 
   const handleRenderError = (error, recordIndex) => {
-    console.error(`Errore rendering riga ${recordIndex}:`, error);
     errore(`❌ Errore visualizzazione riga ${recordIndex + 1}`, {
       durata: 4000,
       azione: {
