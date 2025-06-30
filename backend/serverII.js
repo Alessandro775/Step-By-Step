@@ -14,9 +14,9 @@ const JWT_SECRET = "balla"; // Chiave segreta per la firma dei token JWT
 
 // Configurazione Database MySQL
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
+  host: "172.29.3.212",
+  user: "alessandro",
+  password: "123456",
   database: "step_by_step",
   port: 3306,
 });
