@@ -390,9 +390,7 @@ export const useLogicaEsercizio = () => {
         if (timerRef.current) {
           clearInterval(timerRef.current);
         }
-
-        setCurrentView('risultati');
-        
+          
         if (data.feedback?.includes('BRAVO')) {
           successo(messaggioFinale, { durata: 5000 });
         } else {
