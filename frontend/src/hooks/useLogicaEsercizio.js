@@ -1,7 +1,6 @@
 // hooks/useLogicaEsercizio.js
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useFeedback } from './useFeedback';
-import { serviziEsercizi } from '../servizi/api/serviziEsercizi';
 
 export const useLogicaEsercizio = () => {
   //  STATI PRINCIPALI 
