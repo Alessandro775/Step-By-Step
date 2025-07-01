@@ -31,7 +31,7 @@ const FormAggiungiStudente = ({
       avviso("Formato email non valido", { durata: 3000 });
       return;
     }
-     // Se tutte le validazioni passano, chiama il callback parent
+     // Se tutte le validazioni passano, chiama il componente genitore
     onSubmit(e);
   };
 

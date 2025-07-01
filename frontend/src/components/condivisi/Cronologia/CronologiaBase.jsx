@@ -28,7 +28,7 @@ const CronologiaBase = ({
   const { notifiche, errore, avviso, info } = useFeedback();
 
 //Funzione principale per il recupero dati dall'API gestisce autenticazione, errori e preocessamento dei dati
-  const fetchData = async () => {
+  const fetchData = async () => {//funzione asincrona
     try {
       setLoading(true);
       // Recupera il token di autenticazione

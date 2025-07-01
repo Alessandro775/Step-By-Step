@@ -13,7 +13,7 @@ export const useUploadImmagine = (setFormData) => {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
-      //// Salva il file selezionato
+      // Salva il file selezionato
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
