@@ -15,11 +15,6 @@ const FormAggiungiStudente = ({
   const handleEmailChange = (e) => {
     const email = e.target.value;
     setEmailNuovoStudente(email);
-    
-    // Validazione in tempo reale
-    if (email.length > 0 && !email.includes('@')) {
-      avviso("L'email deve contenere il simbolo @", { durata: 2000 });
-    }
   };
 
   // Gestione submit con validazione

@@ -16,7 +16,7 @@ const CronologiaBase = ({
   onTornaIndietro = () => {},
   testoBottoneGrafici = "📊 Mostra Grafici",
   testoBottoneTabella = "📋 Mostra Tabella",
-  mostraFormatoCompleto = false
+  mostraFormatoCompleto = false //se true mostra data e ora completa, altrimenti solo la data
 }) => { //stati del componente
   const [cronologia, setCronologia] = useState([]);
   const [infoStudente, setInfoStudente] = useState(null);
@@ -97,12 +97,7 @@ const CronologiaBase = ({
     } catch (err) {
       // Gestione degli errori con notifiche
       errore(err.message, {
-        durata: 8000,
-        azione: {
-          testo: "🔄 Riprova",
-          onClick: fetchData
-        },
-        persistente: true
+        durata: 8000
       });
     } finally {
       // Rimuove lo stato di caricamento in ogni caso
@@ -140,11 +135,7 @@ const CronologiaBase = ({
   const handleToggleGrafici = () => {
     setMostraGrafici(!mostraGrafici);
   };
-//bottone torna indietro
-  const handleTornaIndietro = () => {
-    info("⬅️ Tornando alla pagina precedente...", { durata: 1000 });
-    onTornaIndietro();
-  };
+
 //caricamento
   if (loading) {
     return (
@@ -165,14 +156,6 @@ const CronologiaBase = ({
     <div className={styles.container}>
     {/*conteiner delle notifiche sempre visibile*/}
       <ContainerNotifiche notifiche={notifiche} />
-      {/*bottone torna indietro*/}
-      {mostraBottoneTorna && (
-        <div className={styles.topButtonContainer}>
-          <button onClick={handleTornaIndietro} className={styles.backButton}>
-            ← Torna Indietro
-          </button>
-        </div>
-      )}
       {/*header con titolo*/}
       <div className={styles.header}>
         <div className={styles.headerCenter}>
