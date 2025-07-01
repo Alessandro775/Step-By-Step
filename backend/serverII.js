@@ -1,11 +1,11 @@
 const express = require("express");
 const mysql = require("mysql2");
-const cors = require("cors");
+const cors = require("cors");//comunicazione frontend backend
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");//crittorgafia della password
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
+const fs = require("fs"); //operazioni sui file system
 
 // Configurazioni base dell'applicazione
 const app = express();
@@ -14,7 +14,7 @@ const JWT_SECRET = "balla"; // Chiave segreta per la firma dei token JWT
 
 // Configurazione Database MySQL
 const db = mysql.createConnection({
-  host: "localhost",
+  host: "localhost", // Indirizzo del server MySQL
   user: "root",
   password: "",
   database: "step_by_step",
@@ -34,10 +34,7 @@ db.connect((err) => {
   });
 });
 
-/**
- * Configurazione CORS
- * Abilita richieste cross-origin da qualsiasi dominio per permettere
- */
+/*Abilita richieste cross-origin da qualsiasi dominio per permettere*/
 app.use(
   cors({
     origin: "*", // Permette richieste da qualsiasi origine
@@ -53,10 +50,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Configurazione Multer per l'upload delle immagini
 const storage = multer.diskStorage({
-  /**
-   * Definisce la cartella di destinazione per i file caricati
-   * Crea automaticamente la struttura di cartelle se non esiste
-   */
+  //Definisce la cartella di destinazione per i file caricati
   destination: function (req, file, cb) {
     const uploadPath = path.join(__dirname, "uploads", "images");
 
@@ -80,10 +74,7 @@ const storage = multer.diskStorage({
   },
 });
 
-/**
- * Filtro per accettare solo file immagine
- * Valida il tipo per garantire che vengano caricati solo formati supportati
- */
+/* Filtro per accettare solo file immagine che voglio io */
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     "image/jpeg",
@@ -146,10 +137,7 @@ app.post("/api/upload-image", autentica, upload.single("image"), (req, res) => {
   }
 });
 
-/**
- * Route per creare un nuovo contenuto e assegnarlo a uno studente
- * Permette agli educatori di creare esercizi personalizzati con testo e immagini
- */
+/*creare un nuovo esercizio e assegnarlo a uno studente*/
 app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
   if (req.utente.ruolo !== "E") {
     return res.status(403).json({
@@ -221,10 +209,7 @@ app.post("/api/studenti/:idStudente/contenuti", autentica, (req, res) => {
   );
 });
 
-/**
- * Gestione errori Multer per upload file
- * Fornisce messaggi di errore specifici per problemi di upload
- */
+/*Fornisce messaggi di errore specifici per problemi di upload*/
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === "LIMIT_FILE_SIZE") {
@@ -247,7 +232,7 @@ function autentica(req, res, next) {
     console.log("Token mancante nell'header");
     return res.status(401).json({ error: "Token mancante" });
   }
-
+//autenticazione dell'header per tutti gli utenti
   const token = authHeader.split(" ")[1];
   if (!token) {
     console.log("Token non fornito");
@@ -269,10 +254,7 @@ function autentica(req, res, next) {
   }
 }
 
-/**
- * Route per la registrazione di nuovi utenti
- * con validazione specifica per ogni tipo di utente
- */
+/* Route per la registrazione di nuovi utenti */
 app.post("/api/register", async (req, res) => {
   console.log("Dati ricevuti:", req.body);
   // Estrazione di tutti i campi possibili dalla richiesta
@@ -295,10 +277,7 @@ app.post("/api/register", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    /**
-     * Gestione specifica per la registrazione delle famiglie (ruolo "G")
-     * Include validazione dell'esistenza dello studente collegato
-     */
+    /*Gestione  registrazione delle famiglie, validazione dell'esistenza dello studente collegato*/
     if (ruolo === "G") {
       console.log("Registrazione famiglia in corso...");
 
@@ -448,10 +427,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-/**
- * Route per il login degli utenti
- * Gestisce l'autenticazione per tutti i tipi di utenti (studenti, educatori, famiglie)
- */
+/*login degli utenti */
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   console.log("Tentativo login per:", email);
@@ -519,7 +495,7 @@ app.post("/api/login", async (req, res) => {
         ? user.idStudente
         : user.idFamiglia;
 
-    // Generazione del token JWT per la sessione
+    // Generazione del token JWT dei profili per la sessione
     const token = jwt.sign(
       {
         id: userId,
@@ -1694,7 +1670,7 @@ app.put("/api/family-profile", autentica, (req, res) => {
     });
   }
 
-  // VALIDAZIONE TELEFONO PIÙ FLESSIBILE
+  // validazione telefono
   const cleanPhone = numero_telefono.replace(/\s+/g, ""); // Rimuovi spazi
   if (
     cleanPhone.length < 8 ||

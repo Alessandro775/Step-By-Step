@@ -47,7 +47,6 @@ const ContenutoStudente = () => {
   } = usaDialogoConferma();
 
   const handleRiassegnaEsercizio = async (idEsercizioAssegnato, testo) => {
-    console.log("🔄 Riassegnazione richiesta:", { idEsercizioAssegnato, testo });
     //mostra dialogo con dettagli precisi
     const conferma = await mostraConferma({
       titolo: "Conferma Riassegnazione",
@@ -63,7 +62,6 @@ const ContenutoStudente = () => {
   };
 
   const handleEliminaContenuto = async (idEsercizioAssegnato, titolo) => {
-    console.log("🗑️ Eliminazione richiesta:", { idEsercizioAssegnato, titolo });
     //dialogo di conferma sulle azioni
     const conferma = await mostraConferma({
       titolo: "Conferma Eliminazione",
@@ -81,9 +79,9 @@ const ContenutoStudente = () => {
   const handleSubmitForm = async (e) => {
     await submitContenuto(e);
   };
-
+// gestire l'annullamento del form di aggiunta contenuto
   const handleCancelForm = () => {
-    resetForm();
+    resetForm();//pulisce e ripristina il form al suo stato iniziale.
   };
 //mostrare spinner durante il caricamento iniziale
   if (loading) {

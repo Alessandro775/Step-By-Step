@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './VistaEsercizio.module.css';
+import styles from './vistaEsercizio.module.css';
 
 const VistaEsercizio = ({
   esercizioCorrente, //oggetto con dati esercizio corrente
@@ -65,6 +65,12 @@ const VistaEsercizio = ({
         <div className={`${styles.finalStats} ${styles[statisticheFinali.tipo]}`}>
           <h2>{statisticheFinali.tipo === "successo" ? "🎉 Esercizio Completato!" : "⏰ Limite Raggiunto"}</h2>
           <p>{statisticheFinali.messaggio}</p>
+          
+          {/* ✅ FEEDBACK AI DINAMICO NELLE STATISTICHE FINALI */}
+          <div className={styles.feedbackAi}>
+            {statisticheFinali.feedback}
+          </div>
+          
           <div className={styles.statsCard}>
             {/* Parola esercitata */}
             <div className={styles.statItem}>
@@ -145,23 +151,22 @@ const VistaEsercizio = ({
               disabled={
                 microphonePermission !== "granted" || //microfono
                 serverStatus !== "connected" || //tentativi eseguiti
-                numeroTentativi >= MAX_TENTATIVI
+                numeroTentativi > MAX_TENTATIVI
               }
             >
               {/*testo dinamico basato sullo stato*/}
               {isRecording ? "⏹️ Ferma" : 
-               numeroTentativi >= MAX_TENTATIVI ? "🚫 Limite Raggiunto" : 
+               numeroTentativi > (MAX_TENTATIVI) ? "🚫 Limite Raggiunto" : 
                `🎤 Registra (${numeroTentativi}/${MAX_TENTATIVI})`}
             </button>
           </div>
-            {/*messaggio di feedback*/}
+            
+          {/* ✅ FEEDBACK AI DINAMICO DURANTE L'ESERCIZIO */}
           {feedback && (
-            <div className={`${styles.feedback} ${styles[
-              feedback.includes("BRAVO") ? "success" : 
-              feedback.includes("PROVA A FARE DI MEGLIO") ? "warning" : 
-              feedback.includes("SBAGLIATO") ? "error" : "info"
-            ]}`}>
-              {feedback}
+            <div className={styles.feedbackContainer}>
+              <div className={styles.feedbackAi}>
+                {feedback}
+              </div>
             </div>
           )}
 

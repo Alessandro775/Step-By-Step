@@ -15,11 +15,6 @@ const FormAggiungiStudente = ({
   const handleEmailChange = (e) => {
     const email = e.target.value;
     setEmailNuovoStudente(email);
-    
-    // Validazione in tempo reale
-    if (email.length > 0 && !email.includes('@')) {
-      avviso("L'email deve contenere il simbolo @", { durata: 2000 });
-    }
   };
 
   // Gestione submit con validazione
@@ -36,7 +31,7 @@ const FormAggiungiStudente = ({
       avviso("Formato email non valido", { durata: 3000 });
       return;
     }
-     // Se tutte le validazioni passano, chiama il callback parent
+     // Se tutte le validazioni passano, chiama il componente genitore
     onSubmit(e);
   };
 

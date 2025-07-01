@@ -3,12 +3,6 @@ import { formattatoreDate } from "../../../servizi/utilità/utilitaFormattaData.
 import styles from "./ListaContenuti.module.css";
 
 const ListaContenuti = ({ contenuti, onRiassegna, onElimina }) => {
-  console.log("📋 ListaContenuti - Props ricevute:", {
-    contenuti: contenuti?.length || 0, //array dai cotenuti da visualizzare
-    onRiassegna: typeof onRiassegna, //funzione per gestire la riassegnazione
-    onElimina: typeof onElimina //funzione per gestire la comunicazione
-  });
-
   if (contenuti.length === 0) {
     //quando non ci sono contenuti
     return (
@@ -21,7 +15,6 @@ const ListaContenuti = ({ contenuti, onRiassegna, onElimina }) => {
   }
 
   const handleRiassegna = (idEsercizioAssegnato, titolo) => {
-    console.log("🔄 Button Riassegna clicked:", { idEsercizioAssegnato, titolo });
     //verifica la presenza della funzione prima di chiamare
     if (onRiassegna) {
       onRiassegna(idEsercizioAssegnato, titolo);
@@ -31,7 +24,6 @@ const ListaContenuti = ({ contenuti, onRiassegna, onElimina }) => {
   };
 
   const handleElimina = (idEsercizioAssegnato, titolo) => {
-    console.log("🗑️ Button Elimina clicked:", { idEsercizioAssegnato, titolo });
     if (onElimina) {
       onElimina(idEsercizioAssegnato, titolo);
     } else {
@@ -45,9 +37,7 @@ const ListaContenuti = ({ contenuti, onRiassegna, onElimina }) => {
       <h2 className={styles.title}>Contenuti Assegnati ({contenuti.length})</h2>
       {/*griglia dei contenuti*/}
       <div className={styles.grid}>
-        {contenuti.map((contenuto) => {
-          console.log("📄 Rendering contenuto:", contenuto);
-          
+        {contenuti.map((contenuto) => {          
           return (
             <div key={contenuto.idEsercizioAssegnato} className={styles.card}>
               <div className={styles.cardHeader}>

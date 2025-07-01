@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ContainerNotifiche from '../Layout/ContainerNotifiche';
-import MessaggioErrore from '../Layout/MessaggioErrore';
 import { useFeedback } from '../../../hooks/useFeedback';
 import styles from './GraficiCronologia.module.css';
 //componente per visualizzare i grafici della cronoloia
@@ -34,7 +33,6 @@ const GraficiCronologia = ({
                          typeof item.punteggioMedioCumulativo === 'number' &&
                          !isNaN(item.punteggioSingolo) && 
                          !isNaN(item.punteggioMedioCumulativo);
-        
         if (!hasValidNumbers || !hasRequiredFields) {
           invalidItems.push(`Esercizio ${index + 1}: dati punteggio non validi`);
         }
@@ -82,18 +80,7 @@ const GraficiCronologia = ({
     if (messaggiErrore.length > 0) {
       errore(`❌ Problemi con i dati dei grafici: ${messaggiErrore.join(' | ')}`, {
         durata: 6000,
-        azione: {
-          testo: "📊 Dettagli",
-          onClick: () => {
-            info(`Debug info: ${JSON.stringify({
-              punteggioItems: datiGraficoPunteggio.length,
-              erroriItems: datiGraficoErroriTentativi.length,
-              validazionePunteggio: validPunteggio.message,
-              validazioneErrori: validErrori.message
-            }, null, 2)}`, { durata: 10000 });
-          }
-        }
-      });
+        });
     } else if (datiGraficoPunteggio.length === 0 && datiGraficoErroriTentativi.length === 0) {
       //notifica quando non ci sono dati
       info("📋 Nessun dato disponibile per generare i grafici", {
@@ -104,12 +91,8 @@ const GraficiCronologia = ({
 
   // Gestione errori di rendering usando componenti condivisi
   const handleChartError = (chartType, error) => {
-    errore(`❌ Errore nel rendering del grafico ${chartType}: ${error.message}`, {
-      durata: 5000,
-      azione: {
-        testo: "🔄 Ricarica",
-        onClick: () => window.location.reload()
-      }
+    errore(`Errore nel rendering del grafico ${chartType}: ${error.message}`, {
+      durata: 5000
     });
   };
 
@@ -163,7 +146,7 @@ const GraficiCronologia = ({
 // Configurazione per i grafici dei punteggi
   const configPunteggio = {
     titolo: "📈 Andamento Punteggio (Media Cumulativa)",
-    domain: [0, 100], //punteggi da 0 a 100%
+    domain: [0, 100], //punteggi da 0 a 100
     tooltipFormatter: (value, name) => {
       if (name === 'punteggioSingolo') return [`${value}%`, 'Punteggio Singolo'];
       if (name === 'punteggioMedioCumulativo') return [`${value}%`, 'Media Cumulativa'];
@@ -184,7 +167,7 @@ const GraficiCronologia = ({
       if (name === 'tentativi') return [value, 'Tentativi'];
       return [value, name];
     },
-    lines: [//ANCHE QUA STESSA COSA COLORE NILEE ROSSE
+    lines: [//ANCHE QUA STESSA COSA COLORE LINEE ROSSE
       { dataKey: 'errori', stroke: '#ef4444', strokeWidth: 3, dotSize: 6 },
       { dataKey: 'tentativi', stroke: '#f59e0b', strokeWidth: 3, dotSize: 6 }
     ]
